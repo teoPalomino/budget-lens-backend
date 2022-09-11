@@ -99,7 +99,7 @@ DATABASES = {
 
         'ENGINE': 'django.db.backends.postgresql',
 
-        'NAME': 'bl_test',
+        'NAME': 'bud_local_db',
 
         'USER': 'postgres',
 
