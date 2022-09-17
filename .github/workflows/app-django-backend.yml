@@ -51,7 +51,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install pipfile dependencies from Pipfile.lock
         run: |
-          pipenv install
+          pipenv lock --requirements
       - name: Run Tests
         # Step specific environment variables
         env:
