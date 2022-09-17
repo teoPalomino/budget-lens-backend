@@ -64,12 +64,12 @@ jobs:
       - name: Run test suite
         run: |
           pipenv run test -svvv
-          env:
-            TEST_DB_HOST: localhost
-            TEST_DB_NAME: postgres
-            TEST_DB_PASS: postgres
-            TEST_DB_PORT: 5432
-            TEST_DB_USER: postgres
+        env:
+          TEST_DB_HOST: localhost
+          TEST_DB_NAME: postgres
+          TEST_DB_PASS: postgres
+          TEST_DB_PORT: 5432
+          TEST_DB_USER: postgres
       - name: Run linter
         run: |
           pipenv run lint
