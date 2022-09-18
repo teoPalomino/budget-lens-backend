@@ -28,7 +28,7 @@ jobs:
       DJANGO_SECRET_KEY: !l0$=nq9(ib-n1dclpoh^y1z*50jxn@%9%(elwmspw73@qa&
     services:
       postgres_main:
-        image: postgres:14.5
+        image: postgres:12
         env:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
