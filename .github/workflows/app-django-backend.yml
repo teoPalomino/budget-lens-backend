@@ -25,7 +25,7 @@ jobs:
       POSTGRES_HOST: localhost # default host value for the database
       POSTGRES_DB: bud_local_db
       POSTGRES_PORT: 5432
-      DJANGO_SECRET_KEY: weuhraryk_(o2n&$fk3_z@r($73-8!#tugbz6(x_u)v!k__xuv
+      DJANGO_SECRET_KEY: !l0$=nq9(ib-n1dclpoh^y1z*50jxn@%9%(elwmspw73@qa&
     services:
       postgres_main:
         image: postgres:14.5
