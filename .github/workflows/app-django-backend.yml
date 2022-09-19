@@ -50,8 +50,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install pipenv
-        run: |
-          python -m pip install --upgrade pipenv wheel
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: install -d # Install all dependencies, including development ones
       - id: cache-pipenv
         uses: actions/cache@v1
         with:
@@ -80,7 +81,6 @@ jobs:
           DB_HOST: ${{ env.POSTGRES_HOST }}
           DB_DATABASE: ${{ env.POSTGRES_DB }}
           DB_PORT: ${{ env.POSTGRES_PORT }}
-        run: |
-          pipenv shell
-          python manage.py test
-          python manage.py collectstatic --noinput
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: run test # Run custom `test` command defined in the `[scripts]` block of Pipfile
