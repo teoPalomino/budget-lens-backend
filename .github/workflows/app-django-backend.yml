@@ -82,6 +82,5 @@ jobs:
           DB_PORT: ${{ env.POSTGRES_PORT }}
         run: |
           pipenv shell
-        # export PYTHONPATH=$PYTHONPATH:$(pwd)
           python manage.py test
           python manage.py collectstatic --noinput
