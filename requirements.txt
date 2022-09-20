@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 aiocache==0.11.1
 aiofiles==22.1.0
 aiohttp==3.8.1
@@ -115,3 +116,17 @@ virtualenv-clone==0.5.7
 virtualenvwrapper==4.8.4
 websockets==10.3
 yarl==1.8.1
+=======
+asgiref==3.5.2
+cffi==1.15.1
+cryptography==38.0.1
+Django==4.1.1
+django-cors-headers==3.13.0
+django-rest-knox==4.2.0
+djangorestframework==3.13.1
+psycopg2-binary==2.9.3
+pycparser==2.21
+pytz==2022.2.1
+sqlparse==0.4.2
+tzdata==2022.2
+>>>>>>> c2cb7527c25d566c2e101c782ac8528efd959505
