@@ -2,12 +2,16 @@
 This repository is intended for the Capstone team to manage the backend servers of the BudgetLens Application.
 
 ## Getting Started
- First, make sure you have Python3 installed on your local machine. I'd suggest using Python version `3.10` to avoid any version conflicts. You also need to install _pipenv_ to create a python virtual environment to avoid dependency collisions. In a terminal window, run the following command: ` pip install pipenv`. Finally you will need PostgreSQL installed on your machine. The database will be setup on your local machine for now. It's not ideal, but later it will be set up remotely. 
+ First, make sure you have Python3 installed on your local machine. I'd suggest using Python version `3.10` to avoid any version conflicts. You also need to install _virtualenv_ to create a python virtual environment to avoid dependency collisions. In a terminal window, run the following command: ` pip install virtualenv`. Finally you will need PostgreSQL installed on your machine. The database will be setup on your local machine for now. It's not ideal, but later it will be set up remotely. 
  
  Run the following steps: <br>
 
- 1. Inside the project root, where you can find the files _pipfile_ and _pipfile.lock_, run the command `pipenv shell` to start the virtual environment.
- 2. Run the command `pipenv install` to install all python packages and dependencies needed for the project. This command will install all the packages for the project as specified in the _pipfile.lock_ file.
+ 1. Inside the project root, where you can find the _requirements.txt_ file, run the command `pipenv shell` run the following commands to create a new virtual environment:
+      ```
+      virtualenv budget-lens-venv                  
+      source budget-lens-venv/Scripts/activate     # Activate the virtual environment
+      ```
+ 2. Run the command `pip install -r requirements.txt` to install all python packages and dependencies located in the _requirements.txt_ file.
  3. Search for _psql_ and open the application (it is the terminal app for running PostgreSQL commands).
  4. After logging in to your postgres user account, run the following commands:
     ```
@@ -22,4 +26,7 @@ This repository is intended for the Capstone team to manage the backend servers 
  Whenever the database models are updated or a new Django Model class is created, you need to run `python manage.py makemigrations` and then `python manage.py migrate`. the _makemigrations_ checks for migrations and the _migrate_ makes the migrations and updates the database.
 
  ## Adding new Python Packages
- Normally, python users are used to the _pip_ command for installing dependencies, but use instead _pipenv_. This updates the _pipfile_ and _pipfile.lock_ files as well as installing the new package.
+ Follow the steps below to and new python packages
+ 1. Open the virtual environment
+ 2. Install the new python package using `pip install <python-package>`.
+ 3. Update the requirements.txt file with the command `pip freeze > requirements.txt`
