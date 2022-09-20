@@ -6,10 +6,16 @@ This repository is intended for the Capstone team to manage the backend servers 
  
  Run the following steps: <br>
 
- 1. Inside the project root, where you can find the _requirements.txt_ file, run the command `pipenv shell` run the following commands to create a new virtual environment:
+ 1. Inside the project root, where you can find the _requirements.txt_ file, run the following commands to create a new virtual environment:
+      For Windows:
       ```
       virtualenv budget-lens-venv                  
       source budget-lens-venv/Scripts/activate     # Activate the virtual environment
+      ```
+      For Mac:
+      ```
+      virtualenv budget-lens-venv                  
+      source budget-lens-venv/bin/activate     # Activate the virtual environment
       ```
  2. Run the command `pip install -r requirements.txt` to install all python packages and dependencies located in the _requirements.txt_ file.
  3. Search for _psql_ and open the application (it is the terminal app for running PostgreSQL commands).
@@ -26,7 +32,7 @@ This repository is intended for the Capstone team to manage the backend servers 
  Whenever the database models are updated or a new Django Model class is created, you need to run `python manage.py makemigrations` and then `python manage.py migrate`. the _makemigrations_ checks for migrations and the _migrate_ makes the migrations and updates the database.
 
  ## Adding new Python Packages
- Follow the steps below to and new python packages
- 1. Open the virtual environment
+ Follow the steps below to add new python packages:
+ 1. Open the virtual environment by activating it.
  2. Install the new python package using `pip install <python-package>`.
  3. Update the requirements.txt file with the command `pip freeze > requirements.txt`
