@@ -52,17 +52,17 @@ jobs:
       - name: Install Requirements
         run: |
           pip install -r requirements.txt
-#      - name: Run Test Suite
-#          python -m pip install --upgrade pipenv wheel
-#      - id: cache-pipenv
-#        uses: actions/cache@v1
-#        with:
-#          path: ~/.local/share/virtualenvs
-#          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
-#      - name: Install dependencies
-#        uses: VaultVulp/action-pipenv@v2.0.1
-#        with:
-#          command: install -d # Install all dependencies, including development ones
+      - name: Install Dependencies
+          python -m pip install --upgrade pipenv wheel
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+      - name: Install dependencies
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: install -d # Install all dependencies, including development ones
       - name: Run Test Suite
         run: |
           pipenv run test -svvv
