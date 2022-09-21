@@ -52,26 +52,15 @@ jobs:
       - name: Install Requirements
         run: |
           pip install -r requirements.txt
-#      - name: Run Test Suite
-#          python -m pip install --upgrade pipenv wheel
-#      - id: cache-pipenv
-#        uses: actions/cache@v1
-#        with:
-#          path: ~/.local/share/virtualenvs
-#          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
-#      - name: Install dependencies
-#        uses: VaultVulp/action-pipenv@v2.0.1
-#        with:
-#          command: install -d # Install all dependencies, including development ones
-#      - name: Run Test Suite
-#        run: |
-#          pipenv run test -svvv
-#        env:
-#          TEST_DB_HOST: localhost
-#          TEST_DB_NAME: postgres
-#          TEST_DB_PASS: postgres
-#          TEST_DB_PORT: 5432
-#          TEST_DB_USER: postgres
+      - name: Run Test Suite
+        run: |
+          pip run test -svvv
+        env:
+          TEST_DB_HOST: localhost
+          TEST_DB_NAME: postgres
+          TEST_DB_PASS: postgres
+          TEST_DB_PORT: 5432
+          TEST_DB_USER: postgres
       - name: Run Tests
         # Step specific environment variables
         env:
@@ -84,5 +73,3 @@ jobs:
           DB_PORT: ${{ env.POSTGRES_PORT }}
         run: |
           python manage.py test
-#          pipenv run python manage.py test
-#          pipenv run python manage.py collectstatic --noinput
