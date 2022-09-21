@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-import json
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,13 +25,13 @@ PRODUCTION_MODE = os.environ.get("PRODUCTION_MODE") == "True"
 
 if PRODUCTION_MODE:
     DEBUG = False
-    ALLOWED_HOSTS = json.loads(os.environ.get("DJANGO_ALLOWED_HOSTS"))
+    ALLOWED_HOSTS = ["*"]
     STATIC_ROOT = os.environ.get("STATIC_ROOT")
     STATICFILES_DIRS = [BASE_DIR / "static"]
 else:
     try:
-        ALLOWED_HOSTS = json.loads(os.environ.get("DJANGO_ALLOWED_HOSTS"))
-    except json.JSONDecodeError:
+        ALLOWED_HOSTS = ['*']
+    except Exception as e:
         ALLOWED_HOSTS = []
     DEBUG = True
     SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
@@ -52,6 +51,7 @@ INSTALLED_APPS = [
     
     # Our apps
     'users.apps.UsersConfig',
+    'receipts.apps.ReceiptsConfig',
     
     # Installed apps
     'rest_framework',
@@ -96,8 +96,6 @@ WSGI_APPLICATION = 'budget_lens_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
-
 if os.environ.get("POSTGRES_USER"):
     POSTGRES_USER = os.environ.get("POSTGRES_USER")
 else:
@@ -108,7 +106,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'bud_local_db',
         'USER': POSTGRES_USER,
-        'PASSWORD': POSTGRES_PASSWORD,
+        'PASSWORD': '9876',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -196,6 +194,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
