@@ -23,16 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # Configure settings based on "dev mode" or "production mode"
-PRODUCTION_MODE = os.environ.get("PRODUCTION_MODE") == "True"
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE") == "True"
 
 if PRODUCTION_MODE:
     DEBUG = False
-    ALLOWED_HOSTS = ["*"]
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
     STATIC_ROOT = os.environ.get("STATIC_ROOT")
     STATICFILES_DIRS = [BASE_DIR / "static"]
 else:
     try:
-        ALLOWED_HOSTS = ['*']
+        ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
     except Exception as e:
         ALLOWED_HOSTS = []
     DEBUG = True
@@ -98,8 +98,8 @@ WSGI_APPLICATION = 'budget_lens_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if os.environ.get("POSTGRES_USER"):
-    POSTGRES_USER = os.environ.get("POSTGRES_USER")
+if os.getenv("POSTGRES_USER"):
+    POSTGRES_USER = os.getenv("POSTGRES_USER")
 else:
     POSTGRES_USER = "postgres"
 
