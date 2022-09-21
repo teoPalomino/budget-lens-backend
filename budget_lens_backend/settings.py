@@ -12,25 +12,31 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+import json
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
+# Configure settings based on "dev mode" or "production mode"
+PRODUCTION_MODE = os.environ.get("PRODUCTION_MODE") == "True"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str(os.environ.get('DEBUG')) == "1"  # 1 == True
-
-ENV_ALLOWED_HOST = os.environ.get('DJANGO_ALLOWED_HOST') or None
-ALLOWED_HOSTS = []
-if not DEBUG:
-    ALLOWED_HOSTS += [os.environ.get('DJANGO_ALLOWED_HOST')]
-
+if PRODUCTION_MODE:
+    DEBUG = False
+    ALLOWED_HOSTS = json.loads(os.environ.get("DJANGO_ALLOWED_HOSTS"))
+    STATIC_ROOT = os.environ.get("STATIC_ROOT")
+    STATICFILES_DIRS = [BASE_DIR / "static"]
+else:
+    try:
+        ALLOWED_HOSTS = json.loads(os.environ.get("DJANGO_ALLOWED_HOSTS"))
+    except json.JSONDecodeError:
+        ALLOWED_HOSTS = []
+    DEBUG = True
+    SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
+    HOST_NAME = 'http://localhost:8000'
 
 # Application definition
 # python manage.py makemigrations
@@ -72,7 +78,7 @@ ROOT_URLCONF = 'budget_lens_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -87,42 +93,52 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'budget_lens_backend.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+
+if os.environ.get("POSTGRES_USER"):
+    POSTGRES_USER = os.environ.get("POSTGRES_USER")
+else:
+    POSTGRES_USER = "postgres"
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'bud_local_db',
+        'USER': POSTGRES_USER,
+        'PASSWORD': POSTGRES_PASSWORD,
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
-POSTGRES_DB = os.environ.get("POSTGRES_DB")  # database name
-POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")  # database user password
-POSTGRES_USER = os.environ.get("POSTGRES_USER")  # database username
-POSTGRES_HOST = os.environ.get("POSTGRES_HOST")  # database host
-POSTGRES_PORT = os.environ.get("POSTGRES_PORT")  # database port
-
-POSTGRES_READY = (
-    POSTGRES_DB is not None
-    and POSTGRES_PASSWORD is not None
-    and POSTGRES_USER is not None
-    and POSTGRES_HOST is not None
-    and POSTGRES_PORT is not None
-)
-
-if POSTGRES_READY:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": POSTGRES_DB,
-            "USER": POSTGRES_USER,
-            "PASSWORD": POSTGRES_PASSWORD,
-            "HOST": POSTGRES_HOST,
-            "PORT": POSTGRES_PORT,
-        }
-    }
+# POSTGRES_DB = getenv("POSTGRES_DB")  # database name
+# POSTGRES_PASSWORD = getenv("POSTGRES_PASSWORD")  # database user password
+# POSTGRES_USER = getenv("POSTGRES_USER")  # database username
+# POSTGRES_HOST = getenv("POSTGRES_HOST")  # database host
+# POSTGRES_PORT = getenv("POSTGRES_PORT")  # database port
+#
+# POSTGRES_READY = (
+#     POSTGRES_DB is not None
+#     and POSTGRES_PASSWORD is not None
+#     and POSTGRES_USER is not None
+#     and POSTGRES_HOST is not None
+#     and POSTGRES_PORT is not None
+# )
+#
+# if POSTGRES_READY:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.postgresql",
+#             "NAME": POSTGRES_DB,
+#             "USER": POSTGRES_USER,
+#             "PASSWORD": POSTGRES_PASSWORD,
+#             "HOST": POSTGRES_HOST,
+#             "PORT": POSTGRES_PORT,
+#         }
+#     }
 
 # DATABASES = {
 #

@@ -84,6 +84,5 @@ jobs:
           DB_PORT: ${{ env.POSTGRES_PORT }}
         run: |
           python manage.py test
-          python manage.py collectstatic --noinput
 #          pipenv run python manage.py test
 #          pipenv run python manage.py collectstatic --noinput
