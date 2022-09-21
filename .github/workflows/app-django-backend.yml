@@ -52,15 +52,6 @@ jobs:
       - name: Install Requirements
         run: |
           pip install -r requirements.txt
-      - name: Run Test Suite
-        run: |
-          pip run test -svvv
-        env:
-          TEST_DB_HOST: localhost
-          TEST_DB_NAME: postgres
-          TEST_DB_PASS: postgres
-          TEST_DB_PORT: 5432
-          TEST_DB_USER: postgres
       - name: Run Tests
         # Step specific environment variables
         env:
