@@ -63,15 +63,15 @@ jobs:
 #        uses: VaultVulp/action-pipenv@v2.0.1
 #        with:
 #          command: install -d # Install all dependencies, including development ones
-      - name: Run Test Suite
-        run: |
-          pipenv run test -svvv
-        env:
-          TEST_DB_HOST: localhost
-          TEST_DB_NAME: postgres
-          TEST_DB_PASS: postgres
-          TEST_DB_PORT: 5432
-          TEST_DB_USER: postgres
+#      - name: Run Test Suite
+#        run: |
+#          pipenv run test -svvv
+#        env:
+#          TEST_DB_HOST: localhost
+#          TEST_DB_NAME: postgres
+#          TEST_DB_PASS: postgres
+#          TEST_DB_PORT: 5432
+#          TEST_DB_USER: postgres
       - name: Run Tests
         # Step specific environment variables
         env:
