@@ -1,4 +1,4 @@
-from unittest import TestCase
+from django.test import TestCase
 
 
 # A Test example to see if the "python manage.py test" command works when ran in the GitHub actions workflow
