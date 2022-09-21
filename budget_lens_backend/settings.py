@@ -120,52 +120,6 @@ DATABASES = {
     }
 }
 
-# POSTGRES_DB = getenv("POSTGRES_DB")  # database name
-# POSTGRES_PASSWORD = getenv("POSTGRES_PASSWORD")  # database user password
-# POSTGRES_USER = getenv("POSTGRES_USER")  # database username
-# POSTGRES_HOST = getenv("POSTGRES_HOST")  # database host
-# POSTGRES_PORT = getenv("POSTGRES_PORT")  # database port
-#
-# POSTGRES_READY = (
-#     POSTGRES_DB is not None
-#     and POSTGRES_PASSWORD is not None
-#     and POSTGRES_USER is not None
-#     and POSTGRES_HOST is not None
-#     and POSTGRES_PORT is not None
-# )
-#
-# if POSTGRES_READY:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.postgresql",
-#             "NAME": POSTGRES_DB,
-#             "USER": POSTGRES_USER,
-#             "PASSWORD": POSTGRES_PASSWORD,
-#             "HOST": POSTGRES_HOST,
-#             "PORT": POSTGRES_PORT,
-#         }
-#     }
-
-# DATABASES = {
-#
-#     'default': {
-#
-#         'ENGINE': 'django.db.backends.postgresql',
-#
-#         'NAME': 'bud_local_db',
-#
-#         'USER': 'postgres',
-#
-#         'PASSWORD': '9876',
-#
-#         'HOST': 'localhost',
-#
-#         'PORT': '5432',
-#
-#     }
-#
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

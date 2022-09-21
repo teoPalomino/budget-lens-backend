@@ -1,4 +1,4 @@
-name: Django Backend CI/CD Workflow
+name: Django Backend CI Workflow
 
 # Controls when the workflow will run
 on:
