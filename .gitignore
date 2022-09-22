@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Pycharm IDE extension
+.idea
+
 # C extensions
 *.so
 
@@ -102,7 +105,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-budget_lens_backend/.env
+*/.env
+.env
 .venv
 env/
 venv/
