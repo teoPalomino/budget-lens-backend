@@ -63,8 +63,15 @@ jobs:
         run: |
           pip install coverage
           coverage erase
-          coverage run manage.py test
+          coverage run --branch manage.py test
           coverage report
+          coverage html
+      - name: Upload Coverage Report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Coverage_Report
+          path: htmlcov/
+          retention-days: 3
       - name: Run Tests
         # Step specific environment variables
         env:
