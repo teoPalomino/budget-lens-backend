@@ -33,7 +33,7 @@ if PRODUCTION_MODE:
 else:
     try:
         ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-    except Exception as e:
+    except Exception:
         ALLOWED_HOSTS = []
     DEBUG = True
     SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
@@ -120,7 +120,7 @@ DATABASES = {
     }
 }
 
-if 'test' in sys.argv or 'test\coverage' in sys.argv:  # Covers regular testing and django-coverage
+if 'test' in sys.argv or 'test\\coverage' in sys.argv:  # Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
     DATABASES['default']['NAME'] = 'bud_local_db'
     DATABASES['default']['USER'] = 'postgres'

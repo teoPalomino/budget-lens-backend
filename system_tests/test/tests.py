@@ -3,8 +3,10 @@ from selenium import webdriver
 import subprocess
 from django.test import LiveServerTestCase
 
+
 class SystemTests(LiveServerTestCase):
     """Basic system test to see if the deployed website is running or not"""
+
     def setUp(self):
         self.is_webapp_deployed = False
         self.browser = webdriver.Chrome(ChromeDriverManager().install())
@@ -37,5 +39,3 @@ class SystemTests(LiveServerTestCase):
 
         self.assertEqual(expected_requirements_packages, actual_reqirements_packages)
         self.assertEqual(error, b'')
-
-
