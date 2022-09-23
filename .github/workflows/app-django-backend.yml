@@ -64,3 +64,5 @@ jobs:
           DB_PORT: ${{ env.POSTGRES_PORT }}
         run: |
           python manage.py test
+      - name: Run Flake8
+        run: flake8 .

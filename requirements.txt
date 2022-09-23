@@ -12,12 +12,16 @@ Django==4.1.1
 django-cors-headers==3.13.0
 django-rest-knox==4.2.0
 djangorestframework==3.13.1
+flake8==5.0.4
 h11==0.13.0
 idna==3.4
 lxml==4.9.1
+mccabe==0.7.0
 outcome==1.2.0
 psycopg2-binary==2.9.3
+pycodestyle==2.9.1
 pycparser==2.21
+pyflakes==2.5.0
 PySocks==1.7.1
 python-dotenv==0.21.0
 pytz==2022.2.1
