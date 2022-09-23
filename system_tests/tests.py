@@ -5,15 +5,13 @@ from django.test import LiveServerTestCase
 
 class SystemTests(LiveServerTestCase):
     """Basic system test to see if the deployed website is running or not"""
-    @classmethod
-    def setUpClass(cls):
-        cls.is_webapp_deployed = False
-        cls.browser = webdriver.Chrome(ChromeDriverManager().install())
-        cls.browser.implicitly_wait(0.5)
+    def setUp(self):
+        self.is_webapp_deployed = False
+        self.browser = webdriver.Chrome(ChromeDriverManager().install())
+        self.browser.implicitly_wait(0.5)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.browser.quit()
+    def tearDown(self):
+        self.browser.quit()
 
     def test_deployed_site_running(self):
         """Check if the site is available when it has been deployed"""
