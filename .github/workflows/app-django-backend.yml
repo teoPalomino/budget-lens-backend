@@ -55,7 +55,7 @@ jobs:
           pip install -r requirements.txt
       - name: Run pylint
         run: |
-          shopt -s globstar && pylint --load-plugins pylint_django --django-settings-module=budget_lens_backend.settings **/*.py
+          shopt -s globstar && # DJANGO_SETTINGS_MODULE=budget_lens_backend.settings pylint --load-plugins pylint_django --django-settings-module=budget_lens_backend.settings **/*.py
       - name: Run Tests
         # Step specific environment variables
         env:
