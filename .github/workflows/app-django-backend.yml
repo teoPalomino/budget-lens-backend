@@ -58,12 +58,13 @@ jobs:
       - name: Run pylint
         run: |
           # DJANGO_SETTINGS_MODULE=budget_lens_backend.settings pylint --load-plugins pylint_django --django-settings-module=budget_lens_backend.settings **/*.py
-      # Run python test coverage
-      - name: Run Python Django Coverage GitHub Action
-        uses: dc740/django-coveragepy-github-action@0.9
-        with:
-          django-app: 'budget_lens_backend'
-          minimum-coverage: '10'
+      # Run python manage.py test coverage
+      - name: Generate Coverage Report
+        run: |
+          pip install coverage
+          coverage erase
+          coverage run manage.py test
+          coverage report
       - name: Run Tests
         # Step specific environment variables
         env:
