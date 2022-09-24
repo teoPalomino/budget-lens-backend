@@ -31,6 +31,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
+    '206.81.3.66',
+    'api.budgetlens.tech'
 ]
 
 
