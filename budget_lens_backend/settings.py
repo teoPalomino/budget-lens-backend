@@ -27,17 +27,26 @@ PRODUCTION_MODE = os.getenv("PRODUCTION_MODE") == "True"
 
 if PRODUCTION_MODE:
     DEBUG = False
-    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+    ALLOWED_HOSTS = [
+            '127.0.0.1',
+            '206.81.3.66',
+            'api.budgetlens.tech'
+        ]
     STATIC_ROOT = os.environ.get("STATIC_ROOT")
     STATICFILES_DIRS = [BASE_DIR / "static"]
 else:
     try:
-        ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+        ALLOWED_HOSTS = [
+            '127.0.0.1',
+            '206.81.3.66',
+            'api.budgetlens.tech'
+        ]
     except Exception:
         ALLOWED_HOSTS = []
     DEBUG = True
     SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
     HOST_NAME = 'http://localhost:8000'
+
 
 # Application definition
 # python manage.py makemigrations
