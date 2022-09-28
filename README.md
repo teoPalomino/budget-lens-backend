@@ -16,7 +16,7 @@ Run the following steps: <br>
       For Mac:
       ```
       virtualenv budget-lens-venv                  
-      source budget-lens-venv/bin/activate
+      source budget-lens-venv/bin/activate     # Activate the virtual environment
       ```
 2. Run the command `pip install -r requirements.txt` to install all python packages and dependencies located in the _requirements.txt_ file.
 3. Search for _psql_ and open the application (it is the terminal app for running PostgreSQL commands).

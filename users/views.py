@@ -1,9 +1,9 @@
-from rest_framework import viewsets, generics, permissions
+from rest_framework import generics
 from rest_framework.response import Response
 from knox.models import AuthToken
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import password_validators_help_texts
-from .serializers import *
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
 
 class RegisterAPI(generics.GenericAPIView):
