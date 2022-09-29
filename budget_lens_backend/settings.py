@@ -30,7 +30,8 @@ if PRODUCTION_MODE:
     ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
-            'api.budgetlens.tech'
+            'budgetlens.tech',
+            '*.budgetlens.tech'
         ]
     STATIC_ROOT = os.environ.get("STATIC_ROOT")
     STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -39,7 +40,8 @@ else:
         ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
-            'api.budgetlens.tech'
+            'budgetlens.tech',
+            '*.budgetlens.tech'
         ]
     except Exception:
         ALLOWED_HOSTS = []
