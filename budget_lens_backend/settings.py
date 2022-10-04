@@ -69,8 +69,14 @@ INSTALLED_APPS = [
     # Installed apps
     'rest_framework',
     'corsheaders',
-    'knox',
+    'rest_framework.authtoken',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'users.authentication.BearerAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
