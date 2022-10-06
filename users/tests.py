@@ -14,6 +14,23 @@ class UserAPITest(APITestCase):
     def tearDown(self):
         pass
 
+    def helper_create_user_instance(self):
+        """
+        Helper method for creating a new user in db
+        """
+        self.user = User.objects.create_user(
+            username='johncena123@gmail.com',
+            email='johncena123@gmail.com',
+            first_name='John',
+            last_name='Cena',
+            password='westlingrules123'
+        )
+
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number=5141111111
+        )
+
     def test_user_registration(self):
         """
         Test Case for user.RegistrationAPI
@@ -63,18 +80,7 @@ class UserAPITest(APITestCase):
         login_url = reverse('login_user')
 
         # Create a user in the database for testing
-        user = User.objects.create_user(
-            username='johncena123@gmail.com',
-            email='johncena123@gmail.com',
-            first_name='John',
-            last_name='Cena',
-            password='westlingrules123'
-        )
-
-        user_profile = UserProfile.objects.create(
-            user=user,
-            telephone_number=5141111111
-        )
+        self.helper_create_user_instance()
 
         data = {
             'username': 'johncena123@gmail.com',
@@ -91,13 +97,13 @@ class UserAPITest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
         # Assert values in user database match to values from the response
-        self.assertEqual(response.data['user']['username'], user_profile.user.username)
-        self.assertEqual(response.data['user']['email'], user_profile.user.email)
-        self.assertEqual(response.data['user']['first_name'], user_profile.user.first_name)
-        self.assertEqual(response.data['user']['last_name'], user_profile.user.last_name)
+        self.assertEqual(response.data['user']['username'], self.user_profile.user.username)
+        self.assertEqual(response.data['user']['email'], self.user_profile.user.email)
+        self.assertEqual(response.data['user']['first_name'], self.user_profile.user.first_name)
+        self.assertEqual(response.data['user']['last_name'], self.user_profile.user.last_name)
 
         # Get token from database and assert with value from response
-        token = Token.objects.get(user_id=user.pk)
+        token = Token.objects.get(user_id=self.user.pk)
         self.assertEqual(response.data['token'], token.key)
 
     def test_invalid_user_login(self):
@@ -133,16 +139,10 @@ class UserAPITest(APITestCase):
         user_data_url = reverse('user_data')
 
         # Create user instance for the test
-        user = User.objects.create_user(
-            username='johncena123@gmail.com',
-            email='johncena123@gmail.com',
-            first_name='John',
-            last_name='Cena',
-            password='westlingrules123'
-        )
+        self.helper_create_user_instance()
 
         # Create token for the test
-        token = Token.objects.create(user_id=user.pk)
+        token = Token.objects.create(user_id=self.user.pk)
 
         # Enter credentials for authentication using the Bearer token
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
@@ -156,10 +156,10 @@ class UserAPITest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
         # Assert values in user database match to values from the response
-        self.assertEqual(response.data['username'], user.username)
-        self.assertEqual(response.data['email'], user.email)
-        self.assertEqual(response.data['first_name'], user.first_name)
-        self.assertEqual(response.data['last_name'], user.last_name)
+        self.assertEqual(response.data['username'], self.user.username)
+        self.assertEqual(response.data['email'], self.user.email)
+        self.assertEqual(response.data['first_name'], self.user.first_name)
+        self.assertEqual(response.data['last_name'], self.user.last_name)
 
     def test_invalid_token(self):
         """
@@ -191,16 +191,10 @@ class UserAPITest(APITestCase):
         logout_url = reverse('logout_user')
 
         # Create user instance for the test
-        user = User.objects.create_user(
-            username='johncena123@gmail.com',
-            email='johncena123@gmail.com',
-            first_name='John',
-            last_name='Cena',
-            password='westlingrules123'
-        )
+        self.helper_create_user_instance()
 
         # Create token for the test
-        token = Token.objects.create(user_id=user.pk)
+        token = Token.objects.create(user_id=self.user.pk)
 
         # Enter credentials for authentication using the Bearer token
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
