@@ -1,12 +1,12 @@
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from .authentication import BearerToken
 
 
 class RegisterAPI(generics.GenericAPIView):
@@ -19,7 +19,7 @@ class RegisterAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user_profile = serializer.save()
 
-        token = Token.objects.create(user=user_profile.user)
+        token = BearerToken.objects.create(user=user_profile.user)
 
         return Response({
             # saves user and its data
@@ -41,7 +41,14 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
 
-        token = Token.objects.create(user=user)
+        try:
+            token = BearerToken.objects.create(user=user)
+        except:
+            return Response({
+                "details": "Token already exists (User is already logged in)",
+                "token": BearerToken.objects.get(user=user).key
+            })
+
         return Response({
             # saves user and its data
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
@@ -63,7 +70,7 @@ class LogoutAPI(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def delete(self, request, *args, **kwargs):
-        request.user.auth_token.delete()
+        request.user.auth_bearertoken.delete()
         return Response({
             "data": "Succesfully deleted"
         })
