@@ -43,7 +43,7 @@ class LoginAPI(generics.GenericAPIView):
 
         try:
             token = BearerToken.objects.create(user=user)
-        except:
+        except Exception:
             return Response({
                 "details": "Token already exists (User is already logged in)",
                 "token": BearerToken.objects.get(user=user).key
