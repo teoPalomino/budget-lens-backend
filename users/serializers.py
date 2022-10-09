@@ -4,6 +4,7 @@ from .models import UserProfile
 from django.contrib.auth import authenticate
 from django.core import exceptions
 import django.contrib.auth.password_validation as validators
+from rest_framework.validators import UniqueValidator
 
 
 class LoginSerializer(serializers.Serializer):
@@ -24,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
     # Make these field required (username and password are required by default)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
 
     class Meta:
         model = User
