@@ -212,3 +212,108 @@ class UserAPITest(APITestCase):
 
         # Assert that there are no more tokens in the database
         self.assertEqual(BearerToken.objects.count(), 0)
+
+    def test_edit_user_profile_success(self):
+        profile_edit_url = reverse('user_profile_update')
+
+        # Create user instance for the test
+        self.helper_create_user_instance()
+
+        # Create token for the test
+        token = BearerToken.objects.create(user_id=self.user.pk)
+
+        # Enter credentials for authentication using the Bearer token
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
+
+        data = {
+            'username': 'notjohncena@gmail.com',
+            'first_name': 'Joey',
+            'last_name': 'Senorita',
+            'email': 'notjohncena@gmail.com',
+            'telephone_number': 1111111111
+        }
+
+        response = self.client.put(
+            profile_edit_url,
+            data=data,
+            format='multipart'
+        )
+
+        # Retrieve the UserProfile to check against
+        user_profile = UserProfile.objects.get(user=self.user)
+
+        # Assert a good status message
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        # Assert the response was a success
+        self.assertEquals(response.content, b'{"response":"Success"}')
+
+        # Assert values in database match the updated values
+        self.assertEqual(data['username'], user_profile.user.username)
+        self.assertEqual(data['email'], user_profile.user.email)
+        self.assertEqual(data['first_name'], user_profile.user.first_name)
+        self.assertEqual(data['last_name'], user_profile.user.last_name)
+        self.assertEqual(data['telephone_number'], user_profile.telephone_number)
+
+    def test_edit_user_profile_invalid_email(self):
+        profile_edit_url = reverse('user_profile_update')
+
+        # Create user instance for the test
+        self.helper_create_user_instance()
+
+        # Create token for the test
+        token = BearerToken.objects.create(user_id=self.user.pk)
+
+        # Enter credentials for authentication using the Bearer token
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
+
+        data = {
+            'username': 'notjohncena@gmail.com',
+            'first_name': 'Joey',
+            'last_name': 'Senorita',
+            'email': 'notjohncena@gmail',
+            'telephone_number': 1111111111
+        }
+
+        response = self.client.put(
+            profile_edit_url,
+            data=data,
+            format='multipart'
+        )
+
+        # Assert a good status message
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        # Assert the response is an invalid email format
+        self.assertEquals(response.content, b'{"response":"Invalid email format."}')
+
+    def test_edit_user_profile_missing_keys(self):
+        profile_edit_url = reverse('user_profile_update')
+
+        # Create user instance for the test
+        self.helper_create_user_instance()
+
+        # Create token for the test
+        token = BearerToken.objects.create(user_id=self.user.pk)
+
+        # Enter credentials for authentication using the Bearer token
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
+
+        data = {
+            'username': 'notjohncena@gmail.com',
+            'first_name': 'Joey',
+            'last_name': 'Senorita'
+        }
+        response = self.client.put(
+            profile_edit_url,
+            data=data,
+            format='multipart'
+        )
+
+        # Retrieve the UserProfile to check against
+
+        # Assert a good status message
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        # Assert the response was a success
+        self.assertEquals(response.content, b'{"response":"Missing field or value for [\'Email\', \'Phone Number\']."}')
