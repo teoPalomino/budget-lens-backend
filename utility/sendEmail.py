@@ -13,7 +13,7 @@ def sendEmail(to, subject, content):
 
     try:
         #TODO: make this a little more secure, currently, is using is my own sendgrid code, but later on we figure something out
-        sg = SendGridAPIClient(os.environ.get('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'))
+        sg = SendGridAPIClient('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')
         response = sg.send(message)
         print(response.status_code)
         print(response.body)
