@@ -1,3 +1,5 @@
+import pdb
+
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import UserProfile
@@ -73,3 +75,26 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user_profile = UserProfile.objects.create(user=user, telephone_number=validated_data.pop('telephone_number'))
         return user_profile
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    """For verify the user enters an email exists in the system"""
+    email = serializers.EmailField()
+
+    def validate(self, data):
+        # print(data.pop("email"))
+        # pdb.set_trace()
+        return User.objects.filter(email=data["email"]).exists()
+        # return User.objects.filter(email=data["email"]).exists()
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    """
+    Serializer for password change endpoint.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
