@@ -76,7 +76,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user_profile
 
 
-class AddFriendsSerializer(serializers.ModelSerializer):
+class FriendSerializer(serializers.ModelSerializer):
     """Validates the email for adding a friend"""
     class Meta:
         model = Friends
