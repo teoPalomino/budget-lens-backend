@@ -82,7 +82,7 @@ class LogoutAPI(APIView):
     def delete(self, request, *args, **kwargs):
         request.user.auth_bearertoken.delete()
         return Response({
-            "data": "Succesfully deleted"
+            "data": "Successfully deleted"
         })
 
 
