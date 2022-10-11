@@ -13,7 +13,7 @@ from django.contrib.auth.password_validation import password_validators_help_tex
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, EmailSerializer, \
     ValidateDigitSerializer, ChangePasswordSerializer
 from .models import UserProfile, Friends
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, AddFriendsSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, FriendSerializer
 from .authentication import BearerToken
 from django.contrib.auth.models import User
 from utility.sendEmail import SendEmail
@@ -34,9 +34,14 @@ class RegisterAPI(generics.GenericAPIView):
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
 
-        # To use sendEmail function, you have to import it from the utility folder,
-        # for reference, look at the imports at the top
+        # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
         sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
+        # converting all email invites to friend requests upon registration
+        friends = Friends.objects.get(temp_email=user.data['email'])
+        for friend in friends:
+            friend.friend_user = user.data['id']
+            friend.temp_email = None
+            friend.save()
         return Response({
             # saves user and its data
             "user": user.data,
@@ -226,7 +231,7 @@ class ChangePasswordView(generics.GenericAPIView):
 
 class AddFriendsAPI(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, ]
-    serializer_class = AddFriendsSerializer
+    serializer_class = FriendSerializer
 
     def post(self, request, *args, **kwargs):
 
@@ -255,7 +260,7 @@ class AddFriendsAPI(generics.GenericAPIView):
 
         # Email does not exist in database
         else:
-            # call inviteFriendsAPI
+            return None
 
     @staticmethod
     def validateFriendRequest(request_user, friend_user):
@@ -281,7 +286,7 @@ class AddFriendsAPI(generics.GenericAPIView):
 
 class InviteFriendsAPI(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, ]
-    serializer_class = AddFriendsSerializer
+    serializer_class = FriendSerializer
 
     def post(self, request, *args, **kwargs):
         try:
@@ -300,3 +305,5 @@ class InviteFriendsAPI(generics.GenericAPIView):
         sendEmail(request.data.get('email'), 'BudgetLens Invitation', request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
 
         return Response({"response": "An invitation has been sent to the following email"})
+
+
