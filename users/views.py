@@ -65,5 +65,5 @@ class LogoutAPI(APIView):
     def delete(self, request, *args, **kwargs):
         request.user.auth_token.delete()
         return Response({
-            "data": "Succesfully deleted"
+            "data": "Successfully deleted"
         })
