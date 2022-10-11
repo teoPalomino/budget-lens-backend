@@ -5,4 +5,4 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('addReceiptsEndpoint/', views.AddReceiptsAPI.as_view(), name='add_receipts')
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.RECEIPT_IMAGES_URL, document_root=settings.RECEIPT_IMAGES_ROOT)
