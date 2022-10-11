@@ -229,6 +229,7 @@ class AddFriendsAPI(generics.GenericAPIView):
     serializer_class = AddFriendsSerializer
 
     def post(self, request, *args, **kwargs):
+
         friend_user = User.objects.filter(email=request.data.get('email')).values().first()
 
         if friend_user:
@@ -254,21 +255,20 @@ class AddFriendsAPI(generics.GenericAPIView):
 
         # Email does not exist in database
         else:
-            response = self.validateFriendInvite(UserSerializer(request.user).data, friend_user)
+            try:
+                validate_email(request.data.get('email'))
+            except ValidationError:
+                return Response({"response": "Invalid email address"})
 
-            if response:
-                return Response(response)
-            # Email is a valid email
-            else:
-                # Create entry in FRIENDS database for friend request using temp_email
-                serializer = self.get_serializer(data={
-                    "main_user": request.user.id,
-                    "confirmed": False,
-                    "temp_email": request.data.get('email')
-                })
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                # sendEmail(request.data.get('email'), request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
+            # Create entry in FRIENDS database for friend request using temp_email
+            serializer = self.get_serializer(data={
+                "main_user": request.user.id,
+                "confirmed": False,
+                "temp_email": request.data.get('email')
+            })
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            sendEmail(request.data.get('email'), 'BudgetLens Invitation' , request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
 
             return Response({"response": "An invitation has been sent to the following email"})
 
@@ -293,12 +293,3 @@ class AddFriendsAPI(generics.GenericAPIView):
         else:
             return None
 
-    @staticmethod
-    def validateFriendInvite(request_user, friend_user):
-        """Validate the email to send link to download the app"""
-        try:
-            validate_email(friend_user.get('email'))
-        except ValidationError:
-            return {"response": "Invalid email address"}
-
-        return None
