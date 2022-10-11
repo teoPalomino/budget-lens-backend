@@ -7,4 +7,4 @@ from receipts.models import Receipts
 class ReceiptsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Receipts
-        fields = ('scan_date', 'receipt_image_url')
+        fields = ("scan_date", 'receipt_image', )
