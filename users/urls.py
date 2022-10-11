@@ -11,5 +11,7 @@ urlpatterns = [
     path('generateDigitCodeEndpoint/', views.GenerateDigitCodeView.as_view(), name='generate_digit_code'),
     path('validateDigitCodeEndpoint/', views.ValidateDigitCodeView.as_view(), name='validate_digit_code'),
     path('changePasswordEndpoint/', views.ChangePasswordView.as_view(), name='change_password')
+    path('friend/add', views.AddFriendsAPI.as_view(), name='add_friends'),
+    path('friend/invite', views.InviteFriendsAPI.as_view(), name='invite_friends')
 
 ]
