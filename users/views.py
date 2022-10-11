@@ -254,6 +254,14 @@ class AddFriendsAPI(generics.GenericAPIView):
 
         # Email does not exist in database
         else:
+            response = self.validateFriendInvite(UserSerializer(request.user).data, friend_user)
+
+            if response:
+                return Response(response)
+
+            else:
+
+
             # TODO: generate link to download app (???)
 
             # TODO: Send email to user to register, create record marked as temporary in database
@@ -271,11 +279,24 @@ class AddFriendsAPI(generics.GenericAPIView):
             return {"response": "Invalid email address"}
 
         if request_user.get('id') == friend_user.get('id'):
-            return {"response": "You can't add yourself as a friend"}
+            return {"response": "You can't add yourself as a friend."}
         elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'), confirmed=True).exists():
-            return {"response": "You are already friends with this user"}
-        # TODO: Keep this ? or allow users to send multiple friend requests ?
+            return {"response": "You are already friends with this user."}
+        elif Friends.objects.filter(main_user=friend_user.get('id'), friend_user=request_user.get('id'), confirmed=True).exists():
+            return {"response": "You are already friends with this user."}
         elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'), confirmed=False).exists():
-            return {"response": "You have already sent a friend request to this user"}
+            return {"response": "You have already sent a friend request to this user."}
+        elif Friends.objects.filter(main_user=friend_user.get('id'), friend_user=request_user.get('id'), confirmed=False).exists():
+            return {"response": "You have already have a pending friend request from this user."}
         else:
             return None
+
+    @staticmethod
+    def validateFriendInvite(request_user, friend_user):
+        """Validate the email to send link to download the app"""
+        try:
+            validate_email(friend_user.get('email'))
+        except ValidationError:
+            return {"response": "Invalid email address"}
+
+        return None
