@@ -16,7 +16,7 @@ from .models import UserProfile, Friends
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, AddFriendsSerializer
 from .authentication import BearerToken
 from django.contrib.auth.models import User
-from utility.sendEmail import sendEmail
+from utility.sendEmail import SendEmail
 
 
 class RegisterAPI(generics.GenericAPIView):
@@ -258,17 +258,19 @@ class AddFriendsAPI(generics.GenericAPIView):
 
             if response:
                 return Response(response)
-
+            # Email is a valid email
             else:
+                # Create entry in FRIENDS database for friend request using temp_email
+                serializer = self.get_serializer(data={
+                    "main_user": request.user.id,
+                    "confirmed": False,
+                    "temp_email": request.data.get('email')
+                })
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                # sendEmail(request.data.get('email'), request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
 
-
-            # TODO: generate link to download app (???)
-
-            # TODO: Send email to user to register, create record marked as temporary in database
-
-            # TODO: when user registers, send/show them friend request
-
-            return Response({"response": "Could not find this email in our database"})
+            return Response({"response": "An invitation has been sent to the following email"})
 
     @staticmethod
     def validateFriendRequest(request_user, friend_user):
