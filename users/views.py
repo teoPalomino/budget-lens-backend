@@ -116,22 +116,7 @@ class AddFriendsAPI(generics.GenericAPIView):
 
         # Email does not exist in database
         else:
-            try:
-                validate_email(request.data.get('email'))
-            except ValidationError:
-                return Response({"response": "Invalid email address"})
-
-            # Create entry in FRIENDS database for friend request using temp_email
-            serializer = self.get_serializer(data={
-                "main_user": request.user.id,
-                "confirmed": False,
-                "temp_email": request.data.get('email')
-            })
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            sendEmail(request.data.get('email'), 'BudgetLens Invitation' , request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
-
-            return Response({"response": "An invitation has been sent to the following email"})
+            # call inviteFriendsAPI
 
     @staticmethod
     def validateFriendRequest(request_user, friend_user):
@@ -154,3 +139,25 @@ class AddFriendsAPI(generics.GenericAPIView):
         else:
             return None
 
+
+class InviteFriendsAPI(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated, ]
+    serializer_class = AddFriendsSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            validate_email(request.data.get('email'))
+        except ValidationError:
+            return Response({"response": "Invalid email address"})
+
+        # Create entry in FRIENDS database for friend request using temp_email
+        serializer = self.get_serializer(data={
+            "main_user": request.user.id,
+            "confirmed": False,
+            "temp_email": request.data.get('email')
+     })
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        sendEmail(request.data.get('email'), 'BudgetLens Invitation', request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
+
+        return Response({"response": "An invitation has been sent to the following email"})
