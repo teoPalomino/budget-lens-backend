@@ -1,4 +1,3 @@
-from django.core.validators import validate_email
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
@@ -10,8 +9,7 @@ from .models import UserProfile, Friends
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, AddFriendsSerializer
 from .authentication import BearerToken
 from django.contrib.auth.models import User
-from utility.sendEmail import SendEmail
-
+from utility.sendEmail import sendEmail
 
 class RegisterAPI(generics.GenericAPIView):
     """API for registering a new user"""
@@ -24,10 +22,15 @@ class RegisterAPI(generics.GenericAPIView):
         user_profile = serializer.save()
 
         token = BearerToken.objects.create(user=user_profile.user)
+        user = UserSerializer(user_profile.user, context=self.get_serializer_context())
 
+        #TODO: a proper registration email need to be developed, right now, the function is proven to work
+
+        #To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
+        sendEmail(user.data['email'],'User Successfully registered','User Successfully registered')
         return Response({
             # saves user and its data
-            "user": UserSerializer(user_profile.user, context=self.get_serializer_context()).data,
+            "user": user.data,
             "telephone number": user_profile.telephone_number,
             # creates token for that particular user
             # "token": AuthToken.objects.create(user_profile.user)[1],
