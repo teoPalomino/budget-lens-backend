@@ -1,12 +1,15 @@
+from django.core.validators import validate_email
 from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
-from .models import UserProfile
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from .models import UserProfile, Friends
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, AddFriendsSerializer
 from .authentication import BearerToken
+from django.contrib.auth.models import User
 
 
 class RegisterAPI(generics.GenericAPIView):
@@ -74,3 +77,60 @@ class LogoutAPI(APIView):
         return Response({
             "data": "Succesfully deleted"
         })
+
+
+class AddFriendsAPI(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated, ]
+    serializer_class = AddFriendsSerializer
+
+    def post(self, request, *args, **kwargs):
+        friend_user = User.objects.filter(email=request.data.get('email')).values().first()
+
+        if friend_user:
+            response = self.validateFriendRequest(UserSerializer(request.user).data, friend_user)
+
+            if response:
+                return Response(response)
+
+            # Friend user email exists in database
+            else:
+                # TODO: Send friend request email (what will be in the email ?)
+
+                # Create entry in FRIENDS database for friend request
+                serializer = self.get_serializer(data={
+                    "friend_user": friend_user.get('id'),
+                    "main_user": request.user.id,
+                    "confirmed": False
+                })
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+                return Response({"response": "Friend request sent successfully"})
+
+        # Email does not exist in database
+        else:
+            # TODO: generate link to download app (???)
+
+            # TODO: Send email to user to register, create record marked as temporary in database
+
+            # TODO: when user registers, send/show them friend request
+
+            return Response({"response": "Could not find this email in our database"})
+
+    @staticmethod
+    def validateFriendRequest(request_user, friend_user):
+        """Validate that we can send a friend request to the user"""
+        try:
+            validate_email(friend_user.get('email'))
+        except ValidationError:
+            return {"response": "Invalid email address"}
+
+        if request_user.get('id') == friend_user.get('id'):
+            return {"response": "You can't add yourself as a friend"}
+        elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'), confirmed=True).exists():
+            return {"response": "You are already friends with this user"}
+        # TODO: Keep this ? or allow users to send multiple friend requests ?
+        elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'), confirmed=False).exists():
+            return {"response": "You have already sent a friend request to this user"}
+        else:
+            return None

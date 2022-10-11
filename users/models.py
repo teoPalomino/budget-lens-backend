@@ -7,3 +7,12 @@ class UserProfile(models.Model):
     """
     user = models.OneToOneField(User, related_name='user', on_delete=models.CASCADE)
     telephone_number = models.PositiveBigIntegerField()
+
+
+class Friends(models.Model):
+    """
+    A friends profile
+    """
+    main_user = models.ForeignKey(User, related_name='main_user', on_delete=models.CASCADE)
+    friend_user = models.ForeignKey(User, related_name='friend_user', on_delete=models.CASCADE)
+    confirmed = models.BooleanField(default=False)

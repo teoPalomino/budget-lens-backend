@@ -1,6 +1,7 @@
+from django.core.validators import validate_email
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, Friends
 from django.contrib.auth import authenticate
 from django.core import exceptions
 import django.contrib.auth.password_validation as validators
@@ -20,7 +21,7 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """User values for gattering the values of a user in the Views Response"""
+    """User values for gathering the values of a user in the Views Response"""
 
     # Make these field required (username and password are required by default)
     first_name = serializers.CharField(required=True)
@@ -73,3 +74,20 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user_profile = UserProfile.objects.create(user=user, telephone_number=validated_data.pop('telephone_number'))
         return user_profile
+
+
+class AddFriendsSerializer(serializers.ModelSerializer):
+    """Validates the email for adding a friend"""
+    class Meta:
+        model = Friends
+        fields = ('friend_user', 'main_user', 'confirmed')
+
+    def create(self, validated_data):
+        main_user = validated_data.pop('main_user')
+        friend_user = validated_data.pop('friend_user')
+        confirmed = validated_data.pop('confirmed')
+
+        friend = Friends.objects.create(main_user=main_user, friend_user=friend_user, confirmed=confirmed)
+
+        return friend
+

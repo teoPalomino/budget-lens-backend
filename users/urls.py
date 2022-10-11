@@ -5,6 +5,7 @@ urlpatterns = [
     path('registerEndpoint/', views.RegisterAPI.as_view(), name='register_user'),
     path('loginEndpoint/', views.LoginAPI.as_view(), name='login_user'),
     path('userEndpoint/', views.UserAPI.as_view(), name='user_data'),
-    path('logoutEndpoint/', views.LogoutAPI.as_view(), name='logout_user')
+    path('logoutEndpoint/', views.LogoutAPI.as_view(), name='logout_user'),
+    path('addFriends/', views.AddFriendsAPI.as_view(), name='add_friends')
 
 ]
