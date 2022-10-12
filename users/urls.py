@@ -6,12 +6,13 @@ urlpatterns = [
     path('loginEndpoint/', views.LoginAPI.as_view(), name='login_user'),
     path('userEndpoint/', views.UserAPI.as_view(), name='user_data'),
     path('logoutEndpoint/', views.LogoutAPI.as_view(), name='logout_user'),
-    path('addFriends/', views.AddFriendsAPI.as_view(), name='add_friends')
     path('userprofile/', views.UserProfileAPI.as_view(), name='user_profile'),
     path('generateDigitCodeEndpoint/', views.GenerateDigitCodeView.as_view(), name='generate_digit_code'),
     path('validateDigitCodeEndpoint/', views.ValidateDigitCodeView.as_view(), name='validate_digit_code'),
     path('changePasswordEndpoint/', views.ChangePasswordView.as_view(), name='change_password')
+    path('friend/', views.GetFriendsAPI.as_view(), name='get_friends'),
+    path('addFriends/', views.AddFriendsAPI.as_view(), name='add_friends')
     path('friend/add', views.AddFriendsAPI.as_view(), name='add_friends'),
-    path('friend/invite', views.InviteFriendsAPI.as_view(), name='invite_friends')
-
+    path('friend/invite', views.InviteFriendsAPI.as_view(), name='invite_friends'),
+    path('friend/remove', views.RemoveFriendsAPI.as_view(), name='remove_friends')
 ]
