@@ -1,8 +1,8 @@
-import json
-
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -34,7 +34,7 @@ class RegisterAPI(generics.GenericAPIView):
         return Response({
             # saves user and its data
             "user": user.data,
-            "telephone number": user_profile.telephone_number,
+            "telephone_number": str(user_profile.telephone_number),
             # creates token for that particular user
             # "token": AuthToken.objects.create(user_profile.user)[1],
             "token": token.key,
@@ -86,9 +86,12 @@ class LogoutAPI(APIView):
         })
 
 
-class UserUpdateAPI(generics.UpdateAPIView):
+class UserProfileAPI(generics.UpdateAPIView):
     """Handles updating user profile information through a PUT request """
     permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, *args, **kwargs):
+        pass
 
     def update(self, request, *args, **kwargs):
         username = request.data.get('username', "NONE")
@@ -98,7 +101,7 @@ class UserUpdateAPI(generics.UpdateAPIView):
         telephone_number = request.data.get('telephone_number', "NONE")
 
         # Makes sure all request input is valid
-        result = self.is_valid_request(username, first_name, last_name, email, telephone_number)
+        result, status_code = self.is_valid_request(username, first_name, last_name, email, telephone_number)
 
         if result is None:  # no error, update can happen
             user_profile = UserProfile.objects.get(user=request.user)
@@ -111,8 +114,8 @@ class UserUpdateAPI(generics.UpdateAPIView):
             user_profile.telephone_number = telephone_number
             user_profile.save()
 
-            result = {"response": "Success"}
-        return Response(result)
+            result, status_code = {"response": "Success"}, HTTP_200_OK
+        return Response(result, status=status_code)
 
     @staticmethod
     def is_valid_request(username, first_name, last_name, email, telephone_number):
@@ -127,12 +130,17 @@ class UserUpdateAPI(generics.UpdateAPIView):
                 missing_inputs.append(key)
 
         if missing_inputs:
-            return {"response": "Missing field or value for " + str(missing_inputs) + "."}
+            return {"response": "Missing field or value for " + str(missing_inputs) + "."}, HTTP_400_BAD_REQUEST
+
+        # Validate phone number
+        valid_telephone_number = PhoneNumber.from_string(telephone_number)
+        if not valid_telephone_number.is_valid():
+            return {"response": "Invalid phone number."}, HTTP_400_BAD_REQUEST
 
         # Validate the email is a correct format
         try:
             validate_email(email)
         except ValidationError:
-            return {"response": "Invalid email format."}
+            return {"response": "Invalid email format."}, HTTP_400_BAD_REQUEST
         else:
-            return None
+            return None, HTTP_200_OK

@@ -1,3 +1,4 @@
+from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import UserProfile
@@ -71,5 +72,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=user_data['password']
         )
 
-        user_profile = UserProfile.objects.create(user=user, telephone_number=validated_data.pop('telephone_number'))
+        user_profile = UserProfile.objects.create(
+            user=user,
+            telephone_number=str(validated_data.pop('telephone_number'))
+        )
         return user_profile

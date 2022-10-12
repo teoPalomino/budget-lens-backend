@@ -28,7 +28,7 @@ class UserAPITest(APITestCase):
 
         self.user_profile = UserProfile.objects.create(
             user=self.user,
-            telephone_number=5141111111
+            telephone_number="+1-613-555-0187"
         )
 
     def test_user_registration(self):
@@ -44,7 +44,7 @@ class UserAPITest(APITestCase):
                 'last_name': 'Cena',
                 'password': 'westlingrules123',
             },
-            'telephone_number': 5141111111
+            'telephone_number': "+1-613-555-0187"
         }
 
         response = self.client.post(
@@ -214,7 +214,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(BearerToken.objects.count(), 0)
 
     def test_edit_user_profile_success(self):
-        profile_edit_url = reverse('user_profile_update')
+        profile_edit_url = reverse('user_profile')
 
         # Create user instance for the test
         self.helper_create_user_instance()
@@ -230,7 +230,7 @@ class UserAPITest(APITestCase):
             'first_name': 'Joey',
             'last_name': 'Senorita',
             'email': 'notjohncena@gmail.com',
-            'telephone_number': 1111111111
+            'telephone_number': "+1-613-555-0187"
         }
 
         response = self.client.put(
@@ -256,7 +256,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(data['telephone_number'], user_profile.telephone_number)
 
     def test_edit_user_profile_invalid_email(self):
-        profile_edit_url = reverse('user_profile_update')
+        profile_edit_url = reverse('user_profile')
 
         # Create user instance for the test
         self.helper_create_user_instance()
@@ -272,7 +272,7 @@ class UserAPITest(APITestCase):
             'first_name': 'Joey',
             'last_name': 'Senorita',
             'email': 'notjohncena@gmail',
-            'telephone_number': 1111111111
+            'telephone_number': "+1-613-555-0187"
         }
 
         response = self.client.put(
@@ -281,14 +281,46 @@ class UserAPITest(APITestCase):
             format='multipart'
         )
 
-        # Assert a good status message
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Assert the response is an invalid email format
         self.assertEquals(response.content, b'{"response":"Invalid email format."}')
 
+    def test_edit_user_profile_invalid_telephone_number(self):
+        profile_edit_url = reverse('user_profile')
+
+        # Create user instance for the test
+        self.helper_create_user_instance()
+
+        # Create token for the test
+        token = BearerToken.objects.create(user_id=self.user.pk)
+
+        # Enter credentials for authentication using the Bearer token
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
+
+        data = {
+            'username': 'notjohncena@gmail.com',
+            'first_name': 'Joey',
+            'last_name': 'Senorita',
+            'email': 'notjohncena@gmail.com',
+            'telephone_number': "+161355507"
+        }
+
+        response = self.client.put(
+            profile_edit_url,
+            data=data,
+            format='multipart'
+        )
+
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assert the response was a failure
+        self.assertEquals(response.content, b'{"response":"Invalid phone number."}')
+
     def test_edit_user_profile_missing_keys(self):
-        profile_edit_url = reverse('user_profile_update')
+        profile_edit_url = reverse('user_profile')
 
         # Create user instance for the test
         self.helper_create_user_instance()
@@ -310,10 +342,8 @@ class UserAPITest(APITestCase):
             format='multipart'
         )
 
-        # Retrieve the UserProfile to check against
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # Assert a good status message
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
-
-        # Assert the response was a success
+        # Assert the response was a failure
         self.assertEquals(response.content, b'{"response":"Missing field or value for [\'Email\', \'Phone Number\']."}')
