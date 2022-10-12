@@ -1,3 +1,5 @@
+import random
+
 from rest_framework import generics, status
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
@@ -7,7 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, VerifyEmailSerializer, ChangePasswordSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, VerifyEmailSerializer, \
+    ChangePasswordSerializer
 
 
 class RegisterAPI(generics.GenericAPIView):
@@ -70,7 +73,7 @@ class LogoutAPI(APIView):
         })
 
 
-class VerifyEmailView(generics.GenericAPIView):
+class VerifyEmailView(generics.UpdateAPIView):
     """
     An endpoint for verify if the email exists in the account
     """
@@ -80,9 +83,18 @@ class VerifyEmailView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         emailvalidator = serializer.validated_data
+        if emailvalidator:
+            userId = User.objects.get(request.data["email"])
+            code = random.randint(0, 999999)
+            # return UserProfile.objects.get(userId=User.objects.get())
+        else:
+            code = "that email does not exist"
 
         return Response({
-            "EmailExisted": emailvalidator
+            "6-digit-code": code,
+            "emailExists": emailvalidator,
+            "email": request.data["email"],
+            "userId":userId
         })
 
 
