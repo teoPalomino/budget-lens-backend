@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile, Friends
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, AddFriendsSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, FriendSerializer
 from .authentication import BearerToken
 from django.contrib.auth.models import User
 from utility.sendEmail import sendEmail
@@ -30,6 +30,12 @@ class RegisterAPI(generics.GenericAPIView):
 
         # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
         sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
+        # converting all email invites to friend requests upon registration
+        friends = Friends.objects.get(temp_email=user.data['email'])
+        for friend in friends:
+            friend.friend_user = user.data['id']
+            friend.temp_email = None
+            friend.save()
         return Response({
             # saves user and its data
             "user": user.data,
@@ -87,7 +93,7 @@ class LogoutAPI(APIView):
 
 class AddFriendsAPI(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, ]
-    serializer_class = AddFriendsSerializer
+    serializer_class = FriendSerializer
 
     def post(self, request, *args, **kwargs):
 
@@ -181,7 +187,7 @@ class RemoveFriendsAPI(generics.DestroyAPIView):
 
 class InviteFriendsAPI(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, ]
-    serializer_class = AddFriendsSerializer
+    serializer_class = FriendSerializer
 
     def post(self, request, *args, **kwargs):
         try:
