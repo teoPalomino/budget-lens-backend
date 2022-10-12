@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, EmailSerializer, \
     ValidateDigitSerializer, ChangePasswordSerializer
@@ -93,8 +94,8 @@ class LogoutAPI(APIView):
     def delete(self, request, *args, **kwargs):
         request.user.auth_bearertoken.delete()
         return Response({
-            "data": "Successfully deleted"
-        }, HTTP_200_OK)
+            "data": "Succesfully deleted"
+        }, status=HTTP_200_OK)
 
 
 class UserProfileAPI(generics.UpdateAPIView):
@@ -241,12 +242,10 @@ class AddFriendsAPI(generics.GenericAPIView):
             response = self.validateFriendRequest(UserSerializer(request.user).data, friend_user)
 
             if response:
-                return Response(response)
+                return Response(response, status=HTTP_400_BAD_REQUEST)
 
             # Friend user email exists in database
             else:
-                # TODO: Send friend request email (what will be in the email ?)
-
                 # Create entry in FRIENDS database for friend request
                 serializer = self.get_serializer(data={
                     "friend_user": friend_user.get('id'),
@@ -256,7 +255,7 @@ class AddFriendsAPI(generics.GenericAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-                return Response({"response": "Friend request sent successfully"})
+                return Response({"response": "Friend request sent successfully"}, status=HTTP_200_OK)
 
         # Email does not exist in database
         else:
@@ -297,9 +296,9 @@ class GetFriendsAPI(generics.ListAPIView):
             user = UserSerializer(User.objects.get(id=request.data.get('user_id'))).data
 
             if user:
-                return Response({"response": user})
+                return Response({"response": user}, status=HTTP_200_OK)
             else:
-                return Response({"response": "User not found"})
+                return Response({"response": "User not found"}, status=HTTP_400_BAD_REQUEST)
 
         # Return all user's friends
         else:
@@ -308,10 +307,7 @@ class GetFriendsAPI(generics.ListAPIView):
             for friend in friends:
                 friends_list_users.append(UserSerializer(User.objects.get(id=friend.friend_user.id)).data)
 
-            if friends_list_users:
-                return Response({"response": friends_list_users})
-            else:
-                return Response({"response": "You have no friends."})
+            return Response({"response": friends_list_users}, status=HTTP_200_OK)
 
 
 class RemoveFriendsAPI(generics.DestroyAPIView):
@@ -322,9 +318,9 @@ class RemoveFriendsAPI(generics.DestroyAPIView):
             # Delete entry in FRIENDS database for friend request
             Friends.objects.filter(main_user=request.user.id, friend_user=request.data.get('user_id'),
                                    confirmed=True).delete()
-            return Response({"response": "Friend removed successfully"})
+            return Response({"response": "Friend removed successfully"}, status=HTTP_200_OK)
         except Exception:
-            return Response({"response": "Friend not found"})
+            return Response({"response": "Friend not found"}, status=HTTP_400_BAD_REQUEST)
 
 
 class InviteFriendsAPI(generics.GenericAPIView):
