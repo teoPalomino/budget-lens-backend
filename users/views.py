@@ -29,7 +29,7 @@ class RegisterAPI(generics.GenericAPIView):
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
 
         # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
-        sendEmail(user.data['email'],'User Successfully registered','User Successfully registered')
+        sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
         return Response({
             # saves user and its data
             "user": user.data,
@@ -114,10 +114,6 @@ class AddFriendsAPI(generics.GenericAPIView):
 
                 return Response({"response": "Friend request sent successfully"})
 
-        # Email does not exist in database
-        else:
-            # call inviteFriendsAPI
-
     @staticmethod
     def validateFriendRequest(request_user, friend_user):
         """Validate that we can send a friend request to the user"""
@@ -128,16 +124,59 @@ class AddFriendsAPI(generics.GenericAPIView):
 
         if request_user.get('id') == friend_user.get('id'):
             return {"response": "You can't add yourself as a friend."}
-        elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'), confirmed=True).exists():
+        elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'),
+                                    confirmed=True).exists():
             return {"response": "You are already friends with this user."}
-        elif Friends.objects.filter(main_user=friend_user.get('id'), friend_user=request_user.get('id'), confirmed=True).exists():
+        elif Friends.objects.filter(main_user=friend_user.get('id'), friend_user=request_user.get('id'),
+                                    confirmed=True).exists():
             return {"response": "You are already friends with this user."}
-        elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'), confirmed=False).exists():
+        elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'),
+                                    confirmed=False).exists():
             return {"response": "You have already sent a friend request to this user."}
-        elif Friends.objects.filter(main_user=friend_user.get('id'), friend_user=request_user.get('id'), confirmed=False).exists():
+        elif Friends.objects.filter(main_user=friend_user.get('id'), friend_user=request_user.get('id'),
+                                    confirmed=False).exists():
             return {"response": "You have already have a pending friend request from this user."}
         else:
             return None
+
+
+class GetFriendsAPI(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, *args, **kwargs):
+        # If the request specifies a user id, return that user
+        if request.data.get('user_id'):
+            user = UserSerializer(User.objects.get(id=request.data.get('user_id'))).data
+
+            if user:
+                return Response({"response": user})
+            else:
+                return Response({"response": "User not found"})
+
+        # Return all user's friends
+        else:
+            friends = Friends.objects.filter(main_user=self.request.user.id, confirmed=True)
+            friends_list_users = []
+            for friend in friends:
+                friends_list_users.append(UserSerializer(User.objects.get(id=friend.friend_user.id)).data)
+
+            if friends_list_users:
+                return Response({"response": friends_list_users})
+            else:
+                return Response({"response": "You have no friends."})
+
+
+class RemoveFriendsAPI(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            # Delete entry in FRIENDS database for friend request
+            Friends.objects.filter(main_user=request.user.id, friend_user=request.data.get('user_id'),
+                                   confirmed=True).delete()
+            return Response({"response": "Friend removed successfully"})
+        except Exception:
+            return Response({"response": "Friend not found"})
 
 
 class InviteFriendsAPI(generics.GenericAPIView):
@@ -155,9 +194,10 @@ class InviteFriendsAPI(generics.GenericAPIView):
             "main_user": request.user.id,
             "confirmed": False,
             "temp_email": request.data.get('email')
-     })
+        })
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        sendEmail(request.data.get('email'), 'BudgetLens Invitation', request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
+        sendEmail(request.data.get('email'), 'BudgetLens Invitation',
+                  request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
 
         return Response({"response": "An invitation has been sent to the following email"})
