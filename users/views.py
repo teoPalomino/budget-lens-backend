@@ -28,9 +28,9 @@ class RegisterAPI(generics.GenericAPIView):
         user = UserSerializer(user_profile.user, context=self.get_serializer_context())
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
+
         # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
         sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
-
         # converting all email invites to friend requests upon registration
         friends = Friends.objects.get(temp_email=user.data['email'])
         for friend in friends:
