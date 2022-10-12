@@ -9,6 +9,7 @@ from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
 
+
 class RegisterAPI(generics.GenericAPIView):
     """API for registering a new user"""
     queryset = UserProfile.objects.all()
@@ -22,10 +23,10 @@ class RegisterAPI(generics.GenericAPIView):
         token = BearerToken.objects.create(user=user_profile.user)
         user = UserSerializer(user_profile.user, context=self.get_serializer_context())
 
-        #TODO: a proper registration email need to be developed, right now, the function is proven to work
+        # TODO: a proper registration email need to be developed, right now, the function is proven to work
 
-        #To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
-        sendEmail(user.data['email'],'User Successfully registered','User Successfully registered')
+        # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
+        sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
         return Response({
             # saves user and its data
             "user": user.data,
