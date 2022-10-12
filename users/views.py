@@ -9,8 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, VerifyEmailSerializer, \
-    ChangePasswordSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, VerifyEmailSerializer, ChangePasswordSerializer
+from .authentication import BearerToken
+from utility.sendEmail import sendEmail
 
 
 class RegisterAPI(generics.GenericAPIView):
@@ -23,11 +24,16 @@ class RegisterAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user_profile = serializer.save()
 
-        token = Token.objects.create(user=user_profile.user)
+        token = BearerToken.objects.create(user=user_profile.user)
+        user = UserSerializer(user_profile.user, context=self.get_serializer_context())
 
+        # TODO: a proper registration email need to be developed, right now, the function is proven to work
+
+        # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
+        sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
         return Response({
             # saves user and its data
-            "user": UserSerializer(user_profile.user, context=self.get_serializer_context()).data,
+            "user": user.data,
             "telephone number": user_profile.telephone_number,
             # creates token for that particular user
             # "token": AuthToken.objects.create(user_profile.user)[1],
@@ -45,7 +51,14 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
 
-        token = Token.objects.create(user=user)
+        try:
+            token = BearerToken.objects.create(user=user)
+        except Exception:
+            return Response({
+                "details": "Token already exists (User is already logged in)",
+                "token": BearerToken.objects.get(user=user).key
+            })
+
         return Response({
             # saves user and its data
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
@@ -67,13 +80,13 @@ class LogoutAPI(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def delete(self, request, *args, **kwargs):
-        request.user.auth_token.delete()
+        request.user.auth_bearertoken.delete()
         return Response({
             "data": "Succesfully deleted"
         })
 
 
-class VerifyEmailView(generics.UpdateAPIView):
+class VerifyEmailView(generics.GenericAPIView):
     """
     An endpoint for verify if the email exists in the account
     """
@@ -84,8 +97,8 @@ class VerifyEmailView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         emailvalidator = serializer.validated_data
         if emailvalidator:
-            userId = User.objects.get(request.data["email"])
-            code = random.randint(0, 999999)
+            # userId = User.objects.get(email=request.data["email"])
+            code = ' '.join([str(random.randint(0, 999)).zfill(3) for _ in range(2)])
             # return UserProfile.objects.get(userId=User.objects.get())
         else:
             code = "that email does not exist"
@@ -94,7 +107,7 @@ class VerifyEmailView(generics.UpdateAPIView):
             "6-digit-code": code,
             "emailExists": emailvalidator,
             "email": request.data["email"],
-            "userId":userId
+            # "userId": userId
         })
 
 
@@ -131,3 +144,8 @@ class ChangePasswordView(generics.UpdateAPIView):
             return Response(response)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# def generate_six_digit_code():
+#     for
+#     return code

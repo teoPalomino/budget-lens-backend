@@ -51,3 +51,4 @@ webdriver-manager==3.8.3
 webdrivermanager==0.10.0
 wrapt==1.14.1
 wsproto==1.2.0
+sendgrid==6.9.7

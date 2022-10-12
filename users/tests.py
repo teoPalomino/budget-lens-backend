@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
+from users.authentication import BearerToken
 
 from users.models import UserProfile
 
@@ -103,7 +103,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(response.data['user']['last_name'], self.user_profile.user.last_name)
 
         # Get token from database and assert with value from response
-        token = Token.objects.get(user_id=self.user.pk)
+        token = BearerToken.objects.get(user_id=self.user.pk)
         self.assertEqual(response.data['token'], token.key)
 
     def test_invalid_user_login(self):
@@ -130,7 +130,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(response.data['non_field_errors'], ['Incorrect Credentials'])
 
         # Assert that no tokens were generated
-        self.assertEqual(Token.objects.count(), 0)
+        self.assertEqual(BearerToken.objects.count(), 0)
 
     def test_view_user_instance(self):
         """
@@ -142,7 +142,7 @@ class UserAPITest(APITestCase):
         self.helper_create_user_instance()
 
         # Create token for the test
-        token = Token.objects.create(user_id=self.user.pk)
+        token = BearerToken.objects.create(user_id=self.user.pk)
 
         # Enter credentials for authentication using the Bearer token
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
@@ -194,7 +194,7 @@ class UserAPITest(APITestCase):
         self.helper_create_user_instance()
 
         # Create token for the test
-        token = Token.objects.create(user_id=self.user.pk)
+        token = BearerToken.objects.create(user_id=self.user.pk)
 
         # Enter credentials for authentication using the Bearer token
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
@@ -211,4 +211,4 @@ class UserAPITest(APITestCase):
         self.assertEqual(response.data['data'], 'Succesfully deleted')
 
         # Assert that there are no more tokens in the database
-        self.assertEqual(Token.objects.count(), 0)
+        self.assertEqual(BearerToken.objects.count(), 0)
