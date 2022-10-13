@@ -52,3 +52,4 @@ webdrivermanager==0.10.0
 wrapt==1.14.1
 wsproto==1.2.0
 sendgrid==6.9.7
+django-phonenumber-field[phonenumberslite]=7.0.0
