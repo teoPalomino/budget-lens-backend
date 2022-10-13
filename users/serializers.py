@@ -1,4 +1,3 @@
-from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import UserProfile
