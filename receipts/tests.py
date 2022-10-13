@@ -50,7 +50,7 @@ class AddReceiptsAPITest(APITestCase):
         )
         self.user_profile = UserProfile.objects.create(
             user=self.user,
-            telephone_number=5141111111
+            telephone_number="+1-613-555-0187"
         )
         self.data = {
             'username': 'johncena123@gmail.com',
@@ -70,7 +70,7 @@ class AddReceiptsAPITest(APITestCase):
         )
         self.new_user_profile = UserProfile.objects.create(
             user=self.new_user,
-            telephone_number=5144204200
+            telephone_number="+1-613-420-4200"
         )
         self.new_data = {
             'username': 'johndoe123@gmail.com',
