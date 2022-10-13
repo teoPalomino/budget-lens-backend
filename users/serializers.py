@@ -77,15 +77,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user_profile
 
 
-class VerifyEmailSerializer(serializers.Serializer):
+class GenerateDigitCodeSerializer(serializers.Serializer):
     """For verify the user enters an email exists in the system"""
     email = serializers.EmailField()
 
     def validate(self, data):
-        # print(data.pop("email"))
-        # pdb.set_trace()
         return User.objects.filter(email=data["email"]).exists()
-        # return User.objects.filter(email=data["email"]).exists()
+
+
+class ValidateDigitSerializer(serializers.Serializer):
+    """For verify the user enters the correct 6 digits code"""
+    email = serializers.EmailField()
+    digit = serializers.CharField(min_length=6, max_length=6)
+
+    def validate(self, data):
+        user = User.objects.get(email=data["email"])
+        userprofile = UserProfile.objects.get(user_id=user.id)
+        print(user.id)
+        return userprofile.one_time_code
+
+
 
 
 class ChangePasswordSerializer(serializers.Serializer):

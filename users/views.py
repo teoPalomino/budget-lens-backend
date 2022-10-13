@@ -9,8 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, VerifyEmailSerializer, \
-    ChangePasswordSerializer
+from .serializers import *
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
 
@@ -87,11 +86,11 @@ class LogoutAPI(APIView):
         })
 
 
-class VerifyEmailView(generics.GenericAPIView):
+class GenerateDigitCodeView(generics.GenericAPIView):
     """
     An endpoint for verify if the email exists in the account
     """
-    serializer_class = VerifyEmailSerializer
+    serializer_class = GenerateDigitCodeSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -100,7 +99,7 @@ class VerifyEmailView(generics.GenericAPIView):
         if emailvalidator:
             user = User.objects.get(email=request.data["email"])
             userprofile = UserProfile.objects.get(user_id=user.id)
-            code = ' '.join([str(random.randint(0, 999)).zfill(3) for _ in range(2)])
+            code = str(random.randint(0, 999999)).zfill(6)
             print(userprofile.one_time_code)
             userprofile.one_time_code = code
             userprofile.save()
@@ -108,10 +107,24 @@ class VerifyEmailView(generics.GenericAPIView):
                 "6-digit-code": code,
                 "emailExists": emailvalidator,
                 "email": request.data["email"],
-
             })
         return Response({
             "Message:": "The user doesn't exist"
+        })
+
+
+class ValidateDigitCodeView(generics.GenericAPIView):
+    """
+    An endpoint for verifying 6 digits code matches.
+    """
+    serializer_class = ValidateDigitSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        match = True if serializer.validated_data == request.data["digit"] else False
+        return Response({
+            "code match status": match
         })
 
 
@@ -148,7 +161,3 @@ class ChangePasswordView(generics.UpdateAPIView):
             return Response(response)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# def generate_six_digit_code():
-#     for
-#     return code
