@@ -9,7 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, VerifyEmailSerializer, ChangePasswordSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, VerifyEmailSerializer, \
+    ChangePasswordSerializer
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
 
@@ -97,17 +98,20 @@ class VerifyEmailView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         emailvalidator = serializer.validated_data
         if emailvalidator:
-            # userId = User.objects.get(email=request.data["email"])
+            user = User.objects.get(email=request.data["email"])
+            userprofile = UserProfile.objects.get(user_id=user.id)
             code = ' '.join([str(random.randint(0, 999)).zfill(3) for _ in range(2)])
-            # return UserProfile.objects.get(userId=User.objects.get())
-        else:
-            code = "that email does not exist"
+            print(userprofile.one_time_code)
+            userprofile.one_time_code = code
+            userprofile.save()
+            return Response({
+                "6-digit-code": code,
+                "emailExists": emailvalidator,
+                "email": request.data["email"],
 
+            })
         return Response({
-            "6-digit-code": code,
-            "emailExists": emailvalidator,
-            "email": request.data["email"],
-            # "userId": userId
+            "Message:": "The user doesn't exist"
         })
 
 
@@ -144,7 +148,6 @@ class ChangePasswordView(generics.UpdateAPIView):
             return Response(response)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 # def generate_six_digit_code():
 #     for
