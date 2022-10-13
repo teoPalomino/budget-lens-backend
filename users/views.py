@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
@@ -40,7 +42,7 @@ class RegisterAPI(generics.GenericAPIView):
         return Response({
             # saves user and its data
             "user": user.data,
-            "telephone number": user_profile.telephone_number,
+            "telephone_number": str(user_profile.telephone_number),
             # creates token for that particular user
             # "token": AuthToken.objects.create(user_profile.user)[1],
             "token": token.key,
@@ -80,6 +82,66 @@ class UserAPI(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class UserProfileAPI(generics.UpdateAPIView):
+    """Handles updating user profile information through a PUT request """
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, *args, **kwargs):
+        pass
+
+    def update(self, request, *args, **kwargs):
+        username = request.data.get('username', "NONE")
+        first_name = request.data.get('first_name', "NONE")
+        last_name = request.data.get('last_name', "NONE")
+        email = request.data.get('email', "NONE")
+        telephone_number = request.data.get('telephone_number', "NONE")
+
+        # Makes sure all request input is valid
+        result, status_code = self.is_valid_request(username, first_name, last_name, email, telephone_number)
+
+        if result is None:  # no error, update can happen
+            user_profile = UserProfile.objects.get(user=request.user)
+            user_profile.user.username = username
+            user_profile.user.first_name = first_name
+            user_profile.user.last_name = last_name
+            user_profile.user.email = email
+            user_profile.user.save()
+
+            user_profile.telephone_number = telephone_number
+            user_profile.save()
+
+            result, status_code = {"response": "Success"}, HTTP_200_OK
+        return Response(result, status=status_code)
+
+    @staticmethod
+    def is_valid_request(username, first_name, last_name, email, telephone_number):
+        """Checks if the request is valid by looking at the form data key/values and email format"""
+
+        # Ensure no missing key or values for the form data
+        expected_input = {'Username': username, 'First Name': first_name, 'Last Name': last_name, 'Email': email,
+                          'Phone Number': telephone_number}
+        missing_inputs = []
+        for key, value in expected_input.items():
+            if value == "NONE" or value == "":
+                missing_inputs.append(key)
+
+        if missing_inputs:
+            return {"response": "Missing field or value for " + str(missing_inputs) + "."}, HTTP_400_BAD_REQUEST
+
+        # Validate phone number
+        valid_telephone_number = PhoneNumber.from_string(telephone_number)
+        if not valid_telephone_number.is_valid():
+            return {"response": "Invalid phone number."}, HTTP_400_BAD_REQUEST
+
+        # Validate the email is a correct format
+        try:
+            validate_email(email)
+        except ValidationError:
+            return {"response": "Invalid email format."}, HTTP_400_BAD_REQUEST
+        else:
+            return None, HTTP_200_OK
 
 
 class LogoutAPI(APIView):
@@ -239,3 +301,6 @@ class InviteFriendsAPI(generics.GenericAPIView):
                   request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
 
         return Response({"response": "An invitation has been sent to the following email"}, status=HTTP_200_OK)
+
+
+
