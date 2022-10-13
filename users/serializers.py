@@ -97,15 +97,16 @@ class ValidateDigitSerializer(serializers.Serializer):
         return userprofile.one_time_code
 
 
-
-
 class ChangePasswordSerializer(serializers.Serializer):
     model = User
 
     """
     Serializer for password change endpoint.
     """
-    old_password = serializers.CharField(required=True)
+    email = serializers.EmailField()
     new_password = serializers.CharField(required=True)
+    re_password = serializers.CharField(required=True)
+
+
 
 
