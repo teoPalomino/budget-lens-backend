@@ -13,7 +13,6 @@ cryptography==38.0.1
 dill==0.3.5.1
 Django==4.1.1
 django-cors-headers==3.13.0
-django-phonenumber-field==7.0.0
 django-rest-knox==4.2.0
 djangorestframework==3.13.1
 flake8==5.0.4
