@@ -107,6 +107,9 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
     re_password = serializers.CharField(required=True)
 
+    def validate(self, data):
+        return User.objects.filter(email=data["email"]).exists()
+
 
 
 

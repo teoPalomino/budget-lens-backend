@@ -96,11 +96,15 @@ class GenerateDigitCodeView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         emailvalidator = serializer.validated_data
+
+        # if the email exists, generate a random 6 digits number
         if emailvalidator:
             user = User.objects.get(email=request.data["email"])
             userprofile = UserProfile.objects.get(user_id=user.id)
             code = str(random.randint(0, 999999)).zfill(6)
             print(userprofile.one_time_code)
+
+            # Update user profile 6 digits number
             userprofile.one_time_code = code
             userprofile.save()
             return Response({
@@ -128,36 +132,35 @@ class ValidateDigitCodeView(generics.GenericAPIView):
         })
 
 
-class ChangePasswordView(generics.UpdateAPIView):
+class ChangePasswordView(generics.GenericAPIView):
     """
     An endpoint for changing password.
     """
     serializer_class = ChangePasswordSerializer
-    model = User
-    permission_classes = (IsAuthenticated,)
 
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
-
-    def update(self, request, *args, **kwargs):
-        self.object = self.get_object()
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        emailvalidator = serializer.validated_data
 
-        if serializer.is_valid():
-            # Check old password
-            if not serializer.data["new_password"] == serializer.data["re_password"]:
-                return Response({"status": ["Password doesn't match."]}, status=status.HTTP_400_BAD_REQUEST)
-            # set_password also hashes the password that the user will get
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
-            response = {
-                'status': 'success',
-                'code': status.HTTP_200_OK,
-                'message': 'Password updated successfully',
-                'data': []
-            }
+        # verify if the email exists
+        if emailvalidator:
 
-            return Response(response)
+            # verify the two field password match
+            if request.data.get("new_password") == request.data.get("re_password"):
+                user = User.objects.get(email=request.data["email"])
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                # Update password
+                user.set_password(request.data.get("new_password"))
+                user.save()
+
+                return Response({
+                    "Message:": "The password has been changed",
+                    "The new password is:": request.data.get("new_password")
+                })
+
+            return Response({"Message:": "The password doesn't match"})
+
+            return Response({
+                "Message:": "The user doesn't exist"
+            })
