@@ -102,7 +102,6 @@ class GenerateDigitCodeView(generics.GenericAPIView):
             user = User.objects.get(email=request.data["email"])
             userprofile = UserProfile.objects.get(user_id=user.id)
             code = str(random.randint(0, 999999)).zfill(6)
-            print(userprofile.one_time_code)
 
             # Update user profile 6 digits number
             userprofile.one_time_code = code

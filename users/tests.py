@@ -212,3 +212,14 @@ class UserAPITest(APITestCase):
 
         # Assert that there are no more tokens in the database
         self.assertEqual(BearerToken.objects.count(), 0)
+
+    # def test_generateDigitCode_existedUser_succeed(self):
+    #     """
+    #     Test Case for user.views.GenerateDigitCodeView
+    #     The 6 randomized digit code should be generated with the existed User
+    #     """
+    #
+    #     generate_digit_url = reverse('generate_digit_code')
+
+
+
