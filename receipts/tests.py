@@ -103,16 +103,25 @@ class AddReceiptsAPITest(APITestCase):
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
 
         # I check that the user id of the created/added receipt in the database I just created is the same as the user id of the user who created/added it
-        self.assertEqual(receipt.user_id, self.user.id)
+        self.assertEqual(
+            receipt.user_id,
+            self.user.id
+        )
 
         # I check the created/added receipt's datetime scan date in the database is the same as the Unix timestamp equivalent used to rename the receipt's image file
-        self.assertEqual(receipt.scan_date.replace(microsecond=0), make_aware(datetime.datetime.fromtimestamp(time.mktime(receipt.scan_date.timetuple()))).replace(tzinfo=datetime.timezone.utc))
+        self.assertEqual(
+            receipt.scan_date.replace(microsecond=0),
+            make_aware(datetime.datetime.fromtimestamp(time.mktime(receipt.scan_date.timetuple()))).replace(tzinfo=datetime.timezone.utc)
+        )
 
-        # I check to make sure the receipt's image URL directory/path saved in the database is the same as the one I expect it to be, given the user id as its "user_id" sub-folder and the Unix timestamp equivalent used to rename the image file itself
-        self.assertEqual(receipt.receipt_image, os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png'))
+        # I check to make sure the receipt's image URL directory/path saved in the database is the same as the one I expect it
+        # to be,given the user id as its "user_id" sub-folder and the Unix timestamp equivalent used to rename the image file itself
+        self.assertEqual(
+            receipt.receipt_image,
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png')
+        )
 
     def test_user_id_sub_folder_exists(self):
-        shutil.rmtree(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}'), ignore_errors=True)
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
 
         # Here, a similar thing happens compared to the previous test, except that I am now checking what happens
@@ -120,9 +129,15 @@ class AddReceiptsAPITest(APITestCase):
         receipt1 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
         receipt2 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
 
-        self.assertEqual(receipt1.user_id, receipt2.user.id)
+        self.assertEqual(
+            receipt1.user_id,
+            receipt2.user.id
+        )
         self.assertTrue(os.path.join(settings.RECEIPT_IMAGES_URL, f'{receipt1.user.id}'), os.path.join(settings.RECEIPT_IMAGES_URL, f'{receipt2.user.id}'))
-        self.assertNotEqual(receipt1.receipt_image.name.split('/')[2], receipt2.receipt_image.name.split('/')[2])
+        self.assertNotEqual(
+            receipt1.receipt_image.name.split('/')[2],
+            receipt2.receipt_image.name.split('/')[2]
+        )
 
         # The following/rest of the code below in this test is used to check what happens if a new user tries to add a new receipt of their own:
         # I should expect the new receipt to be added to a new "user_id" sub-folder that corresponds to the new user's id, therefore the path/directory
@@ -132,8 +147,14 @@ class AddReceiptsAPITest(APITestCase):
         receipt3 = Receipts.objects.create(user=self.new_user, receipt_image=get_test_image_file())
 
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
-        self.assertEqual(receipt3.user_id, self.new_user.id)
-        self.assertEqual(receipt3.receipt_image, os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}', f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png'))
+        self.assertEqual(
+            receipt3.user_id,
+            self.new_user.id
+        )
+        self.assertEqual(
+            receipt3.receipt_image,
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}', f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png')
+        )
 
     def test_add_receipt_images_using_post_request(self):
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
@@ -152,10 +173,25 @@ class AddReceiptsAPITest(APITestCase):
 
         # Through the post request, I should expect the path/directory of the new added/created receipt to also be automatically saved in the database under the "receipt_images" folder
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
-        self.assertEqual(self.response.data['receipt image URL links'][0]['receipt_image'].split('/')[2], str(self.user.id))
-        self.assertEqual(self.response.data['receipt image URL links'][0]['receipt_image'].split('/')[3].strip('.png'), Receipts.objects.get(user=self.user).receipt_image.name.split('/')[2].strip('.png'))
-        self.assertEqual(self.response.data['receipt image URL links'][0]['receipt_image'].strip('/'), os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt image URL links"][0]["receipt_image"].split("/")[3]}'))
+        self.assertEqual(
+            self.response.data['receipt image URL links'][0]['receipt_image'].split('/')[2],
+            str(self.user.id)
+        )
+        self.assertEqual(
+            self.response.data['receipt image URL links'][0]['receipt_image'].split('/')[3].strip('.png'),
+            Receipts.objects.get(user=self.user).receipt_image.name.split('/')[2].strip('.png')
+        )
+        self.assertEqual(
+            self.response.data['receipt image URL links'][0]['receipt_image'].strip('/'),
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt image URL links"][0]["receipt_image"].split("/")[3]}')
+        )
 
         # Asserts a good/successful status message
-        self.assertEqual(self.response.data['status'], 'success')
-        self.assertEquals(self.response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            self.response.data['status'],
+            'success'
+        )
+        self.assertEquals(
+            self.response.status_code,
+            status.HTTP_200_OK
+        )
