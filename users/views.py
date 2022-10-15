@@ -4,7 +4,6 @@ from django.core.validators import validate_email
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
-
 from rest_framework import generics, status
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
@@ -167,6 +166,7 @@ class GenerateDigitCodeView(generics.GenericAPIView):
             user = User.objects.get(email=request.data["email"])
             userprofile = UserProfile.objects.get(user_id=user.id)
             code = str(random.randint(0, 999999)).zfill(6)
+            sendEmail(request.data["email"], 'Your reset password 6 digit code is here', code)
 
             # Update user profile 6 digits number
             userprofile.one_time_code = code
