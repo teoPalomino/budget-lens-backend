@@ -3,7 +3,6 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.authentication import BearerToken
-from unittest import mock
 
 from users.models import UserProfile
 
@@ -496,27 +495,28 @@ class UserAPITest(APITestCase):
             'telephone_number': "+1-613-555-0187"
         }
 
-        response = self.client.post(
+        self.client.post(
             registration_url,
             data=data,
             format='json'
         )
 
-    def generate_digit_code(self):
-        """
-        A helper method to create a user and generate a 6 digits code to him
-        """
 
-        self.create_user()
+def generate_digit_code(self):
+    """
+    A helper method to create a user and generate a 6 digits code to him
+    """
 
-        generate_digit_url = reverse('generate_digit_code')
+    self.create_user()
 
-        data = {
-            'email': 'johncena123@gmail.com'
-        }
+    generate_digit_url = reverse('generate_digit_code')
 
-        self.client.post(
-            generate_digit_url,
-            data=data,
-            format='json'
-        )
+    data = {
+        'email': 'johncena123@gmail.com'
+    }
+
+    self.client.post(
+        generate_digit_url,
+        data=data,
+        format='json'
+    )
