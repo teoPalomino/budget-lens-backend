@@ -355,6 +355,3 @@ class UserAPITest(APITestCase):
     #     """
     #
     #     generate_digit_url = reverse('generate_digit_code')
-
-
-

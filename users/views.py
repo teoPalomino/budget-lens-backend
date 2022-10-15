@@ -9,7 +9,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
-from .serializers import *
+from .models import UserProfile
+from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, GenerateDigitCodeSerializer, \
+    ValidateDigitSerializer, ChangePasswordSerializer
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
 
