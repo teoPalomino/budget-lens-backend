@@ -86,7 +86,7 @@ class LogoutAPI(APIView):
         request.user.auth_bearertoken.delete()
         return Response({
             "data": "Successfully deleted"
-        })
+        }, HTTP_200_OK)
 
 
 class UserProfileAPI(generics.UpdateAPIView):
@@ -188,8 +188,6 @@ class ValidateDigitCodeView(generics.GenericAPIView):
         # get the user profile data
         userprofile = serializer.validated_data
 
-        print(type(userprofile.one_time_code))
-        print(type(request.data["digit"]))
         # check if the input match the user digit code
         match = True if userprofile.one_time_code == int(request.data["digit"]) else False
         if match:
