@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.authentication import BearerToken
+from unittest import mock
 
 from users.models import UserProfile
 
@@ -348,10 +349,174 @@ class UserAPITest(APITestCase):
         # Assert the response was a failure
         self.assertEquals(response.content, b'{"response":"Missing field or value for [\'Email\', \'Phone Number\']."}')
 
-    # def test_generateDigitCode_existedUser_succeed(self):
-    #     """
-    #     Test Case for user.views.GenerateDigitCodeView
-    #     The 6 randomized digit code should be generated with the existed User
-    #     """
-    #
-    #     generate_digit_url = reverse('generate_digit_code')
+    def test_generateDigitCode_existedUser_succeed(self):
+        """
+        Test Case for user.views.GenerateDigitCodeView
+        The 6 randomized digit code should be generated with the existed User
+        """
+        self.create_user()
+
+        generate_digit_url = reverse('generate_digit_code')
+
+        data = {
+            'email': 'johncena123@gmail.com'
+        }
+
+        response = self.client.post(
+            generate_digit_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 200 status code
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        # Assert the response was a failure
+        self.assertEquals(response.content, b'{"response":"Success"}')
+
+        # Assert the 6 digits code has been saved
+        user = User.objects.get(email='johncena123@gmail.com')
+        userprofile = UserProfile.objects.get(user_id=user.id)
+        self.assertIsNotNone(userprofile.one_time_code)
+
+    def test_generateDigitCode_unExistedUser_failed(self):
+        """
+        Test Case for user.views.GenerateDigitCodeView
+        The 6 randomized digit code should not be generated with the unExisted User
+        """
+
+        generate_digit_url = reverse('generate_digit_code')
+
+        data = {
+            'email': 'unexistedemail@gmail.com'
+        }
+
+        response = self.client.post(
+            generate_digit_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assert the response was a failure
+        self.assertEquals(response.content, b'{"non_field_errors":["User doesn\'t exist"]}')
+
+    def test_validateDigitCode_unExistedUser_failed(self):
+        """
+        Test Case for user.views.GenerateDigitCodeView
+        The 6 randomized digit code should not be generated with the unExisted User
+        """
+        validate_digit_url = reverse('validate_digit_code')
+
+        data = {
+            'email': 'unexistedemail@gmail.com',
+            'digit': 123456
+        }
+
+        response = self.client.post(
+            validate_digit_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assert the response was a failure
+        self.assertEquals(response.content, b'{"non_field_errors":["User doesn\'t exist"]}')
+
+    def test_validateDigitCode_uncorrectedCode_failed(self):
+        """
+        Test Case for user.views.GenerateDigitCodeView
+        The 6 randomized digit code should not be generated with the unExisted User
+        """
+        self.generate_digit_code()
+
+        validate_digit_url = reverse('validate_digit_code')
+
+        data = {
+            'email': 'johncena123@gmail.com',
+            'digit': 000000
+        }
+
+        response = self.client.post(
+            validate_digit_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assert the response was a failure
+        self.assertEquals(response.content, b'{"response":"failed, doesn\'t match"}')
+
+    def test_validateDigitCode_correctedCode_succeed(self):
+        """
+        Test Case for user.views.GenerateDigitCodeView
+        The 6 randomized digit code should not be generated with the unExisted User
+        """
+        self.generate_digit_code()
+
+        validate_digit_url = reverse('validate_digit_code')
+        user = User.objects.get(email='johncena123@gmail.com')
+        userprofile = UserProfile.objects.get(user_id=user.id)
+        data = {
+            'email': 'johncena123@gmail.com',
+            'digit': userprofile.one_time_code
+        }
+
+        response = self.client.post(
+            validate_digit_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 200 status code
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        # Assert the response was a success
+        self.assertEquals(response.content, b'{"response":"succeed"}')
+
+    def create_user(self):
+        """
+        A helper method to create user and avoid duplicated code
+        """
+        registration_url = reverse('register_user')
+        data = {
+            'user': {
+                'username': 'johncena123@gmail.com',
+                'email': 'johncena123@gmail.com',
+                'first_name': 'John',
+                'last_name': 'Cena',
+                'password': 'westlingrules123',
+            },
+            'telephone_number': "+1-613-555-0187"
+        }
+
+        response = self.client.post(
+            registration_url,
+            data=data,
+            format='json'
+        )
+
+    def generate_digit_code(self):
+        """
+        A helper method to create a user and generate a 6 digits code to him
+        """
+
+        self.create_user()
+
+        generate_digit_url = reverse('generate_digit_code')
+
+        data = {
+            'email': 'johncena123@gmail.com'
+        }
+
+        response = self.client.post(
+            generate_digit_url,
+            data=data,
+            format='json'
+        )
