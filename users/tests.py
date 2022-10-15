@@ -353,8 +353,10 @@ class UserAPITest(APITestCase):
         Test Case for user.views.GenerateDigitCodeView
         The 6 randomized digit code should be generated with the existed User
         """
+        # create a user for testing purpose
         self.create_user()
 
+        # generate a 6 digits code for that user
         generate_digit_url = reverse('generate_digit_code')
 
         data = {
@@ -370,7 +372,7 @@ class UserAPITest(APITestCase):
         # Assert a 200 status code
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
-        # Assert the response was a failure
+        # Assert the response was a success
         self.assertEquals(response.content, b'{"response":"Success"}')
 
         # Assert the 6 digits code has been saved
@@ -383,7 +385,7 @@ class UserAPITest(APITestCase):
         Test Case for user.views.GenerateDigitCodeView
         The 6 randomized digit code should not be generated with the unExisted User
         """
-
+        # generate 6 digits code of a non existed user
         generate_digit_url = reverse('generate_digit_code')
 
         data = {
@@ -404,9 +406,10 @@ class UserAPITest(APITestCase):
 
     def test_validateDigitCode_unExistedUser_failed(self):
         """
-        Test Case for user.views.GenerateDigitCodeView
-        The 6 randomized digit code should not be generated with the unExisted User
+        Test Case for user.views.ValidateDigitCodeView
+        The validation should return a 400 if the user is not existed
         """
+        # validate 6 digits number of a non existed user
         validate_digit_url = reverse('validate_digit_code')
 
         data = {
@@ -428,9 +431,10 @@ class UserAPITest(APITestCase):
 
     def test_validateDigitCode_uncorrectedCode_failed(self):
         """
-        Test Case for user.views.GenerateDigitCodeView
-        The 6 randomized digit code should not be generated with the unExisted User
+        Test Case for user.views.ValidateDigitCodeView
+        The user entered wrong 6 randomized digit code should not be return a 200
         """
+        # create a user and generate a 6 digit random code
         self.generate_digit_code()
 
         validate_digit_url = reverse('validate_digit_code')
@@ -454,12 +458,15 @@ class UserAPITest(APITestCase):
 
     def test_validateDigitCode_correctedCode_succeed(self):
         """
-        Test Case for user.views.GenerateDigitCodeView
-        The 6 randomized digit code should not be generated with the unExisted User
+        Test Case for user.views.ValidateDigitCodeView
+        The response should success if 6 randomized digit code entered match the one in the database
         """
+        # create a user and generate a 6 digit random code
         self.generate_digit_code()
 
         validate_digit_url = reverse('validate_digit_code')
+
+        # get the user and validate the 6 digits code of that user
         user = User.objects.get(email='johncena123@gmail.com')
         userprofile = UserProfile.objects.get(user_id=user.id)
         data = {
@@ -478,6 +485,88 @@ class UserAPITest(APITestCase):
 
         # Assert the response was a success
         self.assertEquals(response.content, b'{"response":"succeed"}')
+
+    def test_changePassword_unExistedUser_failed(self):
+        """
+        Test Case for user.views.ChangePasswordView
+        The action of change a password of non existed user should fail
+        """
+        # change password of a non existed user
+        change_password_url = reverse('change_password')
+
+        data = {
+            'email': 'unexistedemail@gmail.com',
+            'new_password': 'aa@@123123',
+            're_password': 'aa@@123123'
+        }
+
+        response = self.client.post(
+            change_password_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assert the response was a failure
+        self.assertEquals(response.content, b'{"non_field_errors":["User doesn\'t exist"]}')
+
+    def test_changePassword_re_passwordNotMatch_failed(self):
+        """
+        Test Case for user.views.ChangePasswordView
+        The action of change a password of a existed user should fail if the new password and the password
+        re-entered isn't the same
+        """
+        change_password_url = reverse('change_password')
+
+        self.create_user()
+
+        data = {
+            'email': 'johncena123@gmail.com',
+            'new_password': 'aa@@123123',
+            're_password': 'aa@@456456'
+        }
+
+        response = self.client.post(
+            change_password_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assert the response was a failure
+        self.assertEquals(response.content, b'{"response":"The password doesn\'t match"}')
+
+    def test_changePassword_succeed(self):
+        """
+        Test Case for user.views.ChangePasswordView
+        The action of change a password of a existed user with matched new password and the password
+        re-entered should succeed
+        """
+        change_password_url = reverse('change_password')
+
+        self.create_user()
+
+        data = {
+            'email': 'johncena123@gmail.com',
+            'new_password': 'aa@@123123',
+            're_password': 'aa@@123123'
+        }
+
+        response = self.client.post(
+            change_password_url,
+            data=data,
+            format='json'
+        )
+
+        # Assert a 200 status code
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        # Assert the response was a success
+        self.assertEquals(response.content, b'{"Message:":"The password has been changed"}')
 
     def create_user(self):
         """
@@ -501,22 +590,22 @@ class UserAPITest(APITestCase):
             format='json'
         )
 
+    def generate_digit_code(self):
 
-def generate_digit_code(self):
-    """
-    A helper method to create a user and generate a 6 digits code to him
-    """
+        """
+        A helper method to create a user and generate a 6 digits code to him
+        """
 
-    self.create_user()
+        self.create_user()
 
-    generate_digit_url = reverse('generate_digit_code')
+        generate_digit_url = reverse('generate_digit_code')
 
-    data = {
-        'email': 'johncena123@gmail.com'
-    }
+        data = {
+            'email': 'johncena123@gmail.com'
+        }
 
-    self.client.post(
-        generate_digit_url,
-        data=data,
-        format='json'
-    )
+        self.client.post(
+            generate_digit_url,
+            data=data,
+            format='json'
+        )
