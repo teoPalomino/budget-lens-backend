@@ -272,7 +272,7 @@ class AddFriendsAPI(generics.GenericAPIView):
             return {"response": "Invalid email address"}
 
         if request_user.get('id') == friend_user.get('id'):
-            return {"response": "You can't add yourself as a friend."}
+            return {"response": "You cannot add yourself as a friend."}
         elif Friends.objects.filter(main_user=request_user.get('id'), friend_user=friend_user.get('id'),
                                     confirmed=True).exists():
             return {"response": "You are already friends with this user."}
@@ -360,20 +360,36 @@ class InviteFriendsAPI(generics.GenericAPIView):
     serializer_class = FriendSerializer
 
     def post(self, request, *args, **kwargs):
+
         try:
             validate_email(request.data.get('email'))
         except ValidationError:
             return Response({"response": "Invalid email address"}, status=HTTP_400_BAD_REQUEST)
 
-        # Create entry in FRIENDS database for friend request using temp_email
-        serializer = self.get_serializer(data={
-            "main_user": request.user.id,
-            "confirmed": False,
-            "temp_email": request.data.get('email')
-        })
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        sendEmail(request.data.get('email'), 'BudgetLens Invitation',
-                  request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
+        friend_user = User.objects.filter(email=request.data.get('email')).values().first()
 
-        return Response({"response": "An invitation has been sent to the following email"}, status=HTTP_200_OK)
+        if friend_user:
+            return Response('This email is already registered as a user', status=HTTP_400_BAD_REQUEST)
+
+        friendInv = Friends.objects.filter(main_user=request.user.id, confirmed=False, temp_email=request.data.get('email'))
+
+        if friendInv:
+            return Response('U have already sent an invite to this email', status=HTTP_400_BAD_REQUEST)
+
+        else:
+            # Create entry in FRIENDS database for friend request using temp_email
+            serializer = self.get_serializer(data={
+                "main_user": request.user.id,
+                "friend_user": None,
+                "confirmed": False,
+                "temp_email": request.data.get('email')
+            })
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            sendEmail(request.data.get('email'), 'BudgetLens Invitation',
+                    request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
+
+            return Response({"response": "An invitation has been sent to the following email"}, status=HTTP_200_OK)
+
+
+
