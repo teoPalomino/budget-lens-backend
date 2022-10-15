@@ -169,8 +169,7 @@ class GenerateDigitCodeView(generics.GenericAPIView):
         # Update user profile 6 digits number
         userprofile.one_time_code = code
         userprofile.save()
-        result, status_code = {"response": "Success"}, HTTP_200_OK
-        return Response(result, status=status_code)
+        return Response({"response": "Success"}, HTTP_200_OK)
 
 
 class ValidateDigitCodeView(generics.GenericAPIView):
@@ -191,9 +190,9 @@ class ValidateDigitCodeView(generics.GenericAPIView):
         print(type(request.data["digit"]))
         # check if the input match the user digit code
         match = True if userprofile.one_time_code == int(request.data["digit"]) else False
-        result, status_code = {"response": match}, HTTP_200_OK
-
-        return Response(result, status=status_code)
+        if match:
+            return Response({"response": "succeed"}, HTTP_200_OK)
+        return Response({"response": "failed, doesn't match"}, HTTP_400_BAD_REQUEST)
 
 
 class ChangePasswordView(generics.GenericAPIView):
