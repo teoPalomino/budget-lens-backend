@@ -5,7 +5,6 @@ from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 
-
 from rest_framework import generics, status
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
@@ -223,9 +222,7 @@ class ChangePasswordView(generics.GenericAPIView):
                     "Message:": "The password has been changed",
                     "The new password is:": request.data.get("new_password")
                 })
-
             return Response({"Message:": "The password doesn't match"})
-
-            return Response({
-                "Message:": "The user doesn't exist"
-            })
+        return Response({
+            "Message:": "The user doesn't exist"
+        })
