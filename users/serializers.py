@@ -85,7 +85,10 @@ class GenerateDigitCodeSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate(self, data):
-        return User.objects.filter(email=data["email"]).exists()
+        if User.objects.filter(email=data["email"]).exists():
+            user = User.objects.get(email=data["email"])
+            return user
+        raise serializers.ValidationError("User doesn't exist")
 
 
 class ValidateDigitSerializer(serializers.Serializer):
@@ -94,10 +97,11 @@ class ValidateDigitSerializer(serializers.Serializer):
     digit = serializers.CharField(min_length=6, max_length=6)
 
     def validate(self, data):
-        user = User.objects.get(email=data["email"])
-        userprofile = UserProfile.objects.get(user_id=user.id)
-        print(user.id)
-        return userprofile.one_time_code
+        if User.objects.filter(email=data["email"]).exists():
+            user = User.objects.get(email=data["email"])
+            userprofile = UserProfile.objects.get(user_id=user.id)
+            return userprofile
+        raise serializers.ValidationError("User doesn't exist")
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -111,8 +115,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     re_password = serializers.CharField(required=True)
 
     def validate(self, data):
-        return User.objects.filter(email=data["email"]).exists()
-
-
-
-
+        if User.objects.filter(email=data["email"]).exists():
+            user = User.objects.get(email=data["email"])
+            return user
+        raise serializers.ValidationError("User doesn't exist")

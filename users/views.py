@@ -2,17 +2,13 @@ import random
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework import generics
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
-from rest_framework import generics, status
-from django.contrib.auth.models import User
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
-from .models import UserProfile
 from .serializers import *
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
@@ -33,7 +29,8 @@ class RegisterAPI(generics.GenericAPIView):
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
 
-        # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
+        # To use sendEmail function, you have to import it from the utility folder,
+        # for reference, look at the imports at the top
         sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
         return Response({
             # saves user and its data
@@ -72,7 +69,7 @@ class LoginAPI(generics.GenericAPIView):
 
 
 class UserAPI(generics.RetrieveAPIView):
-    """User API use for returning user data from a Bearer Authentication"""
+    """User API uses for returning user data from a Bearer Authentication"""
     permission_classes = [IsAuthenticated, ]
     serializer_class = UserSerializer
 
@@ -86,7 +83,7 @@ class LogoutAPI(APIView):
     def delete(self, request, *args, **kwargs):
         request.user.auth_bearertoken.delete()
         return Response({
-            "data": "Succesfully deleted"
+            "data": "Successfully deleted"
         })
 
 
@@ -157,28 +154,24 @@ class GenerateDigitCodeView(generics.GenericAPIView):
     serializer_class = GenerateDigitCodeSerializer
 
     def post(self, request, *args, **kwargs):
+        # those two lines is for using the validated_data method
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        emailvalidator = serializer.validated_data
 
-        # if the email exists, generate a random 6 digits number
-        if emailvalidator:
-            user = User.objects.get(email=request.data["email"])
-            userprofile = UserProfile.objects.get(user_id=user.id)
-            code = str(random.randint(0, 999999)).zfill(6)
-            sendEmail(request.data["email"], 'Your reset password 6 digit code is here', code)
+        # get the user profile data
+        user = serializer.validated_data
+        userprofile = UserProfile.objects.get(user_id=user.id)
 
-            # Update user profile 6 digits number
-            userprofile.one_time_code = code
-            userprofile.save()
-            return Response({
-                "6-digit-code": code,
-                "emailExists": emailvalidator,
-                "email": request.data["email"],
-            })
-        return Response({
-            "Message:": "The user doesn't exist"
-        })
+        # generate a random 6 digits number
+        code = random.randint(100000, 999999)
+        print(request.data["email"])
+        sendEmail(request.data["email"], 'Your reset password 6 digit code is here', str(code))
+
+        # Update user profile 6 digits number
+        userprofile.one_time_code = code
+        userprofile.save()
+        result, status_code = {"response": "Success"}, HTTP_200_OK
+        return Response(result, status=status_code)
 
 
 class ValidateDigitCodeView(generics.GenericAPIView):
@@ -188,12 +181,18 @@ class ValidateDigitCodeView(generics.GenericAPIView):
     serializer_class = ValidateDigitSerializer
 
     def post(self, request, *args, **kwargs):
+        # those two lines is for using the validated_data method
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        match = True if serializer.validated_data == request.data["digit"] else False
-        return Response({
-            "code match status": match
-        })
+
+        # get the user profile data
+        userprofile = serializer.validated_data
+
+        # check if the input match the user digit code
+        match = True if userprofile.one_time_code == request.data["digit"] else False
+        result, status_code = {"response": match}, HTTP_200_OK
+
+        return Response(result, status=status_code)
 
 
 class ChangePasswordView(generics.GenericAPIView):
@@ -203,26 +202,20 @@ class ChangePasswordView(generics.GenericAPIView):
     serializer_class = ChangePasswordSerializer
 
     def post(self, request, *args, **kwargs):
+        # those two lines is for using the validated_data method
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        emailvalidator = serializer.validated_data
 
-        # verify if the email exists
-        if emailvalidator:
+        # get the user
+        user = serializer.validated_data
 
-            # verify the two field password match
-            if request.data.get("new_password") == request.data.get("re_password"):
-                user = User.objects.get(email=request.data["email"])
+        # verify the two field password match
+        if request.data.get("new_password") == request.data.get("re_password"):
+            # Update password
+            user.set_password(request.data.get("new_password"))
+            user.save()
 
-                # Update password
-                user.set_password(request.data.get("new_password"))
-                user.save()
-
-                return Response({
-                    "Message:": "The password has been changed",
-                    "The new password is:": request.data.get("new_password")
-                })
-            return Response({"Message:": "The password doesn't match"})
-        return Response({
-            "Message:": "The user doesn't exist"
-        })
+            return Response({
+                "Message:": "The password has been changed"
+            }), HTTP_200_OK
+        return {"response": "The password doesn't match"}, HTTP_400_BAD_REQUEST
