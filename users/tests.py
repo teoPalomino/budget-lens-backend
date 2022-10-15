@@ -515,7 +515,7 @@ class UserAPITest(APITestCase):
             'email': 'johncena123@gmail.com'
         }
 
-        response = self.client.post(
+        self.client.post(
             generate_digit_url,
             data=data,
             format='json'
