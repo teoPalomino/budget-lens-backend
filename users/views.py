@@ -164,7 +164,6 @@ class GenerateDigitCodeView(generics.GenericAPIView):
 
         # generate a random 6 digits number
         code = random.randint(100000, 999999)
-        print(request.data["email"])
         sendEmail(request.data["email"], 'Your reset password 6 digit code is here', str(code))
 
         # Update user profile 6 digits number
@@ -188,8 +187,10 @@ class ValidateDigitCodeView(generics.GenericAPIView):
         # get the user profile data
         userprofile = serializer.validated_data
 
+        print(type(userprofile.one_time_code))
+        print(type(request.data["digit"]))
         # check if the input match the user digit code
-        match = True if userprofile.one_time_code == request.data["digit"] else False
+        match = True if userprofile.one_time_code == int(request.data["digit"]) else False
         result, status_code = {"response": match}, HTTP_200_OK
 
         return Response(result, status=status_code)
@@ -217,5 +218,5 @@ class ChangePasswordView(generics.GenericAPIView):
 
             return Response({
                 "Message:": "The password has been changed"
-            }), HTTP_200_OK
-        return {"response": "The password doesn't match"}, HTTP_400_BAD_REQUEST
+            }, HTTP_200_OK)
+        return Response({"response": "The password doesn't match"}, HTTP_400_BAD_REQUEST)

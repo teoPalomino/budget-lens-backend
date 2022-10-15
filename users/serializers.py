@@ -94,7 +94,7 @@ class GenerateDigitCodeSerializer(serializers.Serializer):
 class ValidateDigitSerializer(serializers.Serializer):
     """For verify the user enters the correct 6 digits code"""
     email = serializers.EmailField()
-    digit = serializers.CharField(min_length=6, max_length=6)
+    digit = serializers.IntegerField()
 
     def validate(self, data):
         if User.objects.filter(email=data["email"]).exists():

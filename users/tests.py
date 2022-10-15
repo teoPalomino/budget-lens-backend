@@ -208,7 +208,7 @@ class UserAPITest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
         # Assert that the data message is correct
-        self.assertEqual(response.data['data'], 'Succesfully deleted')
+        self.assertEqual(response.data['data'], 'Successfully deleted')
 
         # Assert that there are no more tokens in the database
         self.assertEqual(BearerToken.objects.count(), 0)
