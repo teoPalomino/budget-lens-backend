@@ -34,7 +34,7 @@ class RegisterAPI(generics.GenericAPIView):
         # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
         sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
         # converting all email invites to friend requests upon registration
-        friends = Friends.objects.get(temp_email=user.data['email'])
+        friends = Friends.objects.filter(temp_email=user.data['email'])
         for friend in friends:
             friend.friend_user = user.data['id']
             friend.temp_email = None
