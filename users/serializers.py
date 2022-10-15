@@ -78,7 +78,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user_profile
 
 
-class GenerateDigitCodeSerializer(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     """For verify the user enters an email exists in the system"""
     email = serializers.EmailField()
 

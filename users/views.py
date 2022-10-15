@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile
-from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, GenerateDigitCodeSerializer, \
+from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, EmailSerializer, \
     ValidateDigitSerializer, ChangePasswordSerializer
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
@@ -153,7 +153,7 @@ class GenerateDigitCodeView(generics.GenericAPIView):
     """
     An endpoint for verify if the email exists in the account
     """
-    serializer_class = GenerateDigitCodeSerializer
+    serializer_class = EmailSerializer
 
     def post(self, request, *args, **kwargs):
         # those two lines is for using the validated_data method
