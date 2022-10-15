@@ -4,6 +4,8 @@ from receipts.models import Receipts
 
 
 class ReceiptsSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Receipts
-        fields = ('receipt_image',)
+        fields = ('user', 'scan_date', 'receipt_image',)
