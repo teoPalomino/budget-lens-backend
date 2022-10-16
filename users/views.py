@@ -1,15 +1,17 @@
+import random
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework import generics
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
 
 from .models import UserProfile
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, EmailSerializer, \
+    ValidateDigitSerializer, ChangePasswordSerializer
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
 
@@ -29,7 +31,8 @@ class RegisterAPI(generics.GenericAPIView):
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
 
-        # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
+        # To use sendEmail function, you have to import it from the utility folder,
+        # for reference, look at the imports at the top
         sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
         return Response({
             # saves user and its data
@@ -68,7 +71,7 @@ class LoginAPI(generics.GenericAPIView):
 
 
 class UserAPI(generics.RetrieveAPIView):
-    """User API use for returning user data from a Bearer Authentication"""
+    """User API uses for returning user data from a Bearer Authentication"""
     permission_classes = [IsAuthenticated, ]
     serializer_class = UserSerializer
 
@@ -83,7 +86,7 @@ class LogoutAPI(APIView):
         request.user.auth_bearertoken.delete()
         return Response({
             "data": "Successfully deleted"
-        })
+        }, HTTP_200_OK)
 
 
 class UserProfileAPI(generics.UpdateAPIView):
@@ -144,3 +147,75 @@ class UserProfileAPI(generics.UpdateAPIView):
             return {"response": "Invalid email format."}, HTTP_400_BAD_REQUEST
         else:
             return None, HTTP_200_OK
+
+
+class GenerateDigitCodeView(generics.GenericAPIView):
+    """
+    An endpoint for verify if the email exists in the account
+    """
+    serializer_class = EmailSerializer
+
+    def post(self, request, *args, **kwargs):
+        # those two lines is for using the validated_data method
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # get the user profile data
+        user = serializer.validated_data
+        userprofile = UserProfile.objects.get(user_id=user.id)
+
+        # generate a random 6 digits number
+        code = random.randint(100000, 999999)
+        sendEmail(request.data["email"], 'Your reset password 6 digit code is here', str(code))
+
+        # Update user profile 6 digits number
+        userprofile.one_time_code = code
+        userprofile.save()
+        return Response({"response": "Success"}, HTTP_200_OK)
+
+
+class ValidateDigitCodeView(generics.GenericAPIView):
+    """
+    An endpoint for verifying 6 digits code matches.
+    """
+    serializer_class = ValidateDigitSerializer
+
+    def post(self, request, *args, **kwargs):
+        # those two lines is for using the validated_data method
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # get the user profile data
+        userprofile = serializer.validated_data
+
+        # check if the input match the user digit code
+        match = True if userprofile.one_time_code == int(request.data["digit"]) else False
+        if match:
+            return Response({"response": "succeed"}, HTTP_200_OK)
+        return Response({"response": "failed, doesn't match"}, HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordView(generics.GenericAPIView):
+    """
+    An endpoint for changing password.
+    """
+    serializer_class = ChangePasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        # those two lines is for using the validated_data method
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # get the user
+        user = serializer.validated_data
+
+        # verify the two field password match
+        if request.data.get("new_password") == request.data.get("re_password"):
+            # Update password
+            user.set_password(request.data.get("new_password"))
+            user.save()
+
+            return Response({
+                "Message:": "The password has been changed"
+            }, HTTP_200_OK)
+        return Response({"response": "The password doesn't match"}, HTTP_400_BAD_REQUEST)
