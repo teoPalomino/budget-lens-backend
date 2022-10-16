@@ -1,11 +1,11 @@
 [flake8]
 
 ; Ignore files that developers won't change
-extend-exclude = 
+extend-exclude =
     ./budget-lens-venv/,
     ./manage.py,
-    
-; Ingore checks
+
+; Ignore checks
 
 ; Adjust checks
 max-line-length = 200
