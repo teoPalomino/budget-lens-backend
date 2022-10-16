@@ -76,3 +76,44 @@ class RegisterSerializer(serializers.ModelSerializer):
             telephone_number=str(validated_data.pop('telephone_number'))
         )
         return user_profile
+
+
+class EmailSerializer(serializers.Serializer):
+    """For verify the user enters an email exists in the system"""
+    email = serializers.EmailField()
+
+    def validate(self, data):
+        if User.objects.filter(email=data["email"]).exists():
+            user = User.objects.get(email=data["email"])
+            return user
+        raise serializers.ValidationError("User doesn't exist")
+
+
+class ValidateDigitSerializer(serializers.Serializer):
+    """For verify the user enters the correct 6 digits code"""
+    email = serializers.EmailField()
+    digit = serializers.IntegerField()
+
+    def validate(self, data):
+        if User.objects.filter(email=data["email"]).exists():
+            user = User.objects.get(email=data["email"])
+            userprofile = UserProfile.objects.get(user_id=user.id)
+            return userprofile
+        raise serializers.ValidationError("User doesn't exist")
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    """
+    Serializer for password change endpoint.
+    """
+    email = serializers.EmailField()
+    new_password = serializers.CharField(required=True)
+    re_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        if User.objects.filter(email=data["email"]).exists():
+            user = User.objects.get(email=data["email"])
+            return user
+        raise serializers.ValidationError("User doesn't exist")
