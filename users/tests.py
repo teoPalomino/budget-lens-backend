@@ -23,7 +23,7 @@ class UserAPITest(APITestCase):
             email='johncena123@gmail.com',
             first_name='John',
             last_name='Cena',
-            password='westlingrules123'
+            password='wrestlingrules123'
         )
 
         self.user2 = User.objects.create_user(
@@ -48,20 +48,20 @@ class UserAPITest(APITestCase):
         """
         Test Case for user.RegistrationAPI
         """
-        registation_url = reverse('register_user')
+        registration_url = reverse('register_user')
         data = {
             'user': {
                 'username': 'johncena123@gmail.com',
                 'email': 'johncena123@gmail.com',
                 'first_name': 'John',
                 'last_name': 'Cena',
-                'password': 'westlingrules123',
+                'password': 'wrestlingrules123',
             },
             'telephone_number': "+1-613-555-0187"
         }
 
         response = self.client.post(
-            registation_url,
+            registration_url,
             data=data,
             format='json'
         )
@@ -97,7 +97,7 @@ class UserAPITest(APITestCase):
 
         data = {
             'username': 'johncena123@gmail.com',
-            'password': 'westlingrules123'
+            'password': 'wrestlingrules123'
         }
 
         response = self.client.post(
@@ -127,7 +127,7 @@ class UserAPITest(APITestCase):
 
         data = {
             'username': 'wrongusername@gmail.com',
-            'password': 'westlingrules123'
+            'password': 'wrestlingrules123'
         }
 
         response = self.client.post(
@@ -191,7 +191,7 @@ class UserAPITest(APITestCase):
             format='json',
         )
 
-        # Assert an unathorized status message
+        # Assert an unauthorized status message
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # Assert values in user database match to values from the response
