@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from users.authentication import BearerToken
 
-from users.models import UserProfile, Friends
+from users.models import UserProfile
 
 
 class UserAPITest(APITestCase):
