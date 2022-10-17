@@ -2,7 +2,7 @@ import random
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_404_NOT_FOUND
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
@@ -300,7 +300,7 @@ class FriendsAPI(generics.ListAPIView):
             if user:
                 return Response({"response": UserSerializer(user).data}, status=HTTP_200_OK)
             else:
-                return Response({"response": "User not found"}, status=HTTP_400_BAD_REQUEST)
+                return Response({"response": "User not found"}, status=HTTP_404_NOT_FOUND)
 
         # Return all user's friends
         else:
