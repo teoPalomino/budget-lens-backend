@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     # Our apps
     'users.apps.UsersConfig',
     'receipts.apps.ReceiptsConfig',
+    'friends.apps.FriendsConfig',
 
     # Installed apps
     'rest_framework',

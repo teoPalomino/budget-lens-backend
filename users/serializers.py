@@ -1,7 +1,6 @@
-from django.core.validators import validate_email
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile, Friends
+from .models import UserProfile
 from django.contrib.auth import authenticate
 from django.core import exceptions
 import django.contrib.auth.password_validation as validators
@@ -77,24 +76,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             telephone_number=str(validated_data.pop('telephone_number'))
         )
         return user_profile
-
-
-class FriendSerializer(serializers.ModelSerializer):
-    """Validates the email for adding a friend"""
-    class Meta:
-        model = Friends
-        fields = '__all__'
-
-    def create(self, validated_data):
-        main_user = validated_data.pop('main_user')
-        friend_user = validated_data.pop('friend_user')
-        confirmed = validated_data.pop('confirmed')
-        temp_email = validated_data.pop('temp_email')
-
-        friend = Friends.objects.create(main_user=main_user, friend_user=friend_user, confirmed=confirmed, temp_email=temp_email)
-
-        return friend
-
 
 
 class EmailSerializer(serializers.Serializer):
