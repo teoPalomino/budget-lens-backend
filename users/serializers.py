@@ -20,7 +20,7 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """User values for gattering the values of a user in the Views Response"""
+    """User values for gathering the values of a user in the Views Response"""
 
     # Make these field required (username and password are required by default)
     first_name = serializers.CharField(required=True)

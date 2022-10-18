@@ -2,16 +2,17 @@ import random
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.password_validation import password_validators_help_texts
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from .models import UserProfile
+from friends.models import Friends
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, EmailSerializer, \
     ValidateDigitSerializer, ChangePasswordSerializer
+from .models import UserProfile
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
 
@@ -30,10 +31,14 @@ class RegisterAPI(generics.GenericAPIView):
         user = UserSerializer(user_profile.user, context=self.get_serializer_context())
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
-
-        # To use sendEmail function, you have to import it from the utility folder,
-        # for reference, look at the imports at the top
+        # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
         sendEmail(user.data['email'], 'User Successfully registered', 'User Successfully registered')
+        # converting all email invites to friend requests upon registration
+        friends = Friends.objects.filter(temp_email=user.data['email'])
+        for friend in friends:
+            friend.friend_user = user.data['id']
+            friend.temp_email = None
+            friend.save()
         return Response({
             # saves user and its data
             "user": user.data,
@@ -56,7 +61,7 @@ class LoginAPI(generics.GenericAPIView):
 
         try:
             token = BearerToken.objects.create(user=user)
-        except Exception:
+        except ValidationError:
             return Response({
                 "details": "Token already exists (User is already logged in)",
                 "token": BearerToken.objects.get(user=user).key
@@ -86,7 +91,7 @@ class LogoutAPI(APIView):
         request.user.auth_bearertoken.delete()
         return Response({
             "data": "Successfully deleted"
-        }, HTTP_200_OK)
+        }, status=HTTP_200_OK)
 
 
 class UserProfileAPI(generics.UpdateAPIView):
@@ -143,7 +148,8 @@ class UserProfileAPI(generics.UpdateAPIView):
         # Validate the email is a correct format
         try:
             validate_email(email)
-        except ValidationError:
+        # For some reason ValidationError is not caught here, causing the tests to fail. Exception is caught instead
+        except Exception:
             return {"response": "Invalid email format."}, HTTP_400_BAD_REQUEST
         else:
             return None, HTTP_200_OK
