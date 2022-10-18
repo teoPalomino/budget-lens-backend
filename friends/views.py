@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_404_NOT_FOUND
 from rest_framework import generics
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Friends
