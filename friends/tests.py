@@ -175,7 +175,6 @@ class FriendsAPITest(APITestCase):
         # Assert the response was a failure
         self.assertEquals(response.content, b'{"response":"You have already sent a friend request to this user."}')
 
-
     def test_invite_friend_success(self):
         """
         Test Case for user.InviteFriendsAPI
@@ -305,4 +304,3 @@ class FriendsAPITest(APITestCase):
 
         # Assert the response was a failure
         self.assertEquals(response.content, b'"U have already sent an invite to this email"')
-

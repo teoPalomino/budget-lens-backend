@@ -102,7 +102,8 @@ class RemoveFriendsAPI(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         if kwargs.get('friend_id'):
-            friend = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'), confirmed=True)
+            friend = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'),
+                                            confirmed=True)
             if friend.exists():
                 friend.delete()
                 return Response({"response": "Friend removed successfully"}, status=HTTP_200_OK)
@@ -119,7 +120,8 @@ class FriendRequestResponseAPI(generics.UpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         if kwargs.get('friend_id'):
-            friend = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'), confirmed=False)
+            friend = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'),
+                                            confirmed=False)
             if friend.exists():
                 # requestResponse of 0 = reject, 1 = accept
                 if kwargs.get('requestResponse') == 1:
@@ -153,7 +155,8 @@ class InviteFriendsAPI(generics.GenericAPIView):
         if friend_user:
             return Response('This email is already registered as a user', status=HTTP_400_BAD_REQUEST)
 
-        friendInv = Friends.objects.filter(main_user=request.user.id, confirmed=False, temp_email=request.data.get('email'))
+        friendInv = Friends.objects.filter(main_user=request.user.id, confirmed=False,
+                                           temp_email=request.data.get('email'))
 
         if friendInv:
             return Response('U have already sent an invite to this email', status=HTTP_400_BAD_REQUEST)
@@ -169,9 +172,6 @@ class InviteFriendsAPI(generics.GenericAPIView):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             sendEmail(request.data.get('email'), 'BudgetLens Invitation',
-                    request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
+                      request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
 
             return Response({"response": "An invitation has been sent to the following email"}, status=HTTP_200_OK)
-
-
-

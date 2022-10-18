@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics
-from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -62,7 +61,7 @@ class LoginAPI(generics.GenericAPIView):
 
         try:
             token = BearerToken.objects.create(user=user)
-        except Exception:
+        except ValidationError:
             return Response({
                 "details": "Token already exists (User is already logged in)",
                 "token": BearerToken.objects.get(user=user).key
@@ -226,4 +225,3 @@ class ChangePasswordView(generics.GenericAPIView):
                 "Message:": "The password has been changed"
             }, HTTP_200_OK)
         return Response({"response": "The password doesn't match"}, HTTP_400_BAD_REQUEST)
-
