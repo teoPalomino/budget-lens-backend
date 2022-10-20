@@ -37,7 +37,7 @@ class FriendsAPITest(APITestCase):
 
         self.user3 = User.objects.create_user(
             username='johnnybravo@gmail.com',
-            email= 'johnnybravo@gmail.com',
+            email='johnnybravo@gmail.com',
             first_name='johnny',
             last_name='bravo',
             password='johnnybravo123'
