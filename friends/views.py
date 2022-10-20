@@ -174,3 +174,17 @@ class InviteFriendsAPI(generics.GenericAPIView):
                       request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
 
             return Response({"response": "An invitation has been sent to the following email"}, status=HTTP_200_OK)
+
+
+class FriendRequestsAPI(generics.ListAPIView):
+    """Returns a user's friend requests"""
+    permission_classes = [IsAuthenticated, ]
+    serializer_class = FriendSerializer
+
+    def get(self, request, *args, **kwargs):
+        friend_requests = Friends.objects.filter(main_user=request.user.id, confirmed=False, temp_email=None)
+        friend_requests_list = []
+        for friend_request in friend_requests:
+            friend_requests_list.append(UserSerializer(User.objects.get(id=friend_request.friend_user.id)).data)
+
+        return Response({"response": friend_requests_list}, status=HTTP_200_OK)
