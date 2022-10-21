@@ -25,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Configure settings based on "dev mode" or "production mode"
 PRODUCTION_MODE = os.getenv("PRODUCTION_MODE")
 DEBUG = os.getenv("DEBUG")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 if PRODUCTION_MODE:
     if not DEBUG:
