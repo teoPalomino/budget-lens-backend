@@ -23,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # Configure settings based on "dev mode" or "production mode"
-PRODUCTION_MODE = os.getenv("PRODUCTION_MODE") == True
-DEBUG = os.getenv("DEBUG") == True
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE")
+DEBUG = os.getenv("DEBUG")
 
 if PRODUCTION_MODE and not DEBUG:
     ALLOWED_HOSTS = [
@@ -43,7 +43,7 @@ else:
             'budgetlens.tech',
             'api.budgetlens.tech'
         ]
-    except Exception as e:
+    except Exception:
         ALLOWED_HOSTS = []
     SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
     HOST_NAME = 'http://localhost:8000'
