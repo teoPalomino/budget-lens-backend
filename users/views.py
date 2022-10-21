@@ -1,6 +1,6 @@
 import random
-from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.db import IntegrityError
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -61,7 +61,7 @@ class LoginAPI(generics.GenericAPIView):
 
         try:
             token = BearerToken.objects.create(user=user)
-        except ValidationError:
+        except IntegrityError:
             return Response({
                 "details": "Token already exists (User is already logged in)",
                 "token": BearerToken.objects.get(user=user).key
@@ -99,7 +99,19 @@ class UserProfileAPI(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, *args, **kwargs):
-        pass
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            data = {
+                "username": user_profile.user.username,
+                "first_name": user_profile.user.first_name,
+                "last_name": user_profile.user.last_name,
+                "email": user_profile.user.email,
+                "telephone_number": str(user_profile.telephone_number)
+            }
+            return Response(data, status=HTTP_200_OK)
+        except Exception:
+            return Response({"response": "There has been an error retrieving the user profile."},
+                            status=404)
 
     def update(self, request, *args, **kwargs):
         username = request.data.get('username', "NONE")

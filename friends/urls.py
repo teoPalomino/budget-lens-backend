@@ -8,5 +8,6 @@ urlpatterns = [
     path('friend/requestResponse/<int:friend_id>/<int:requestResponse>', views.FriendRequestResponseAPI.as_view(),
          name='friend_request_response'),
     path('friend/invite', views.InviteFriendsAPI.as_view(), name='invite_friends'),
-    path('friend/remove/<int:friend_id>', views.RemoveFriendsAPI.as_view(), name='remove_friends')
+    path('friend/remove/<int:friend_id>', views.RemoveFriendsAPI.as_view(), name='remove_friends'),
+    path('friend/requests', views.FriendRequestsAPI.as_view(), name='friend_requests'),
 ]
