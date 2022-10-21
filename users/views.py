@@ -1,6 +1,6 @@
 import random
-from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.db import IntegrityError
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -61,7 +61,7 @@ class LoginAPI(generics.GenericAPIView):
 
         try:
             token = BearerToken.objects.create(user=user)
-        except ValidationError:
+        except IntegrityError:
             return Response({
                 "details": "Token already exists (User is already logged in)",
                 "token": BearerToken.objects.get(user=user).key
