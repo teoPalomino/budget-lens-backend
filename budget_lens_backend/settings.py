@@ -26,27 +26,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 PRODUCTION_MODE = os.getenv("PRODUCTION_MODE")
 DEBUG = os.getenv("DEBUG")
 
-if PRODUCTION_MODE and not DEBUG:
-    ALLOWED_HOSTS = [
-            '127.0.0.1',
-            '206.81.3.66',
-            'budgetlens.tech',
-            'api.budgetlens.tech'
-        ]
-    STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
-    RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
-else:
-    try:
+if PRODUCTION_MODE:
+    if not DEBUG:
         ALLOWED_HOSTS = [
-            '127.0.0.1',
-            '206.81.3.66',
-            'budgetlens.tech',
-            'api.budgetlens.tech'
-        ]
-    except Exception:
-        ALLOWED_HOSTS = []
-    SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
-    HOST_NAME = 'http://localhost:8000'
+                '127.0.0.1',
+                '206.81.3.66',
+                'budgetlens.tech',
+                'api.budgetlens.tech'
+            ]
+        STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
+        RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
+else:
+    if DEBUG:
+        try:
+            ALLOWED_HOSTS = [
+                '127.0.0.1',
+                '206.81.3.66',
+                'budgetlens.tech',
+                'api.budgetlens.tech'
+            ]
+        except Exception:
+            ALLOWED_HOSTS = []
+        SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
+        HOST_NAME = 'http://localhost:8000'
 
 
 # Application definition
