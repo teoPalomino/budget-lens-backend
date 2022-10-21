@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # Configure settings based on "dev mode" or "production mode"
-PRODUCTION_MODE = os.getenv("PRODUCTION_MODE") == "True"
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE") == True
 
 if PRODUCTION_MODE:
     DEBUG = False
@@ -33,8 +33,8 @@ if PRODUCTION_MODE:
             'budgetlens.tech',
             '*.budgetlens.tech'
         ]
-    STATIC_ROOT = os.environ.get("STATIC_ROOT")
-    STATICFILES_DIRS = [BASE_DIR / "static"]
+    STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
+    RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
 else:
     try:
         ALLOWED_HOSTS = [
