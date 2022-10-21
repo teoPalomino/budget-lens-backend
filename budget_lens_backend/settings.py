@@ -41,7 +41,7 @@ elif not PRODUCTION_MODE and DEBUG:
             '127.0.0.1',
             '206.81.3.66',
             'budgetlens.tech',
-            '*.budgetlens.tech'
+            'api.budgetlens.tech'
         ]
     except Exception as e:
         ALLOWED_HOSTS = []
