@@ -75,7 +75,7 @@ jobs:
       - name: Run Tests
         # Step specific environment variables
         env:
-          DEBUG: ${{ env.DEBUG }}
+          DEBUG: True
           DJANGO_SECRET_KEY: ${{ env.DJANGO_SECRET_KEY }}
           DB_USERNAME: ${{ env.POSTGRES_USER }}
           DB_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
