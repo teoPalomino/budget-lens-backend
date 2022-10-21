@@ -24,18 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Configure settings based on "dev mode" or "production mode"
 PRODUCTION_MODE = os.getenv("PRODUCTION_MODE") == True
+DEBUG = os.getenv("DEBUG") == True
 
-if PRODUCTION_MODE:
-    DEBUG = False
+if PRODUCTION_MODE and not DEBUG:
     ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
             'budgetlens.tech',
-            '*.budgetlens.tech'
+            'api.budgetlens.tech'
         ]
     STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
     RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
-else:
+elif not PRODUCTION_MODE and DEBUG:
     try:
         ALLOWED_HOSTS = [
             '127.0.0.1',
@@ -43,9 +43,8 @@ else:
             'budgetlens.tech',
             '*.budgetlens.tech'
         ]
-    except Exception:
+    except Exception as e:
         ALLOWED_HOSTS = []
-    DEBUG = True
     SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
     HOST_NAME = 'http://localhost:8000'
 
