@@ -35,7 +35,7 @@ if PRODUCTION_MODE and not DEBUG:
         ]
     STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
     RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
-elif not PRODUCTION_MODE and DEBUG:
+else:
     try:
         ALLOWED_HOSTS = [
             '127.0.0.1',
