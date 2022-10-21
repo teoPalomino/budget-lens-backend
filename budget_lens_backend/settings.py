@@ -23,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # Configure settings based on "dev mode" or "production mode"
-PRODUCTION_MODE = os.getenv("PRODUCTION_MODE")
-DEBUG = os.getenv("DEBUG")
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", False)
+DEBUG = os.getenv("DEBUG", False)
 
 if PRODUCTION_MODE and not DEBUG:
     ALLOWED_HOSTS = [
