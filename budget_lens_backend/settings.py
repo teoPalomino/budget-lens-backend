@@ -23,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # Configure settings based on "dev mode" or "production mode"
-PRODUCTION_MODE = os.getenv("PRODUCTION_MODE")
-DEBUG = os.getenv("DEBUG")
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", 'False') == 'True'
+DEBUG = os.getenv("DEBUG", 'True') == 'True'
 SECRET_KEY = os.getenv("SECRET_KEY", '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&')
 
 if PRODUCTION_MODE == 'True' and DEBUG == 'False':
