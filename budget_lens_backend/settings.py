@@ -23,10 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # Configure settings based on "dev mode" or "production mode"
-PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", 'False') == "True"
-DEBUG = os.getenv("DEBUG", 'False') == "True"
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE")
+DEBUG = os.getenv("DEBUG")
 
-if PRODUCTION_MODE and not DEBUG:
+SECRET_KEY = ''
+
+if PRODUCTION_MODE == 'True' and DEBUG == 'False':
     ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
@@ -35,7 +37,7 @@ if PRODUCTION_MODE and not DEBUG:
         ]
     STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
     RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
-else:
+elif PRODUCTION_MODE == 'False' and DEBUG == 'True':
     try:
         ALLOWED_HOSTS = [
             '127.0.0.1',
