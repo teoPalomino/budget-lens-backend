@@ -39,12 +39,21 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         """
         #
         reciept_list_response = super().get(request, *args, **kwargs)
-        try:
-            paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
-            paginator.page(kwargs['pageNumber'])
-        except:
-            pass
-        
+
+        # If Page size is less than zero
+        if (kwargs['pageSize'] < 0):
+            return Response({
+                'description': 'Page Size cannot be less than zero'
+            }, status=HTTP_400_BAD_REQUEST)
+
+        paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
+
+        # If page number is not in range of number of pages
+        if kwargs['pageNumber'] > paginator.num_pages or kwargs['pageSize'] < 0:
+            return Response({
+                'description': 'Page Number is out of range or is less than zero'
+            }, status=HTTP_400_BAD_REQUEST)
+
         page = paginator.page(kwargs['pageNumber'])
 
         return Response({
