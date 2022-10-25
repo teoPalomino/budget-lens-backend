@@ -121,7 +121,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # to be,given the user id as its "user_id" sub-folder and the Unix timestamp equivalent used to rename the image file itself
         self.assertEqual(
             receipt.receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png').replace('\\', '/')
         )
 
     def test_user_id_sub_folder_exists(self):
@@ -156,7 +156,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             receipt3.receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}', f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}', f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png').replace('\\', '/')
         )
 
     def test_add_null_receipt_images_using_post_request_from_Receipts_API_View(self):
@@ -213,7 +213,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(user=self.user).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX CREATED status message
@@ -268,7 +268,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data[0]["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data[0]["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -315,7 +315,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -366,7 +366,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -439,7 +439,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
