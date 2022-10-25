@@ -1,5 +1,6 @@
 import datetime
 import os
+from random import randint
 import shutil
 import tempfile
 import time
@@ -8,11 +9,12 @@ from math import trunc
 from PIL import Image
 from django.conf import settings
 from django.contrib.auth.models import User
+from users.authentication import BearerToken
 from django.core.files.images import ImageFile
 from django.urls import reverse
 from django.utils.timezone import make_aware
 from rest_framework import status
-from rest_framework.test import APITransactionTestCase
+from rest_framework.test import APITransactionTestCase, APITestCase
 
 from receipts.models import Receipts
 from users.models import UserProfile
@@ -505,3 +507,38 @@ class AddReceiptsAPITest(APITransactionTestCase):
             len(os.listdir(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}'))),
             Receipts.objects.all().count()
         )
+
+
+class PaginationReceiptsAPITest(APITestCase):
+    '''
+    Test Cases for dividing the receipts of a user into pages
+    '''
+    def setUp(self):
+        # Create a user to test with
+        self.user = User.objects.create_user(
+            username='johncena123@gmail.com',
+            email='johncena123@gmail.com',
+            first_name='John',
+            last_name='Cena',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-0187"
+        )
+
+        # Create login token
+        self.token = BearerToken.objects.create(user=self.user)
+
+        # Create random number of receipts from certain range for this user.
+        for i in range(randint(0, 10)):
+            Receipts.objects.create(
+                user=self.user, 
+                receipt_image=get_test_image_file()
+            )
+        
+        # Get the size of the reciepts create for this user
+        self.receipt_size = len(Receipts.objects.filter(user=self.user))
+
+    def test_pagination_successful(self):
+        print(self.receipt_size)
