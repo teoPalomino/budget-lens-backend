@@ -1,6 +1,3 @@
-import pdb
-from queue import Empty
-from urllib import response
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,7 +6,6 @@ from .models import Receipts
 from .serializers import ReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
-from django.core import serializers
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 
