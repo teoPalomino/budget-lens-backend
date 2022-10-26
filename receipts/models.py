@@ -8,6 +8,8 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+from merchant.models import Merchant
+
 
 def upload_to(instance, filename):
     image_file_types = ['.png', '.jpg', '.jpeg']
@@ -27,6 +29,7 @@ class Receipts(models.Model):
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
     scan_date = models.DateTimeField(default=timezone.now)
     receipt_image = models.ImageField(upload_to=upload_to)
+    merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.CASCADE)
 
     # When a receipt image is deleted from the database, the receipt image file is also deleted from the file system/server
     def delete(self, using=None, keep_parents=False):
