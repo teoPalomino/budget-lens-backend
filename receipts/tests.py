@@ -1,5 +1,6 @@
 import datetime
 import os
+import pdb
 from random import randint
 import shutil
 import tempfile
@@ -18,6 +19,7 @@ from rest_framework.test import APITransactionTestCase, APITestCase
 
 from receipts.models import Receipts
 from users.models import UserProfile
+from merchant.models import Merchant
 
 
 # This function is used when I want to directly create/add a new scanned receipt in the database
@@ -102,7 +104,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
 
         # I then create a new receipt and add it to the database
-        receipt = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
+        receipt = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
 
         # Now, I should expect the "user_id" sub-folder to exist in the "receipt_images" folder since a receipt has been added/created
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
@@ -131,8 +133,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         # Here, a similar thing happens compared to the previous test, except that I am now checking what happens
         # when a new receipt is added by the same user: I should expect the new receipt to be added to the same "user_id" sub-folder
-        receipt1 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
-        receipt2 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
+        receipt1 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
+        receipt2 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
 
         self.assertEqual(
             receipt1.user_id,
@@ -149,7 +151,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # of the new receipt's image URL saved in the database should be different from the one of the previous receipt's image URL saved in the database
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}')))
 
-        receipt3 = Receipts.objects.create(user=self.new_user, receipt_image=get_test_image_file())
+        receipt3 = Receipts.objects.create(user=self.new_user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
 
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
         self.assertEqual(
@@ -535,7 +537,8 @@ class PaginationReceiptsAPITest(APITestCase):
         for i in range(randint(0, 100)):
             Receipts.objects.create(
                 user=self.user,
-                receipt_image=get_test_image_file()
+                receipt_image=get_test_image_file(),
+                merchant=Merchant.objects.create(name='Random Merchant')
             )
 
         # Get the size of the reciepts create for this user
