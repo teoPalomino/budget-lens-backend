@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Receipts
-from .serializers import ReceiptsSerializer
+from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -61,5 +61,5 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
 class DetailReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Receipts.objects.all()
-    serializer_class = ReceiptsSerializer
+    serializer_class = PutPatchReceiptsSerializer
     lookup_url_kwarg = 'receipt_id'

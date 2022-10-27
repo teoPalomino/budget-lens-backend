@@ -22,3 +22,11 @@ class ReceiptsSerializer(serializers.ModelSerializer):
             merchant=merchant
         )
         return receipt
+
+
+class PutPatchReceiptsSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Receipts
+        fields = ('user', 'scan_date', 'receipt_image')

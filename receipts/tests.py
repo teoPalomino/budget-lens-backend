@@ -201,7 +201,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
 
@@ -242,7 +245,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
 
@@ -250,7 +256,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
 
@@ -289,14 +298,20 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
         self.assertEqual(
@@ -335,14 +350,20 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
         self.assertEqual(
@@ -409,14 +430,20 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
         self.assertEqual(
@@ -468,14 +495,20 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': '\{"name": Random Merchant\}'
+            },
             format='multipart'
         )
         self.assertEqual(
