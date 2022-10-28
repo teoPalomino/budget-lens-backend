@@ -203,7 +203,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -247,7 +247,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -258,7 +258,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -298,13 +298,13 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         # List of all the recent post responses done in this test
-        response_list = [] 
+        response_list = []
 
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -316,7 +316,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -359,12 +359,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         # List of all the recent post responses done in this test
-        response_list = [] 
+        response_list = []
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -376,7 +376,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -447,13 +447,13 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         # List of all the recent post responses done in this test
-        response_list = [] 
+        response_list = []
 
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -465,7 +465,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -521,13 +521,13 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         # List of all the recent post responses done in this test
-        response_list = [] 
+        response_list = []
 
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
@@ -539,7 +539,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': '\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}'
             },
             format='multipart'
         )
