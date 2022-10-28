@@ -748,15 +748,3 @@ class PaginationReceiptsAPITest(APITestCase):
         )
 
         self.assertEqual(response.data['description'], 'Page Number is out of range or is less than zero')
-
-    def test_pagination_zero_page_size_error(self):
-        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 0})
-
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-
-        response = self.client.get(
-            url_paged_receipts,
-            format='json'
-        )
-
-        self.assertEqual(response.data['description'], 'Page Size cannot be less than zero')

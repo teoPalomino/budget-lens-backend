@@ -38,9 +38,8 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
 
         # If Page size is less than zero
         if (kwargs['pageSize'] <= 0):
-            return Response({
-                'description': 'Page Size cannot be less than zero'
-            }, status=HTTP_400_BAD_REQUEST)
+            # Make default page size = 10
+            kwargs['pageSize'] = 10
 
         paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
 

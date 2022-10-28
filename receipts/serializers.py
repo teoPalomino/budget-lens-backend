@@ -30,6 +30,7 @@ class ReceiptsSerializer(serializers.ModelSerializer):
 
 
 class PutPatchReceiptsSerializer(serializers.ModelSerializer):
+    '''Serializer for PutReceipts, used to update the receipt of a user if need be'''
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
