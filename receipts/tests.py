@@ -1,6 +1,5 @@
 import datetime
 import os
-import pdb
 from random import randint
 import shutil
 import tempfile
@@ -164,6 +163,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
 
     def test_add_null_receipt_images_using_post_request_from_Receipts_API_View(self):
+        shutil.rmtree(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}'), ignore_errors=True)
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
 
         # Here, I am testing the API client for the case where a user tries to add a null receipt (or no receipt at all basically)
@@ -296,6 +296,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the GET request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
+        # List of all the recent post responses done in this test
+        response_list = [] 
+
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -304,6 +308,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -314,8 +320,11 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(response_list),
             Receipts.objects.all().count()
         )
 
@@ -348,6 +357,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the PUT request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
+        # List of all the recent post responses done in this test
+        response_list = [] 
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -356,6 +368,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -366,8 +380,11 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(response_list),
             Receipts.objects.all().count()
         )
 
@@ -428,6 +445,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the PATCH request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
+        # List of all the recent post responses done in this test
+        response_list = [] 
+
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -436,6 +457,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -446,8 +469,11 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(response_list),
             Receipts.objects.all().count()
         )
 
@@ -493,6 +519,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the DELETE request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
+        # List of all the recent post responses done in this test
+        response_list = [] 
+
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -501,6 +531,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -511,8 +543,11 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+
+        response_list.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(response_list),
             Receipts.objects.all().count()
         )
 
