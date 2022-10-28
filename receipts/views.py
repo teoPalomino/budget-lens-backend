@@ -6,7 +6,7 @@ from .models import Receipts
 from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK
 
 
 # Initial Plan:
@@ -43,11 +43,13 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
 
         paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
 
-        # If page number is not in range of number of pages
-        if kwargs['pageNumber'] > paginator.num_pages or kwargs['pageNumber'] <= 0:
-            return Response({
-                'description': 'Page Number is out of range or is less than zero'
-            }, status=HTTP_400_BAD_REQUEST)
+        # If page number is greater than page limit, set it to the last page
+        if kwargs['pageNumber'] > paginator.num_pages:
+            kwargs['pageNumber'] = paginator.num_pages
+
+        # If page number is less than 1, set it to the first page
+        if kwargs['pageNumber'] <= 0:
+            kwargs['pageNumber'] = 1
 
         page = paginator.page(kwargs['pageNumber'])
 

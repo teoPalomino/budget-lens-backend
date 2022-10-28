@@ -735,7 +735,11 @@ class PaginationReceiptsAPITest(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['description'], 'Page Number is out of range or is less than zero')
+        self.assertEqual(len(response.data['page_list']), 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
 
     def test_pagination_over_page_size_error(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': self.receipt_size//10 + 2, 'pageSize': 10})
@@ -747,4 +751,24 @@ class PaginationReceiptsAPITest(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['description'], 'Page Number is out of range or is less than zero')
+        self.assertTrue(len(response.data['page_list']) <= 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {self.receipt_size//10} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {self.receipt_size//10 + 1} of {self.receipt_size//10 + 1}>')
+
+    def test_pagination_zero_page_size_error(self):
+        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 0})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_receipts,
+            format='json'
+        )
+
+        self.assertEqual(len(response.data['page_list']), 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')

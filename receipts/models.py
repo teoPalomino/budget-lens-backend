@@ -29,7 +29,7 @@ class Receipts(models.Model):
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
     scan_date = models.DateTimeField(default=timezone.now)
     receipt_image = models.ImageField(upload_to=upload_to)
-    merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.CASCADE)
+    merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING)
     location = models.CharField(max_length=200)
     total = models.FloatField()
     tax = models.FloatField()
