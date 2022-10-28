@@ -103,7 +103,15 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
 
         # I then create a new receipt and add it to the database
-        receipt = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
+        receipt = Receipts.objects.create(
+            user=self.user, receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4
+        )
 
         # Now, I should expect the "user_id" sub-folder to exist in the "receipt_images" folder since a receipt has been added/created
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
@@ -132,8 +140,26 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         # Here, a similar thing happens compared to the previous test, except that I am now checking what happens
         # when a new receipt is added by the same user: I should expect the new receipt to be added to the same "user_id" sub-folder
-        receipt1 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
-        receipt2 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
+        receipt1 = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4
+        )
+        receipt2 = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4
+        )
 
         self.assertEqual(
             receipt1.user_id,
@@ -150,7 +176,16 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # of the new receipt's image URL saved in the database should be different from the one of the previous receipt's image URL saved in the database
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}')))
 
-        receipt3 = Receipts.objects.create(user=self.new_user, receipt_image=get_test_image_file(), merchant=Merchant.objects.create(name='Random Merchant'))
+        receipt3 = Receipts.objects.create(
+            user=self.new_user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4
+        )
 
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
         self.assertEqual(
@@ -203,7 +238,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -247,7 +287,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -258,7 +303,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -304,7 +354,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -316,7 +371,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -364,7 +424,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -376,7 +441,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -453,7 +523,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -465,7 +540,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -527,7 +607,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -539,7 +624,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('list_create_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}'
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4
             },
             format='multipart'
         )
@@ -606,7 +696,12 @@ class PaginationReceiptsAPITest(APITestCase):
             Receipts.objects.create(
                 user=self.user,
                 receipt_image=get_test_image_file(),
-                merchant=Merchant.objects.create(name='Random Merchant')
+                merchant=Merchant.objects.create(name='Random Merchant'),
+                location='123 Testing Street T1E 5T5',
+                total=1.1,
+                tax=2.2,
+                tip=3.3,
+                coupon=4
             )
 
         # Get the size of the reciepts create for this user

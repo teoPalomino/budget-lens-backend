@@ -10,7 +10,7 @@ class ReceiptsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Receipts
-        fields = ('user', 'scan_date', 'receipt_image', 'merchant')
+        fields = '__all__'
 
     def create(self, validated_data):
         merchant = Merchant.objects.create(
@@ -19,7 +19,12 @@ class ReceiptsSerializer(serializers.ModelSerializer):
         receipt = Receipts.objects.create(
             user=validated_data['user'],
             receipt_image=validated_data['receipt_image'],
-            merchant=merchant
+            merchant=merchant,
+            location=validated_data['location'],
+            total=validated_data['total'],
+            tax=validated_data['tax'],
+            tip=validated_data['tip'],
+            coupon=validated_data['coupon'],
         )
         return receipt
 
