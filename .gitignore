@@ -139,3 +139,6 @@ dmypy.json
 
 # DS_Store
 *.DS_Store
+
+# Remove receipt images folder for local development
+receipt_images/*
