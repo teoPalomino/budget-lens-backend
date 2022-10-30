@@ -707,7 +707,10 @@ class PaginationReceiptsAPITest(APITestCase):
             else:
                 self.assertEqual(len(response.data['page_list']), 10)
 
-            self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10 + 1}>')
+            if self.receipt_size % 10 == 0:
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10}>')
+            else:
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10 + 1}>')
 
     def test_pagination_page_zero_error(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 0, 'pageSize': 10})
