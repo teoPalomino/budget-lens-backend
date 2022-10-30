@@ -43,8 +43,8 @@ class ReceiptsAPIView(generics.ListCreateAPIView):
     url = '/api/receipts/?merchant_name=mcdonalds'
     These two urls are somewhat equivalent, as they will both return all the receipts where the merchant name in the
     merchant field of the table contains 'mcdonalds'.
-    The difference is that the first url will search all the fields for the text 'mcdonalds' and will return an entry
-    with any field containing the text 'mcdonalds'.
+    The difference is that the first url will search for and include any receipt with a field containing the text
+    'mcdonalds'.
     """
     permission_classes = [IsAuthenticated]
     queryset = Receipts.objects.all()
