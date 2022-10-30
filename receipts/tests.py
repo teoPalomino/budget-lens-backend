@@ -89,6 +89,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             format='json'
         )
         self.image = create_image('.png')
+        self.receipts_from_responses = []
 
     # I have to use the "tearDown" method to make sure the added/created scanned
     # test receipts don't stay locally in the "receipt_images" folder
@@ -281,7 +282,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
 
         # Since no receipts have been added/created by the user yet, I should expect the list of receipts to be empty
-        self.assertEqual(self.response.data, [])
+        self.assertEqual(self.receipts_from_responses, [])
 
         self.response = self.client.post(
             reverse('list_create_receipts'),
@@ -296,6 +297,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         # I am creating a second image to add to the list of receipts
         self.image = create_image('.jpeg')
@@ -312,13 +314,14 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         # Now, after the user has added/created the new receipts, when I call the GET request, I should expect the list of receipts to contain the newly added receipts
         self.response = self.client.get(
             reverse('list_create_receipts')
         )
         self.assertEqual(
-            len(list(self.response.data)),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
         self.assertEqual(
@@ -347,9 +350,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
-
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -363,8 +363,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -380,11 +379,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -418,8 +416,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -433,8 +429,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -450,11 +445,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -516,9 +510,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
-
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -532,8 +523,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -549,11 +539,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -600,9 +589,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
-
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -616,8 +602,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -633,11 +618,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -717,13 +701,16 @@ class PaginationReceiptsAPITest(APITestCase):
                 url_paged_receipts,
                 format='json'
             )
-            # self.assertEqual(len(response.data['page_list']), 10)
+
             if i == self.receipt_size//10 + 1:
                 self.assertEqual(len(response.data['page_list']), self.receipt_size % 10)
             else:
                 self.assertEqual(len(response.data['page_list']), 10)
 
-            self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10 + 1}>')
+            if self.receipt_size % 10 == 0:
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10}>')
+            else:
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10 + 1}>')
 
     def test_pagination_page_zero_error(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 0, 'pageSize': 10})
@@ -735,7 +722,7 @@ class PaginationReceiptsAPITest(APITestCase):
             format='json'
         )
 
-        self.assertEqual(len(response.data['page_list']), 10)
+        self.assertTrue(len(response.data['page_list']) <= 10)
         if (self.receipt_size % 10 == 0):
             self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
         else:
@@ -767,7 +754,23 @@ class PaginationReceiptsAPITest(APITestCase):
             format='json'
         )
 
-        self.assertEqual(len(response.data['page_list']), 10)
+        self.assertTrue(len(response.data['page_list']) <= 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
+
+    def test_pagination_invalid_type_string(self):
+        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 'test', 'pageSize': 'test'})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_receipts,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) <= 10)
         if (self.receipt_size % 10 == 0):
             self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
         else:
