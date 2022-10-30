@@ -13,10 +13,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 class ReceiptsFilter(django_filters.FilterSet):
     merchant_name = django_filters.CharFilter(field_name='merchant__name', lookup_expr='icontains')
+    start_date = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='gte')
+    end_date = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='lte')
 
     class Meta:
         model = Receipts
-        fields = ['id', 'scan_date', 'user_id', 'merchant_name', 'coupon', 'location', 'total', 'tax', 'tip']
+        fields = ['id', 'start_date', 'end_date', 'user_id', 'merchant_name', 'coupon', 'location', 'total', 'tax',
+                  'tip']
 
 
 class ReceiptsAPIView(generics.ListCreateAPIView):
@@ -45,6 +48,12 @@ class ReceiptsAPIView(generics.ListCreateAPIView):
     merchant field of the table contains 'mcdonalds'.
     The difference is that the first url will search for and include any receipt with a field containing the text
     'mcdonalds'.
+
+    url = '/api/receipts/?start_date=2020-01-01'
+    This will return all the receipts where the scan_date is greater than or equal to 2020-01-01.
+
+    url = '/api/receipts/?start_date=2020-01-01&end_date=2020-01-31'
+    This will return all the receipts with the scan_date between the start_date and end_date (inclusive).
     """
     permission_classes = [IsAuthenticated]
     queryset = Receipts.objects.all()
