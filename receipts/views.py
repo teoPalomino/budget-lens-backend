@@ -1,4 +1,5 @@
-from rest_framework import generics
+import django_filters
+from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -7,19 +8,54 @@ from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
+from django_filters.rest_framework import DjangoFilterBackend
 
 
-# Initial Plan:
-#   make a user folder with the user_id as the name
-#   make a sub-folder inside that specific user's folder with the receipt_id as the name
-#   save the image inside the folder of the user's receipt with the current unix timestamp scan_date as the image file name
+class ReceiptsFilter(django_filters.FilterSet):
+    merchant_name = django_filters.CharFilter(field_name='merchant__name', lookup_expr='icontains')
+
+    class Meta:
+        model = Receipts
+        fields = ['id', 'scan_date', 'user_id', 'merchant_name', 'coupon', 'location', 'total', 'tax', 'tip']
 
 
 class ReceiptsAPIView(generics.ListCreateAPIView):
+    """
+    This view returns a list of all the receipts for the user.
+
+    It also accepts optional query parameters to filter, order and search the receipts.
+    examples:
+    url = '/api/receipts/?search=starbucks'
+    This will return all the receipts where the merchant name contains 'starbucks'.
+
+    url = '/api/receipts/?ordering=total,tip'
+    This will return all the receipts for all users, and order them by total and then tip in ASCENDING order.
+
+    url = '/api/receipts/?tip=1&ordering=-total'
+    This will return all the receipts for tip=1, and order them by total in DESCENDING(notice the '-') order.
+
+    url = '/api/receipts/?tax=1&merchant_name=starbucks&ordering=scan_date&search=montreal'
+    This will return all the receipts for tax=1, where the merchant name contains 'starbucks',ordered by
+    scan_date, and anything containing the text 'montreal'. All the query parameters are optional, and can be used
+    together or separately.
+
+    url = '/api/receipts/?search=mcdonalds'
+    url = '/api/receipts/?merchant_name=mcdonalds'
+    These two urls are somewhat equivalent, as they will both return all the receipts where the merchant name in the
+    merchant field of the table contains 'mcdonalds'.
+    The difference is that the first url will search all the fields for the text 'mcdonalds' and will return an entry
+    with any field containing the text 'mcdonalds'.
+    """
     permission_classes = [IsAuthenticated]
     queryset = Receipts.objects.all()
     serializer_class = ReceiptsSerializer
     parser_classes = (MultiPartParser, FormParser)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    # should I only include certain fields to search, ordering and filter? currently supports all
+    filterset_class = ReceiptsFilter
+    ordering_fields = '__all__'
+    search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip']
 
 
 class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
