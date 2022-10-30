@@ -89,7 +89,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             format='json'
         )
         self.image = create_image('.png')
-        
         self.receipts_from_responses = []
 
     # I have to use the "tearDown" method to make sure the added/created scanned
