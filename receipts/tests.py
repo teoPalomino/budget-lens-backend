@@ -89,6 +89,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             format='json'
         )
         self.image = create_image('.png')
+        
+        self.receipts_from_responses = []
 
     # I have to use the "tearDown" method to make sure the added/created scanned
     # test receipts don't stay locally in the "receipt_images" folder
@@ -281,7 +283,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
 
         # Since no receipts have been added/created by the user yet, I should expect the list of receipts to be empty
-        self.assertEqual(self.response.data, [])
+        self.assertEqual(self.receipts_from_responses, [])
 
         self.response = self.client.post(
             reverse('list_create_receipts'),
@@ -296,6 +298,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         # I am creating a second image to add to the list of receipts
         self.image = create_image('.jpeg')
@@ -312,13 +315,14 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         # Now, after the user has added/created the new receipts, when I call the GET request, I should expect the list of receipts to contain the newly added receipts
         self.response = self.client.get(
             reverse('list_create_receipts')
         )
         self.assertEqual(
-            len(list(self.response.data)),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
         self.assertEqual(
@@ -347,9 +351,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
-
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -363,8 +364,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -380,11 +380,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -418,8 +417,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -433,8 +430,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -450,11 +446,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -516,9 +511,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
-
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -532,8 +524,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -549,11 +540,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -600,9 +590,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
 
-        # List of all the recent post responses done in this test
-        response_list = []
-
         self.response = self.client.post(
             reverse('list_create_receipts'),
             data={
@@ -616,8 +603,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
@@ -633,11 +619,10 @@ class AddReceiptsAPITest(APITransactionTestCase):
             },
             format='multipart'
         )
-
-        response_list.append(self.response.data)
+        self.receipts_from_responses.append(self.response.data)
 
         self.assertEqual(
-            len(response_list),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
