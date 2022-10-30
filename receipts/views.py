@@ -36,6 +36,18 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         #
         reciept_list_response = super().get(request, *args, **kwargs)
 
+        # Try to turn page number to an int value, otherwise set to default value of 1
+        try:
+            kwargs['pageNumber'] = int(kwargs['pageNumber'])
+        except Exception:
+            kwargs['pageNumber'] = 1
+
+        # Try to turn page size to an int value, otherwise set to default value of 10
+        try:
+            kwargs['pageSize'] = int(kwargs['pageSize'])
+        except Exception:
+            kwargs['pageSize'] = 10
+
         # If Page size is less than zero
         if (kwargs['pageSize'] <= 0):
             # Make default page size = 10
