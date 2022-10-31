@@ -1,5 +1,6 @@
 import datetime
 import os
+from random import randint
 import shutil
 import tempfile
 import time
@@ -8,14 +9,16 @@ from math import trunc
 from PIL import Image
 from django.conf import settings
 from django.contrib.auth.models import User
+from users.authentication import BearerToken
 from django.core.files.images import ImageFile
 from django.urls import reverse
 from django.utils.timezone import make_aware
 from rest_framework import status
-from rest_framework.test import APITransactionTestCase
+from rest_framework.test import APITransactionTestCase, APITestCase
 
 from receipts.models import Receipts
 from users.models import UserProfile
+from merchant.models import Merchant
 
 
 # This function is used when I want to directly create/add a new scanned receipt in the database
@@ -86,6 +89,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             format='json'
         )
         self.image = create_image('.png')
+        self.receipts_from_responses = []
 
     # I have to use the "tearDown" method to make sure the added/created scanned
     # test receipts don't stay locally in the "receipt_images" folder
@@ -100,7 +104,17 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
 
         # I then create a new receipt and add it to the database
-        receipt = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
+        receipt = Receipts.objects.create(
+            user=self.user, receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
+        )
 
         # Now, I should expect the "user_id" sub-folder to exist in the "receipt_images" folder since a receipt has been added/created
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
@@ -121,7 +135,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # to be,given the user id as its "user_id" sub-folder and the Unix timestamp equivalent used to rename the image file itself
         self.assertEqual(
             receipt.receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png').replace('\\', '/')
         )
 
     def test_user_id_sub_folder_exists(self):
@@ -129,8 +143,30 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         # Here, a similar thing happens compared to the previous test, except that I am now checking what happens
         # when a new receipt is added by the same user: I should expect the new receipt to be added to the same "user_id" sub-folder
-        receipt1 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
-        receipt2 = Receipts.objects.create(user=self.user, receipt_image=get_test_image_file())
+        receipt1 = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
+        )
+        receipt2 = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
+        )
 
         self.assertEqual(
             receipt1.user_id,
@@ -147,7 +183,18 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # of the new receipt's image URL saved in the database should be different from the one of the previous receipt's image URL saved in the database
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}')))
 
-        receipt3 = Receipts.objects.create(user=self.new_user, receipt_image=get_test_image_file())
+        receipt3 = Receipts.objects.create(
+            user=self.new_user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
+        )
 
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
         self.assertEqual(
@@ -156,10 +203,11 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             receipt3.receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}', f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}', f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png').replace('\\', '/')
         )
 
     def test_add_null_receipt_images_using_post_request_from_Receipts_API_View(self):
+        shutil.rmtree(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}'), ignore_errors=True)
         self.assertFalse(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
 
         # Here, I am testing the API client for the case where a user tries to add a null receipt (or no receipt at all basically)
@@ -197,7 +245,17 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
 
@@ -213,7 +271,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(user=self.user).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX CREATED status message
@@ -234,28 +292,50 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
 
         # Since no receipts have been added/created by the user yet, I should expect the list of receipts to be empty
-        self.assertEqual(self.response.data, [])
+        self.assertEqual(self.receipts_from_responses, [])
 
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         # I am creating a second image to add to the list of receipts
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         # Now, after the user has added/created the new receipts, when I call the GET request, I should expect the list of receipts to contain the newly added receipts
         self.response = self.client.get(
             reverse('list_create_receipts')
         )
         self.assertEqual(
-            len(list(self.response.data)),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
         self.assertEqual(
@@ -268,7 +348,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data[0]["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data[0]["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -283,20 +363,44 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the GET request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -315,7 +419,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -329,20 +433,44 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the PUT request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -366,7 +494,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -403,20 +531,44 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the PATCH request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -439,7 +591,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -462,20 +614,44 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the DELETE request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
+
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
             reverse('list_create_receipts'),
-            data={'receipt_image': self.image},
+            data={
+                'receipt_image': self.image,
+                'merchant': r'\{"name": Random Merchant\}',
+                'location': '123 Testing Street T1E 5T5',
+                'total': 1.1,
+                'tax': 2.2,
+                'tip': 3.3,
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
+            },
             format='multipart'
         )
+        self.receipts_from_responses.append(self.response.data)
+
         self.assertEqual(
-            len(list(self.response.data)),
+            len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
 
@@ -505,3 +681,129 @@ class AddReceiptsAPITest(APITransactionTestCase):
             len(os.listdir(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}'))),
             Receipts.objects.all().count()
         )
+
+
+class PaginationReceiptsAPITest(APITestCase):
+    '''
+    Test Cases for dividing the receipts of a user into pages
+    '''
+
+    def setUp(self):
+        # Create a user to test with
+        self.user = User.objects.create_user(
+            username='johncena123@gmail.com',
+            email='johncena123@gmail.com',
+            first_name='John',
+            last_name='Cena',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-0187"
+        )
+
+        # Create login token
+        self.token = BearerToken.objects.create(user=self.user)
+
+        # Create random number of receipts from certain range for this user.
+        for i in range(randint(0, 100)):
+            Receipts.objects.create(
+                user=self.user,
+                receipt_image=get_test_image_file(),
+                merchant=Merchant.objects.create(name='Random Merchant'),
+                location='123 Testing Street T1E 5T5',
+                total=1.1,
+                tax=2.2,
+                tip=3.3,
+                coupon=4,
+                currency="CAD",
+                important_dates="2022-10-09"
+            )
+
+        # Get the size of the reciepts create for this user
+        self.receipt_size = len(Receipts.objects.filter(user=self.user))
+
+    def test_pagination_successful(self):
+        for i in range(1, self.receipt_size//10 + 2):
+            url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': i, 'pageSize': 10})
+
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+            response = self.client.get(
+                url_paged_receipts,
+                format='json'
+            )
+
+            if i == self.receipt_size//10 + 1:
+                self.assertEqual(len(response.data['page_list']), self.receipt_size % 10)
+            else:
+                self.assertEqual(len(response.data['page_list']), 10)
+
+            if self.receipt_size % 10 == 0:
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10}>')
+            else:
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10 + 1}>')
+
+    def test_pagination_page_zero_error(self):
+        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 0, 'pageSize': 10})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_receipts,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) <= 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
+
+    def test_pagination_over_page_size_error(self):
+        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': self.receipt_size//10 + 2, 'pageSize': 10})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_receipts,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) <= 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {self.receipt_size//10} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {self.receipt_size//10 + 1} of {self.receipt_size//10 + 1}>')
+
+    def test_pagination_zero_page_size_error(self):
+        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 0})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_receipts,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) <= 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
+
+    def test_pagination_invalid_type_string(self):
+        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 'test', 'pageSize': 'test'})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_receipts,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) <= 10)
+        if (self.receipt_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
