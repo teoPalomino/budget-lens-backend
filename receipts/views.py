@@ -56,15 +56,15 @@ class ReceiptsAPIView(generics.ListCreateAPIView):
     This will return all the receipts with the scan_date between the start_date and end_date (inclusive).
     """
     permission_classes = [IsAuthenticated]
-    queryset = Receipts.objects.all()
     serializer_class = ReceiptsSerializer
     parser_classes = (MultiPartParser, FormParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-
-    # should I only include certain fields to search, ordering and filter? currently supports all
     filterset_class = ReceiptsFilter
     ordering_fields = '__all__'
     search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip']
+
+    def get_queryset(self):
+        return Receipts.objects.filter(user=self.request.user)
 
 
 class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
