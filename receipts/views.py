@@ -8,8 +8,12 @@ from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
-from django_filters.rest_framework import DjangoFilterBackend
 
+
+# Initial Plan:
+#   make a user folder with the user_id as the name
+#   make a sub-folder inside that specific user's folder with the receipt_id as the name
+#   save the image inside the folder of the user's receipt with the current unix timestamp scan_date as the image file name
 
 class ReceiptsFilter(django_filters.FilterSet):
     merchant_name = django_filters.CharFilter(field_name='merchant__name', lookup_expr='icontains')
@@ -66,6 +70,20 @@ class ReceiptsAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         return Receipts.objects.filter(user=self.request.user)
 
+
+class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Receipts.objects.all()
+    serializer_class = ReceiptsSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get(self, request, *args, **kwargs):
+        """
+        Get the resonse from the super class which returns the entire list
+        and then paginate the results
+        """
+        #
+        reciept_list_response = super().get(request, *args, **kwargs)
 
 class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]

@@ -111,7 +111,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
             total=1.1,
             tax=2.2,
             tip=3.3,
-            coupon=4
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
         )
 
         # Now, I should expect the "user_id" sub-folder to exist in the "receipt_images" folder since a receipt has been added/created
@@ -149,7 +151,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
             total=1.1,
             tax=2.2,
             tip=3.3,
-            coupon=4
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
         )
         receipt2 = Receipts.objects.create(
             user=self.user,
@@ -159,7 +163,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
             total=1.1,
             tax=2.2,
             tip=3.3,
-            coupon=4
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
         )
 
         self.assertEqual(
@@ -185,7 +191,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
             total=1.1,
             tax=2.2,
             tip=3.3,
-            coupon=4
+            coupon=4,
+            currency="CAD",
+            important_dates="2022-10-09"
         )
 
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
@@ -244,7 +252,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -293,7 +303,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -310,7 +322,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -359,7 +373,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -375,7 +391,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -425,7 +443,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -441,7 +461,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -519,7 +541,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -535,7 +559,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -598,7 +624,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -614,7 +642,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'total': 1.1,
                 'tax': 2.2,
                 'tip': 3.3,
-                'coupon': 4
+                'coupon': 4,
+                'currency': "CAD",
+                'important_dates': "2022-10-09"
             },
             format='multipart'
         )
@@ -685,7 +715,9 @@ class PaginationReceiptsAPITest(APITestCase):
                 total=1.1,
                 tax=2.2,
                 tip=3.3,
-                coupon=4
+                coupon=4,
+                currency="CAD",
+                important_dates="2022-10-09"
             )
 
         # Get the size of the reciepts create for this user
