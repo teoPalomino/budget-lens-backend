@@ -73,6 +73,9 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
 
 class DetailReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
-    queryset = Receipts.objects.all()
     serializer_class = PutPatchReceiptsSerializer
     lookup_url_kwarg = 'receipt_id'
+
+    # Ensure user can only delete their own receipts
+    def get_queryset(self):
+        return Receipts.objects.filter(user=self.request.user)
