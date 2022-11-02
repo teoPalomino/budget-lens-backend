@@ -881,7 +881,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         )
 
     def test_search(self):
-        receipts_url = reverse('create_receipts') + '?search=CAD'
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=CAD'
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')
@@ -892,7 +892,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_partial_keyword_search(self):
-        receipts_url = reverse('create_receipts') + '?search=123'
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=123'
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')
@@ -900,10 +900,10 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # should return all 3 receipts because they all contain '123' in their location field
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(len(response.data['page_list']), 3)
 
     def test_ordering(self):
-        receipts_url = reverse('create_receipts') + '?ordering=-total'
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?ordering=-total'
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')
@@ -912,15 +912,15 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
 
         # the response return receipts in descending order of total, therefore the previous total field should be
         # greater than or equal to the current total field
-        for i in range(len(response.data)):
+        for i in range(len(response.data['page_list'])):
             if i > 0:
-                previous_total = response.data[i - 1]['total']
+                previous_total = response.data['page_list'][i - 1]['total']
             else:
-                previous_total = response.data[i]['total']
-            self.assertTrue(previous_total >= response.data[i]['total'])
+                previous_total = response.data['page_list'][i]['total']
+            self.assertTrue(previous_total >= response.data['page_list'][i]['total'])
 
     def test_filtering(self):
-        receipts_url = reverse('create_receipts') + "?currency=USD"
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + "?currency=USD"
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')
@@ -928,4 +928,4 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # only one receipt contained the currency USD
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data['page_list']), 1)
