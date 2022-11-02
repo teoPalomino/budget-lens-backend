@@ -128,14 +128,16 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I check the created/added receipt's datetime scan date in the database is the same as the Unix timestamp equivalent used to rename the receipt's image file
         self.assertEqual(
             receipt.scan_date.replace(microsecond=0),
-            make_aware(datetime.datetime.fromtimestamp(time.mktime(receipt.scan_date.timetuple()))).replace(tzinfo=datetime.timezone.utc)
+            make_aware(datetime.datetime.fromtimestamp(time.mktime(receipt.scan_date.timetuple()))).replace(
+                tzinfo=datetime.timezone.utc)
         )
 
         # I check to make sure the receipt's image URL directory/path saved in the database is the same as the one I expect it
         # to be,given the user id as its "user_id" sub-folder and the Unix timestamp equivalent used to rename the image file itself
         self.assertEqual(
             receipt.receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png').replace('\\', '/')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
+                         f'{trunc(time.mktime(receipt.scan_date.timetuple()))}.png').replace('\\', '/')
         )
 
     def test_user_id_sub_folder_exists(self):
@@ -172,7 +174,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             receipt1.user_id,
             receipt2.user.id
         )
-        self.assertTrue(os.path.join(settings.RECEIPT_IMAGES_URL, f'{receipt1.user.id}'), os.path.join(settings.RECEIPT_IMAGES_URL, f'{receipt2.user.id}'))
+        self.assertTrue(os.path.join(settings.RECEIPT_IMAGES_URL, f'{receipt1.user.id}'),
+                        os.path.join(settings.RECEIPT_IMAGES_URL, f'{receipt2.user.id}'))
         self.assertNotEqual(
             receipt1.receipt_image.name.split('/')[2],
             receipt2.receipt_image.name.split('/')[2]
@@ -203,7 +206,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             receipt3.receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}', f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png').replace('\\', '/')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}',
+                         f'{trunc(time.mktime(receipt3.scan_date.timetuple()))}.png').replace('\\', '/')
         )
 
     def test_add_null_receipt_images_using_post_request_from_Receipts_API_View(self):
@@ -271,7 +275,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(user=self.user).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
+                         f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX CREATED status message
@@ -348,7 +353,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data[0]["receipt_image"].split("/")[5]}').replace('\\', '/')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
+                         f'{self.response.data[0]["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -419,7 +425,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
+                         f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -494,7 +501,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
+                         f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -591,7 +599,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
-            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}', f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
+            os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
+                         f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -681,8 +690,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             len(os.listdir(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}'))),
             Receipts.objects.all().count()
         )
-    def test_delete_receipt_from_another_user(self):
 
+    def test_delete_receipt_from_another_user(self):
         # Authenticate the user
         self.client.force_authenticate(user=self.user)
 
@@ -701,7 +710,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
 
         # Try to send a delete request for a receipt that is not theirs
-        self.delete_response = self.client.delete(reverse('detail_receipts', kwargs={ 'receipt_id' : self.other_user_receipt.pk} ))
+        self.delete_response = self.client.delete(
+            reverse('detail_receipts', kwargs={'receipt_id': self.other_user_receipt.pk}))
 
         self.assertEquals(
             self.delete_response.status_code,
@@ -712,7 +722,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             self.delete_response.data['detail'],
             'Not found.'
         )
-
 
 
 class PaginationReceiptsAPITest(APITestCase):
@@ -756,7 +765,7 @@ class PaginationReceiptsAPITest(APITestCase):
         self.receipt_size = len(Receipts.objects.filter(user=self.user))
 
     def test_pagination_successful(self):
-        for i in range(1, self.receipt_size//10 + 2):
+        for i in range(1, self.receipt_size // 10 + 2):
             url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': i, 'pageSize': 10})
 
             self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
@@ -766,15 +775,15 @@ class PaginationReceiptsAPITest(APITestCase):
                 format='json'
             )
 
-            if i == self.receipt_size//10 + 1:
+            if i == self.receipt_size // 10 + 1:
                 self.assertEqual(len(response.data['page_list']), self.receipt_size % 10)
             else:
                 self.assertEqual(len(response.data['page_list']), 10)
 
             if self.receipt_size % 10 == 0:
-                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10}>')
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size // 10}>')
             else:
-                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size//10 + 1}>')
+                self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size // 10 + 1}>')
 
     def test_pagination_page_zero_error(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 0, 'pageSize': 10})
@@ -788,12 +797,13 @@ class PaginationReceiptsAPITest(APITestCase):
 
         self.assertTrue(len(response.data['page_list']) <= 10)
         if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
         else:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
 
     def test_pagination_over_page_size_error(self):
-        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': self.receipt_size//10 + 2, 'pageSize': 10})
+        url_paged_receipts = reverse('list_paged_receipts',
+                                     kwargs={'pageNumber': self.receipt_size // 10 + 2, 'pageSize': 10})
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
@@ -804,9 +814,11 @@ class PaginationReceiptsAPITest(APITestCase):
 
         self.assertTrue(len(response.data['page_list']) <= 10)
         if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'], f'<Page {self.receipt_size//10} of {self.receipt_size//10}>')
+            self.assertEqual(response.data['description'],
+                             f'<Page {self.receipt_size // 10} of {self.receipt_size // 10}>')
         else:
-            self.assertEqual(response.data['description'], f'<Page {self.receipt_size//10 + 1} of {self.receipt_size//10 + 1}>')
+            self.assertEqual(response.data['description'],
+                             f'<Page {self.receipt_size // 10 + 1} of {self.receipt_size // 10 + 1}>')
 
     def test_pagination_zero_page_size_error(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 0})
@@ -820,9 +832,9 @@ class PaginationReceiptsAPITest(APITestCase):
 
         self.assertTrue(len(response.data['page_list']) <= 10)
         if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
         else:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
 
     def test_pagination_invalid_type_string(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 'test', 'pageSize': 'test'})
@@ -836,6 +848,6 @@ class PaginationReceiptsAPITest(APITestCase):
 
         self.assertTrue(len(response.data['page_list']) <= 10)
         if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10}>')
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
         else:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size//10 + 1}>')
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
