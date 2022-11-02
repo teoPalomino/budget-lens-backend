@@ -8,6 +8,9 @@ from django.db.models.signals import pre_save
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+
+from merchant.models import Merchant
+
 from utility.analyze_receipt import analyze_receipts
 
 def upload_to(instance, filename):
@@ -28,6 +31,14 @@ class Receipts(models.Model):
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
     scan_date = models.DateTimeField(default=timezone.now)
     receipt_image = models.ImageField(upload_to=upload_to)
+    merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING)
+    location = models.CharField(max_length=200)
+    total = models.FloatField()
+    tax = models.FloatField()
+    tip = models.FloatField()
+    coupon = models.FloatField()
+    currency = models.CharField(max_length=10)
+    important_dates = models.DateField()
     receipt_text = models.TextField(default=None,blank=True, null=True)
 
     def save(self, *args, **kwargs):
