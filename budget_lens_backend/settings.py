@@ -29,11 +29,12 @@ SECRET_KEY = os.getenv("SECRET_KEY", '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwms
 
 if PRODUCTION_MODE == 'True':
     ALLOWED_HOSTS = [
-            '127.0.0.1',
-            '206.81.3.66',
-            'budgetlens.tech',
-            'api.budgetlens.tech'
-        ]
+        '127.0.0.1',
+        '206.81.3.66',
+        'budgetlens.tech',
+        'api.budgetlens.tech'
+    ]
+    ALLOWED_HOSTS.append(os.getenv('ADDRESS'))
     STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
     RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
 else:
@@ -44,6 +45,7 @@ else:
             'budgetlens.tech',
             'api.budgetlens.tech'
         ]
+        ALLOWED_HOSTS.append(os.getenv('ADDRESS'))
     except Exception:
         ALLOWED_HOSTS = []
     HOST_NAME = 'http://localhost:8000'
