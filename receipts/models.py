@@ -13,6 +13,7 @@ from merchant.models import Merchant
 
 from utility.analyze_receipt import analyze_receipts
 
+
 def upload_to(instance, filename):
     image_file_types = ['.png', '.jpg', '.jpeg']
     image_file_extension = os.path.splitext(filename)[1]
@@ -39,7 +40,7 @@ class Receipts(models.Model):
     coupon = models.FloatField()
     currency = models.CharField(max_length=10)
     important_dates = models.DateField()
-    receipt_text = models.TextField(default=None,blank=True, null=True)
+    receipt_text = models.TextField(default=None, blank=True, null=True)
 
     def save(self, *args, **kwargs):
 
@@ -68,7 +69,7 @@ class Receipts(models.Model):
             pass
 
     @receiver(post_save, sender='receipts.Receipts')
-    def post_save_receipt(sender, instance,created, *args, **kwargs):
-            if created:
-                instance.receipt_text = analyze_receipts(instance.receipt_image.path)
-                instance.save()
+    def post_save_receipt(sender, instance, created, *args, **kwargs):
+        if created:
+            instance.receipt_text = analyze_receipts(instance.receipt_image.path)
+            instance.save()

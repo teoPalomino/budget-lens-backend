@@ -1,4 +1,4 @@
-import os
+
 def analyze_receipts(file):
     path_to_sample_documents = file
     from azure.core.credentials import AzureKeyCredential
