@@ -220,7 +220,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             format='multipart'
         )
 
@@ -248,7 +248,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # (See the "Given" part of the "Given, When, Then" test design pattern in each of the two acceptance criteria scenarios for this user story (BUD-4) on the Jira Board)
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -293,14 +293,14 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # (See the "Given" part of the "Given, When, Then" test design pattern in each of the two acceptance criteria scenarios for this user story (BUD-4) on the Jira Board)
         self.client.force_authenticate(user=self.user)
         self.response = self.client.get(
-            reverse('list_create_receipts')
+            reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10})
         )
 
         # Since no receipts have been added/created by the user yet, I should expect the list of receipts to be empty
         self.assertEqual(self.receipts_from_responses, [])
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -319,7 +319,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am creating a second image to add to the list of receipts
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -337,24 +337,24 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         # Now, after the user has added/created the new receipts, when I call the GET request, I should expect the list of receipts to contain the newly added receipts
         self.response = self.client.get(
-            reverse('list_create_receipts')
+            reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10})
         )
         self.assertEqual(
             len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
         self.assertEqual(
-            self.response.data[0]['receipt_image'].split('/')[4],
+            self.response.data['page_list'][0]['receipt_image'].split('/')[4],
             str(self.user.id)
         )
         self.assertEqual(
-            self.response.data[0]['receipt_image'].split('/')[5].strip('.png'),
+            self.response.data['page_list'][0]['receipt_image'].split('/')[5].strip('.png'),
             Receipts.objects.get(id=1).receipt_image.name.split('/')[2].strip('.png')
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
             os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
-                         f'{self.response.data[0]["receipt_image"].split("/")[5]}').replace('\\', '/')
+                         f'{self.response.data["page_list"][0]["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -371,7 +371,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -389,7 +389,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -442,7 +442,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -460,7 +460,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -541,7 +541,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -559,7 +559,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -625,7 +625,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -643,7 +643,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -881,7 +881,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         )
 
     def test_search(self):
-        receipts_url = reverse('list_create_receipts') + '?search=CAD'
+        receipts_url = reverse('create_receipts') + '?search=CAD'
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')
@@ -892,7 +892,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_partial_keyword_search(self):
-        receipts_url = reverse('list_create_receipts') + '?search=123'
+        receipts_url = reverse('create_receipts') + '?search=123'
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')
@@ -903,7 +903,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         self.assertEqual(len(response.data), 3)
 
     def test_ordering(self):
-        receipts_url = reverse('list_create_receipts') + '?ordering=-total'
+        receipts_url = reverse('create_receipts') + '?ordering=-total'
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')
@@ -920,7 +920,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
             self.assertTrue(previous_total >= response.data[i]['total'])
 
     def test_filtering(self):
-        receipts_url = reverse('list_create_receipts') + "?currency=USD"
+        receipts_url = reverse('create_receipts') + "?currency=USD"
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(receipts_url, format='json')

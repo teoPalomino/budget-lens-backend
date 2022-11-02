@@ -24,8 +24,9 @@ class ReceiptsFilter(django_filters.FilterSet):
                   'merchant_name', 'coupon', 'location', 'total', 'tax', 'tip', 'currency']
 
 
-class ReceiptsAPIView(generics.ListCreateAPIView):
+class PostReceiptsAPIView(generics.CreateAPIView):
     """
+    (This view is only for Posting new receipts) ---- Add this instead to the doc string of this view
     This view returns a list of all the receipts for the user.
 
     It also accepts optional query parameters to filter, order and search the receipts.
