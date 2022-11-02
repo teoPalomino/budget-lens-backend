@@ -914,7 +914,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         # greater than or equal to the current total field
         for i in range(len(response.data)):
             if i > 0:
-                previous_total = response.data[i-1]['total']
+                previous_total = response.data[i - 1]['total']
             else:
                 previous_total = response.data[i]['total']
             self.assertTrue(previous_total >= response.data[i]['total'])

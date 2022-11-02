@@ -84,21 +84,6 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         #
         reciept_list_response = super().get(request, *args, **kwargs)
 
-
-class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Receipts.objects.all()
-    serializer_class = ReceiptsSerializer
-    parser_classes = (MultiPartParser, FormParser)
-
-    def get(self, request, *args, **kwargs):
-        """
-        Get the resonse from the super class which returns the entire list
-        and then paginate the results
-        """
-        #
-        reciept_list_response = super().get(request, *args, **kwargs)
-
         # Try to turn page number to an int value, otherwise set to default value of 1
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
