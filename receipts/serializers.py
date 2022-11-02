@@ -8,4 +8,4 @@ class ReceiptsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Receipts
-        fields = ('user', 'scan_date', 'receipt_image',)
+        fields = ('user', 'scan_date', 'receipt_image','receipt_text')
