@@ -1,4 +1,5 @@
 import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,20 +11,17 @@ from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
 
 
-# Initial Plan:
-#   make a user folder with the user_id as the name
-#   make a sub-folder inside that specific user's folder with the receipt_id as the name
-#   save the image inside the folder of the user's receipt with the current unix timestamp scan_date as the image file name
-
 class ReceiptsFilter(django_filters.FilterSet):
     merchant_name = django_filters.CharFilter(field_name='merchant__name', lookup_expr='icontains')
-    start_date = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='gte')
-    end_date = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='lte')
+    scan_date_start = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='gte')
+    scan_date_end = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='lte')
+    important_date_start = django_filters.DateTimeFilter(field_name='important_date', lookup_expr='gte')
+    important_date_end = django_filters.DateTimeFilter(field_name='important_date', lookup_expr='lte')
 
     class Meta:
         model = Receipts
-        fields = ['id', 'start_date', 'end_date', 'user_id', 'merchant_name', 'coupon', 'location', 'total', 'tax',
-                  'tip']
+        fields = ['id', 'scan_date_start', 'scan_date_end', 'important_date_start', 'important_date_end', 'user_id',
+                  'merchant_name', 'coupon', 'location', 'total', 'tax', 'tip', 'currency']
 
 
 class ReceiptsAPIView(generics.ListCreateAPIView):
@@ -53,11 +51,11 @@ class ReceiptsAPIView(generics.ListCreateAPIView):
     The difference is that the first url will search for and include any receipt with a field containing the text
     'mcdonalds'.
 
-    url = '/api/receipts/?start_date=2020-01-01'
+    url = '/api/receipts/?scan_date_start=2020-01-01'
     This will return all the receipts where the scan_date is greater than or equal to 2020-01-01.
 
-    url = '/api/receipts/?start_date=2020-01-01&end_date=2020-01-31'
-    This will return all the receipts with the scan_date between the start_date and end_date (inclusive).
+    url = '/api/receipts/?scan_date_start=2020-01-01&scan_date_end=2020-01-31'
+    This will return all the receipts with the scan_date between the scan_date_start and scan_date_end (inclusive).
     """
     permission_classes = [IsAuthenticated]
     serializer_class = ReceiptsSerializer
@@ -65,7 +63,8 @@ class ReceiptsAPIView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ReceiptsFilter
     ordering_fields = '__all__'
-    search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip']
+    search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip', 'currency',
+                     'important_dates']
 
     def get_queryset(self):
         return Receipts.objects.filter(user=self.request.user)
@@ -84,6 +83,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         """
         #
         reciept_list_response = super().get(request, *args, **kwargs)
+
 
 class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
