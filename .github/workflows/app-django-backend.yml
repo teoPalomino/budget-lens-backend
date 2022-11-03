@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     # Add in environment variables for the entire "build" job
     env:
+      APP_ENV: test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 9876
       POSTGRES_HOST: localhost # default host value for the database
