@@ -220,7 +220,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             format='multipart'
         )
 
@@ -248,7 +248,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # (See the "Given" part of the "Given, When, Then" test design pattern in each of the two acceptance criteria scenarios for this user story (BUD-4) on the Jira Board)
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -293,14 +293,14 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # (See the "Given" part of the "Given, When, Then" test design pattern in each of the two acceptance criteria scenarios for this user story (BUD-4) on the Jira Board)
         self.client.force_authenticate(user=self.user)
         self.response = self.client.get(
-            reverse('list_create_receipts')
+            reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10})
         )
 
         # Since no receipts have been added/created by the user yet, I should expect the list of receipts to be empty
         self.assertEqual(self.receipts_from_responses, [])
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -319,7 +319,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am creating a second image to add to the list of receipts
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -337,24 +337,24 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         # Now, after the user has added/created the new receipts, when I call the GET request, I should expect the list of receipts to contain the newly added receipts
         self.response = self.client.get(
-            reverse('list_create_receipts')
+            reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10})
         )
         self.assertEqual(
             len(self.receipts_from_responses),
             Receipts.objects.all().count()
         )
         self.assertEqual(
-            self.response.data[0]['receipt_image'].split('/')[4],
+            self.response.data['page_list'][0]['receipt_image'].split('/')[4],
             str(self.user.id)
         )
         self.assertEqual(
-            self.response.data[0]['receipt_image'].split('/')[5].strip('.png'),
+            self.response.data['page_list'][0]['receipt_image'].split('/')[5].strip('.png'),
             Receipts.objects.get(id=1).receipt_image.name.split('/')[2].strip('.png')
         )
         self.assertEqual(
             Receipts.objects.get(id=1).receipt_image,
             os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}',
-                         f'{self.response.data[0]["receipt_image"].split("/")[5]}').replace('\\', '/')
+                         f'{self.response.data["page_list"][0]["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
         # Asserts a Successful 2XX OK status message
@@ -371,7 +371,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -389,7 +389,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -442,7 +442,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -460,7 +460,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -541,7 +541,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -559,7 +559,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -625,7 +625,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -643,7 +643,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('list_create_receipts'),
+            reverse('create_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -689,38 +689,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.assertEqual(
             len(os.listdir(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}'))),
             Receipts.objects.all().count()
-        )
-
-    def test_delete_receipt_from_another_user(self):
-        # Authenticate the user
-        self.client.force_authenticate(user=self.user)
-
-        # Insert a receipt for another user
-        self.other_user_receipt = Receipts.objects.create(
-            user=self.new_user,
-            receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Fancy Merchant'),
-            location='555 Concordia Street JD3 5T5',
-            total=1.1,
-            tax=2.2,
-            tip=3.3,
-            coupon=4,
-            currency="USD",
-            important_dates="2022-10-09"
-        )
-
-        # Try to send a delete request for a receipt that is not theirs
-        self.delete_response = self.client.delete(
-            reverse('detail_receipts', kwargs={'receipt_id': self.other_user_receipt.pk}))
-
-        self.assertEquals(
-            self.delete_response.status_code,
-            status.HTTP_404_NOT_FOUND
-        )
-
-        self.assertEquals(
-            self.delete_response.data['detail'],
-            'Not found.'
         )
 
 
@@ -851,3 +819,113 @@ class PaginationReceiptsAPITest(APITestCase):
             self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
         else:
             self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
+
+
+class TestReceiptsFilteringOrderingSearching(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='johncena123@gmail.com',
+            email='momoamineahmadi@gmail.com',
+            first_name='John',
+            last_name='Cena',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-0187"
+        )
+        self.data = {
+            'username': 'johncena123@gmail.com',
+            'password': 'wrestlingrules123'
+        }
+
+        self.token = BearerToken.objects.create(user=self.user)
+
+        Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD",
+            important_dates="2022-10-09"
+        )
+
+        Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=2,
+            tax=2,
+            tip=2,
+            coupon=2,
+            currency="CAD",
+            important_dates="2022-10-09"
+        )
+
+        Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Random Merchant'),
+            location='123 Testing Street T1E 5T5',
+            total=3,
+            tax=3,
+            tip=3,
+            coupon=3,
+            currency="USD",
+            important_dates="2022-10-09"
+        )
+
+    def test_search(self):
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=CAD'
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(receipts_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # ensure only 2 receipts are returned
+        self.assertEqual(len(response.data), 2)
+
+    def test_partial_keyword_search(self):
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=123'
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(receipts_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # should return all 3 receipts because they all contain '123' in their location field
+        self.assertEqual(len(response.data['page_list']), 3)
+
+    def test_ordering(self):
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?ordering=-total'
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(receipts_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # the response return receipts in descending order of total, therefore the previous total field should be
+        # greater than or equal to the current total field
+        for i in range(len(response.data['page_list'])):
+            if i > 0:
+                previous_total = response.data['page_list'][i - 1]['total']
+            else:
+                previous_total = response.data['page_list'][i]['total']
+            self.assertTrue(previous_total >= response.data['page_list'][i]['total'])
+
+    def test_filtering(self):
+        receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + "?currency=USD"
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(receipts_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # only one receipt contained the currency USD
+        self.assertEqual(len(response.data['page_list']), 1)
