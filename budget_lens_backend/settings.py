@@ -31,7 +31,6 @@ if PRODUCTION_MODE == 'True':
     ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
-            '192.168.2.10',
             'budgetlens.tech',
             'api.budgetlens.tech'
         ]
@@ -42,7 +41,6 @@ elif PRODUCTION_MODE == 'False':
         ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
-            '192.168.2.10',
             'budgetlens.tech',
             'api.budgetlens.tech'
         ]
