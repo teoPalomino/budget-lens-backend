@@ -1,4 +1,4 @@
-
+import os
 def analyze_receipts(file):
     if os.getenv('APP_ENV') != 'test':
         path_to_sample_documents = file
