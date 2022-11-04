@@ -505,7 +505,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.assertEqual(
             self.response.data['receipt_image'].split('/')[4],
-            print(self.response.data['receipt_image'].split('/')[4]),
             str(self.user.id)
         )
         self.assertEqual(
