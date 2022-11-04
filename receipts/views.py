@@ -71,7 +71,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     filterset_class = ReceiptsFilter
     ordering_fields = '__all__'
     search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip', 'currency',
-                     'important_dates', 'time_of_sale']
+                     'important_dates']
 
     def get(self, request, *args, **kwargs):
         """
