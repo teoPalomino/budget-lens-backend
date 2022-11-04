@@ -37,6 +37,7 @@ class Receipts(models.Model):
     coupon = models.FloatField()
     currency = models.CharField(max_length=10)
     important_dates = models.DateField()
+    time_of_sale = models.DateTimeField(default=timezone.now())
 
     # When a receipt image is deleted from the database, the receipt image file is also deleted from the file system/server
     def delete(self, using=None, keep_parents=False):
