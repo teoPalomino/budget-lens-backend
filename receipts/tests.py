@@ -263,7 +263,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'coupon': 4,
                 'currency': "CAD",
                 'important_dates': "2022-10-09",
-                'time_of_sale' : "2022-10-25 14:30:59"
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
