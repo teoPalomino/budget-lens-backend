@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Receipts
-from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
+from .serializers import ManualReceiptsSerializer, ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
@@ -14,6 +14,12 @@ from rest_framework.status import HTTP_200_OK
 class PostReceiptsAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ReceiptsSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+
+class PostManualReceiptsAPIView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ManualReceiptsSerializer
     parser_classes = (MultiPartParser, FormParser)
 
 

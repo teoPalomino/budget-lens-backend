@@ -28,15 +28,15 @@ class Receipts(models.Model):
     """A Receipts model with a user model"""
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
     scan_date = models.DateTimeField(default=timezone.now)
-    receipt_image = models.ImageField(upload_to=upload_to)
+    receipt_image = models.ImageField(upload_to=upload_to, null=True, blank=True)
     merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING)
-    location = models.CharField(max_length=200)
+    location = models.CharField(max_length=200, null=True, blank=True)
     total = models.FloatField()
     tax = models.FloatField()
-    tip = models.FloatField()
-    coupon = models.FloatField()
-    currency = models.CharField(max_length=10)
-    important_dates = models.DateField()
+    tip = models.FloatField(null=True, blank=True)
+    coupon = models.FloatField(null=True, blank=True)
+    currency = models.CharField(max_length=10, null=True, blank=True)
+    important_dates = models.DateField(null=True, blank=True)
 
     # When a receipt image is deleted from the database, the receipt image file is also deleted from the file system/server
     def delete(self, using=None, keep_parents=False):
