@@ -41,7 +41,7 @@ class Receipts(models.Model):
     currency = models.CharField(max_length=10)
     important_dates = models.DateField()
     receipt_text = models.TextField(default=None, blank=True, null=True)
-    time_of_sale = models.DateTimeField(default=timezone.now())
+    time_of_sale = models.DateTimeField(help_text='YYYY-MM-DD HH:MM:SS')
     def save(self, *args, **kwargs):
 
         super(Receipts, self).save(*args, **kwargs)

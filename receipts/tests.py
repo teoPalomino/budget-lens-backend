@@ -113,7 +113,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tip=3.3,
             coupon=4,
             currency="CAD",
-            important_dates="2022-10-09"
+            important_dates="2022-10-09",
+            time_of_sale="2022-10-25 14:30:59"
         )
 
         # Now, I should expect the "user_id" sub-folder to exist in the "receipt_images" folder since a receipt has been added/created
@@ -155,7 +156,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tip=3.3,
             coupon=4,
             currency="CAD",
-            important_dates="2022-10-09"
+            important_dates="2022-10-09",
+            time_of_sale="2022-10-25 14:30:59"
         )
         receipt2 = Receipts.objects.create(
             user=self.user,
@@ -167,7 +169,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tip=3.3,
             coupon=4,
             currency="CAD",
-            important_dates="2022-10-09"
+            important_dates="2022-10-09",
+            time_of_sale="2022-10-25 14:30:59"
         )
 
         self.assertEqual(
@@ -196,7 +199,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tip=3.3,
             coupon=4,
             currency="CAD",
-            important_dates="2022-10-09"
+            important_dates="2022-10-09",
+            time_of_sale="2022-10-25 14:30:59"
         )
 
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
@@ -258,7 +262,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale' : "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -310,7 +315,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -329,7 +335,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
+
             },
             format='multipart'
         )
@@ -381,7 +389,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -399,7 +408,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -452,7 +462,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -470,7 +481,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -551,7 +563,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -569,7 +582,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -635,7 +649,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -653,7 +668,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tip': 3.3,
                 'coupon': 4,
                 'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'important_dates': "2022-10-09",
+                'time_of_sale': "2022-10-25 14:30:59"
             },
             format='multipart'
         )
@@ -758,7 +774,8 @@ class PaginationReceiptsAPITest(APITestCase):
                 tip=3.3,
                 coupon=4,
                 currency="CAD",
-                important_dates="2022-10-09"
+                important_dates="2022-10-09",
+                time_of_sale="2022-10-25 14:30:59"
             )
 
         # Get the size of the reciepts create for this user
@@ -883,7 +900,8 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
             tip=1,
             coupon=1,
             currency="CAD",
-            important_dates="2022-10-09"
+            important_dates="2022-10-09",
+            time_of_sale="2022-10-25 14:30:59"
         )
 
         Receipts.objects.create(
@@ -896,7 +914,8 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
             tip=2,
             coupon=2,
             currency="CAD",
-            important_dates="2022-10-09"
+            important_dates="2022-10-09",
+            time_of_sale="2022-10-25 14:30:59"
         )
 
         Receipts.objects.create(
@@ -909,7 +928,8 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
             tip=3,
             coupon=3,
             currency="USD",
-            important_dates="2022-10-09"
+            important_dates="2022-10-09",
+            time_of_sale="2022-10-25 14:30:59"
         )
 
     def test_search(self):
