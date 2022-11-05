@@ -30,12 +30,12 @@ def upload_to(instance, filename):
 class Receipts(models.Model):
     """A Receipts model with a user model"""
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
-    scan_date = models.DateTimeField(default=timezone.now)
-    receipt_image = models.ImageField(upload_to=upload_to)
-    merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING)
+    scan_date = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    receipt_image = models.ImageField(upload_to=upload_to, null=True, blank=True)
+    merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING, null=True, blank=True)
     location = models.CharField(max_length=200, null=True, blank=True)
-    total = models.FloatField()
-    tax = models.FloatField()
+    total = models.FloatField(null=True, blank=True)
+    tax = models.FloatField(null=True, blank=True)
     tip = models.FloatField(null=True, blank=True)
     coupon = models.FloatField(null=True, blank=True)
     currency = models.CharField(max_length=10, null=True, blank=True)
