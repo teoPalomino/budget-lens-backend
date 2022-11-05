@@ -27,6 +27,7 @@ class ReceiptsSerializer(serializers.ModelSerializer):
             coupon=validated_data['coupon'],
             currency=validated_data['currency'],
             important_dates=validated_data['important_dates'],
+            time_of_sale=validated_data['time_of_sale'],
         )
         return receipt
 
@@ -37,4 +38,5 @@ class PutPatchReceiptsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Receipts
-        fields = ('user', 'scan_date', 'receipt_image')
+        fields = ('user', 'merchant', 'currency', 'scan_date', 'total', 'location', 'receipt_image',
+                  'important_dates', 'time_of_sale')

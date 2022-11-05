@@ -41,12 +41,13 @@ class Receipts(models.Model):
     currency = models.CharField(max_length=10)
     important_dates = models.DateField()
     receipt_text = models.TextField(default=None, blank=True, null=True)
-
+    time_of_sale = models.DateTimeField(default=timezone.now())
     def save(self, *args, **kwargs):
 
         super(Receipts, self).save(*args, **kwargs)
         # if self.receipt_image and self.receipt_text is None:
         #     analyze_receipts(self.receipt_image.path)
+
 
     # When a receipt image is deleted from the database, the receipt image file is also deleted from the file system/server
     def delete(self, using=None, keep_parents=False):
