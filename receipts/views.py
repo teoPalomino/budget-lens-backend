@@ -133,8 +133,7 @@ class SaveReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PutPatchReceiptsSerializer
     lookup_url_kwarg = 'receipt_id'
 
-      # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
-    @receiver(pre_save, sender='receipts.Receipts')
+    # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
     def pre_save_image(sender, instance, *args, **kwargs):
         try:
             old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
