@@ -5,10 +5,13 @@ from math import trunc
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from merchant.models import Merchant
+
+from utility.analyze_receipt import analyze_receipts
 
 
 def upload_to(instance, filename):
@@ -37,6 +40,13 @@ class Receipts(models.Model):
     coupon = models.FloatField()
     currency = models.CharField(max_length=10)
     important_dates = models.DateField()
+    receipt_text = models.TextField(default=None, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+
+        super(Receipts, self).save(*args, **kwargs)
+        # if self.receipt_image and self.receipt_text is None:
+        #     analyze_receipts(self.receipt_image.path)
 
     # When a receipt image is deleted from the database, the receipt image file is also deleted from the file system/server
     def delete(self, using=None, keep_parents=False):
@@ -57,3 +67,9 @@ class Receipts(models.Model):
                     os.remove(old_receipt_image.path)
         except instance.DoesNotExist:
             pass
+
+    @receiver(post_save, sender='receipts.Receipts')
+    def post_save_receipt(sender, instance, created, *args, **kwargs):
+        if created:
+            instance.receipt_text = analyze_receipts(instance.receipt_image.path)
+            instance.save()
