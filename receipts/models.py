@@ -53,22 +53,22 @@ class Receipts(models.Model):
         self.receipt_image.delete()
         super().delete()
 
-  # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
-    @receiver(pre_save, sender='receipts.Receipts')
-    def pre_save_image(sender, instance, *args, **kwargs):
-        try:
-            old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
-            if os.path.exists(old_receipt_image.path) is False: #if image doesnt exist already -> pass. caller will save image.
-                pass   
-            try:
-                new_updated_receipt_image = instance.receipt_image
-            except ValueError:
-                new_updated_receipt_image = None
-            if new_updated_receipt_image != old_receipt_image:
-                if os.path.exists(old_receipt_image.path):
-                    os.remove(old_receipt_image.path)
-        except instance.DoesNotExist:
-            pass
+#   # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
+#     @receiver(pre_save, sender='receipts.Receipts')
+#     def pre_save_image(sender, instance, *args, **kwargs):
+#         try:
+#             old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
+#             if os.path.exists(old_receipt_image.path) is False: #if image doesnt exist already -> pass. caller will save image.
+#                 pass   
+#             try:
+#                 new_updated_receipt_image = instance.receipt_image
+#             except ValueError:
+#                 new_updated_receipt_image = None
+#             if new_updated_receipt_image != old_receipt_image:
+#                 if os.path.exists(old_receipt_image.path):
+#                     os.remove(old_receipt_image.path)
+#         except instance.DoesNotExist:
+#             pass
 
     @receiver(post_save, sender='receipts.Receipts')
     def post_save_receipt(sender, instance, created, *args, **kwargs):
