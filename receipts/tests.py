@@ -18,7 +18,6 @@ from rest_framework.test import APITransactionTestCase, APITestCase
 
 from receipts.models import Receipts
 from users.models import UserProfile
-from merchant.models import Merchant
 
 
 # This function is used when I want to directly create/add a new scanned receipt in the database
@@ -106,7 +105,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I then create a new receipt and add it to the database
         receipt = Receipts.objects.create(
             user=self.user, receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Random Merchant'),
             location='123 Testing Street T1E 5T5',
             total=1.1,
             tax=2.2,
@@ -148,7 +146,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         receipt1 = Receipts.objects.create(
             user=self.user,
             receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Random Merchant'),
             location='123 Testing Street T1E 5T5',
             total=1.1,
             tax=2.2,
@@ -160,7 +157,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         receipt2 = Receipts.objects.create(
             user=self.user,
             receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Random Merchant'),
             location='123 Testing Street T1E 5T5',
             total=1.1,
             tax=2.2,
@@ -189,7 +185,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         receipt3 = Receipts.objects.create(
             user=self.new_user,
             receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Random Merchant'),
             location='123 Testing Street T1E 5T5',
             total=1.1,
             tax=2.2,
@@ -251,7 +246,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -303,7 +297,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -322,7 +315,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -374,7 +366,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -392,7 +383,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -445,7 +435,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -463,7 +452,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -544,7 +532,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -562,7 +549,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -628,7 +614,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -646,7 +631,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
             reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
-                'merchant': r'\{"name": Random Merchant\}',
                 'location': '123 Testing Street T1E 5T5',
                 'total': 1.1,
                 'tax': 2.2,
@@ -699,7 +683,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.other_user_receipt = Receipts.objects.create(
             user=self.new_user,
             receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Fancy Merchant'),
             location='555 Concordia Street JD3 5T5',
             total=1.1,
             tax=2.2,
@@ -751,7 +734,6 @@ class PaginationReceiptsAPITest(APITestCase):
             Receipts.objects.create(
                 user=self.user,
                 receipt_image=get_test_image_file(),
-                merchant=Merchant.objects.create(name='Random Merchant'),
                 location='123 Testing Street T1E 5T5',
                 total=1.1,
                 tax=2.2,
@@ -876,7 +858,6 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         Receipts.objects.create(
             user=self.user,
             receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
             tax=1,
@@ -889,7 +870,6 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         Receipts.objects.create(
             user=self.user,
             receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Random Merchant'),
             location='123 Testing Street T1E 5T5',
             total=2,
             tax=2,
@@ -902,7 +882,6 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         Receipts.objects.create(
             user=self.user,
             receipt_image=get_test_image_file(),
-            merchant=Merchant.objects.create(name='Random Merchant'),
             location='123 Testing Street T1E 5T5',
             total=3,
             tax=3,
