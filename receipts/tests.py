@@ -1262,7 +1262,7 @@ class PaginationReceiptsAPITest(APITestCase):
             if i == self.receipt_size // 10 + 1:
                 self.assertEqual(len(response.data['page_list']), self.receipt_size % 10)
             else:
-                self.assertEqual(len(response.data['page_list']), 10)
+                self.assertEqual(len(response.data['page_list']), 0)
 
             if self.receipt_size % 10 == 0:
                 self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size // 10}>')
