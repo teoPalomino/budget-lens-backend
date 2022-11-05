@@ -31,8 +31,7 @@ class Receipts(models.Model):
     """A Receipts model with a user model"""
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
     scan_date = models.DateTimeField(default=timezone.now, null=True, blank=True)
-    receipt_image = models.ImageField(upload_to=upload_to)
-    merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING, null=True, blank=True)
+    receipt_image = models.ImageField(upload_to=upload_to,null=True)
     location = models.CharField(max_length=200, null=True, blank=True)
     total = models.FloatField(null=True, blank=True)
     tax = models.FloatField(null=True, blank=True)
