@@ -9,8 +9,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from merchant.models import Merchant
-
 from utility.analyze_receipt import analyze_receipts
 
 
