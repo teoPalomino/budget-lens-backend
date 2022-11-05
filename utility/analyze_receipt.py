@@ -6,7 +6,7 @@ def analyze_receipts(file):
         from azure.ai.formrecognizer import DocumentAnalysisClient
 
         endpoint = "https://budgetlens.cognitiveservices.azure.com/"
-        key = 'eda67d70c1d04f5d964946779e494672'
+        key = 'eda67d70c1d04f5d964946779e494672' #this is actually a secret lol
 
         document_analysis_client = DocumentAnalysisClient(
             endpoint=endpoint, credential=AzureKeyCredential(key)

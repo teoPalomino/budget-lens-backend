@@ -53,11 +53,13 @@ class Receipts(models.Model):
         self.receipt_image.delete()
         super().delete()
 
-    # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
+  # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
     @receiver(pre_save, sender='receipts.Receipts')
     def pre_save_image(sender, instance, *args, **kwargs):
         try:
             old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
+            if os.path.exists(old_receipt_image.path) is False: #if image doesnt exist already -> pass. caller will save image.
+                pass   
             try:
                 new_updated_receipt_image = instance.receipt_image
             except ValueError:
@@ -73,3 +75,10 @@ class Receipts(models.Model):
         if created:
             instance.receipt_text = analyze_receipts(instance.receipt_image.path)
             instance.save()
+
+#first, to use the same method for add and update -> if receipt already exists in db, follow mechanism of update
+#if it doesnt already exist -> adding a new receipt. 
+
+#1. find security loopholes:- static vals of key or secret: replace with an env variable
+#2. functions should return something for client side (even if it fails)
+#3. bring all implenentation out of models and put it in views

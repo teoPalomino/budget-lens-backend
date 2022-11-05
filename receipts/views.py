@@ -127,3 +127,31 @@ class DetailReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
     # Ensure user can only delete their own receipts
     def get_queryset(self):
         return Receipts.objects.filter(user=self.request.user)
+
+class SaveReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PutPatchReceiptsSerializer
+    lookup_url_kwarg = 'receipt_id'
+
+      # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
+    @receiver(pre_save, sender='receipts.Receipts')
+    def pre_save_image(sender, instance, *args, **kwargs):
+        try:
+            old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
+            if os.path.exists(old_receipt_image.path) is False: #if image doesnt exist already -> pass. caller will save image.
+                pass   
+            try:
+                new_updated_receipt_image = instance.receipt_image
+            except ValueError:
+                new_updated_receipt_image = None
+            if new_updated_receipt_image != old_receipt_image:
+                if os.path.exists(old_receipt_image.path):
+                    os.remove(old_receipt_image.path)
+        except instance.DoesNotExist:
+            pass
+
+#API call
+    # def save_image():
+    #     pre_save_image()
+    #     save()
+    #     post_save_image()
