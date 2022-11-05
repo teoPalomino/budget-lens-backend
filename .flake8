@@ -4,6 +4,7 @@
 extend-exclude =
     ./budget-lens-venv/,
     ./manage.py,
+    ./utility,
 
 ; Ignore checks
 

@@ -691,6 +691,38 @@ class AddReceiptsAPITest(APITransactionTestCase):
             Receipts.objects.all().count()
         )
 
+    def test_delete_receipt_from_another_user(self):
+        # Authenticate the user
+        self.client.force_authenticate(user=self.user)
+
+        # Insert a receipt for another user
+        self.other_user_receipt = Receipts.objects.create(
+            user=self.new_user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Fancy Merchant'),
+            location='555 Concordia Street JD3 5T5',
+            total=1.1,
+            tax=2.2,
+            tip=3.3,
+            coupon=4,
+            currency="USD",
+            important_dates="2022-10-09"
+        )
+
+        # Try to send a delete request for a receipt that is not theirs
+        self.delete_response = self.client.delete(
+            reverse('detail_receipts', kwargs={'receipt_id': self.other_user_receipt.pk}))
+
+        self.assertEquals(
+            self.delete_response.status_code,
+            status.HTTP_404_NOT_FOUND
+        )
+
+        self.assertEquals(
+            self.delete_response.data['detail'],
+            'Not found.'
+        )
+
 
 class PaginationReceiptsAPITest(APITestCase):
     '''

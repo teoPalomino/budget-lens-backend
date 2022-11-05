@@ -23,20 +23,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # Configure settings based on "dev mode" or "production mode"
-PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", 'False') == 'True'
-DEBUG = os.getenv("DEBUG", 'False') == 'True'
-SECRET_KEY = os.getenv("SECRET_KEY", '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&')
+PRODUCTION_MODE = os.getenv("APP_ENV")
+DEBUG = os.getenv("APP_DEBUG")
+SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
 
 if PRODUCTION_MODE == 'True':
     ALLOWED_HOSTS = [
-            '127.0.0.1',
-            '206.81.3.66',
-            'budgetlens.tech',
-            'api.budgetlens.tech'
-        ]
+        '127.0.0.1',
+        '206.81.3.66',
+        'budgetlens.tech',
+        'api.budgetlens.tech'
+    ]
+    ALLOWED_HOSTS.append(os.getenv('ADDRESS'))
     STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
     RECEIPT_IMAGES_DIRS = [BASE_DIR / "receipt_images"]
-else:
+elif PRODUCTION_MODE == 'False':
     try:
         ALLOWED_HOSTS = [
             '127.0.0.1',
@@ -44,8 +45,10 @@ else:
             'budgetlens.tech',
             'api.budgetlens.tech'
         ]
+        ALLOWED_HOSTS.append(os.getenv('ADDRESS'))
     except Exception:
         ALLOWED_HOSTS = []
+
     HOST_NAME = 'http://localhost:8000'
 
 
