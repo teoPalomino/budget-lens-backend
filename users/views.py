@@ -32,12 +32,9 @@ class RegisterAPI(generics.GenericAPIView):
         # creating the forwardingEmail of a user
 
         email = user.data['email']
-        print(email)
         splitEmail = email.split('@')[0]
-        print(splitEmail)
         randomInt = random.randint(1000, 9999)
         user_profile.forwardingEmail = str(splitEmail + str(randomInt) + "@budgetlens.tech")
-        print(user_profile.forwardingEmail)
         user_profile.save()
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
@@ -117,7 +114,8 @@ class UserProfileAPI(generics.UpdateAPIView):
                 "first_name": user_profile.user.first_name,
                 "last_name": user_profile.user.last_name,
                 "email": user_profile.user.email,
-                "telephone_number": str(user_profile.telephone_number)
+                "telephone_number": str(user_profile.telephone_number),
+                "forwardingEmail": user_profile.forwarding_email
             }
             return Response(data, status=HTTP_200_OK)
         except Exception:
