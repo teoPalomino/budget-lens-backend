@@ -220,7 +220,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             format='multipart'
         )
 
@@ -248,7 +248,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # (See the "Given" part of the "Given, When, Then" test design pattern in each of the two acceptance criteria scenarios for this user story (BUD-4) on the Jira Board)
         self.client.force_authenticate(user=self.user)
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -300,7 +300,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.assertEqual(self.receipts_from_responses, [])
 
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -319,7 +319,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am creating a second image to add to the list of receipts
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -371,7 +371,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -389,7 +389,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -442,7 +442,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -460,7 +460,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -541,7 +541,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -559,7 +559,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -625,7 +625,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.client.force_authenticate(user=self.user)
 
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
@@ -643,7 +643,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         self.image = create_image('.jpeg')
         self.response = self.client.post(
-            reverse('create_receipts'),
+            reverse('create_manual_receipts'),
             data={
                 'receipt_image': self.image,
                 'merchant': r'\{"name": Random Merchant\}',
