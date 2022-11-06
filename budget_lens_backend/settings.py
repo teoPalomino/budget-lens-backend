@@ -27,7 +27,7 @@ PRODUCTION_MODE = os.getenv("APP_ENV")
 DEBUG = os.getenv("APP_DEBUG")
 SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
 
-if PRODUCTION_MODE == 'True':
+if PRODUCTION_MODE != 'test':
     ALLOWED_HOSTS = [
         '127.0.0.1',
         '206.81.3.66',
@@ -81,6 +81,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'users.authentication.BearerAuthentication',
     ),
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.FileUploadParser',
+    ],
 }
 
 MIDDLEWARE = [
