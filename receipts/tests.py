@@ -45,7 +45,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
     # test_update_specific_receipt_image_with_receipt_id_using_patch_request_from_Detail_Receipts_API_View
     # test_delete_specific_receipt_image_with_receipt_id_using_delete_request_from_Detail_Receipts_API_View
     reset_sequences = True
-    exit()
     def setUp(self):
         self.user = User.objects.create_user(
             username='johncena123@gmail.com',
