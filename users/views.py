@@ -23,12 +23,22 @@ class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         user_profile = serializer.save()
-
         token = BearerToken.objects.create(user=user_profile.user)
         user = UserSerializer(user_profile.user, context=self.get_serializer_context())
+
+        # creating the forwardingEmail of a user
+
+        email = user.data['email']
+        print(email)
+        splitEmail = email.split('@')[0]
+        print(splitEmail)
+        randomInt = random.randint(1000, 9999)
+        user_profile.forwardingEmail = str(splitEmail + str(randomInt) + "@budgetlens.tech")
+        print(user_profile.forwardingEmail)
+        user_profile.save()
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
         # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
@@ -43,6 +53,7 @@ class RegisterAPI(generics.GenericAPIView):
             # saves user and its data
             "user": user.data,
             "telephone_number": str(user_profile.telephone_number),
+            "forwardingEmail": str(user_profile.forwardingEmail),
             # creates token for that particular user
             # "token": AuthToken.objects.create(user_profile.user)[1],
             "token": token.key,

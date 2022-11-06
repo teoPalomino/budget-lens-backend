@@ -57,7 +57,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('user', 'telephone_number')
+        fields = ('user', 'telephone_number', 'forwardingEmail')
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -73,7 +73,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user_profile = UserProfile.objects.create(
             user=user,
-            telephone_number=str(validated_data.pop('telephone_number'))
+            telephone_number=str(validated_data.pop('telephone_number')),
         )
         return user_profile
 

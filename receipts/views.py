@@ -1,9 +1,14 @@
+import datetime
+import imgkit
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, filters
+
+from rest_framework import generics, filters, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from users.models import UserProfile
 from .models import Receipts
 from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -127,3 +132,32 @@ class DetailReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
     # Ensure user can only delete their own receipts
     def get_queryset(self):
         return Receipts.objects.filter(user=self.request.user)
+
+
+class ParseReceiptsAPIView(APIView):
+    parser_classes = (FormParser, MultiPartParser)
+
+    def post(self, request, *args, **kwargs):
+
+        # check if it is a valid forwarding email
+
+        email = request.data['to']
+        try:
+            userProfile = UserProfile.objects.get(forwardingEmail=email)
+        except:
+            return Response({"response": "This email does not correspond to any Budget Lens account"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # create file and store image of html data from email
+
+        filename = str(email + str(datetime.datetime.now()) + '.jpg')
+        imgkit.from_string(str(request.data['html']), filename)
+
+        # assign forwarded receipt to the correct user
+
+        currentUser = userProfile.user
+        print(currentUser)
+
+        # TODO pass the picture through the ocr
+
+        return Response(filename)
