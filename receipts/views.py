@@ -14,8 +14,8 @@ from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
-
-
+from users.authentication import BearerToken
+import requests
 class PostReceiptsAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ReceiptsSerializer
@@ -155,9 +155,30 @@ class ParseReceiptsAPIView(APIView):
 
         # assign forwarded receipt to the correct user
 
-        currentUser = userProfile.user
-        print(currentUser)
+
+        token = str(BearerToken.objects.get(user=userProfile.user))
+
+
+
+        url = "https://api.budgetlens.tech/api/receipts/"
+
+        payload = {}
+        files = [
+            ('receipt_image', (filename,
+                               open(filename, 'rb'),
+                               'image/jpeg'))
+        ]
+        headers = {
+            'Authorization': 'Bearer '+token
+        }
+
+        try:
+            response = requests.request("POST", url, headers=headers, data=payload, files=files)
+        except Exception as e:
+            f = open("error.txt", "a")
+            f.write(str(e))
+            f.close()
 
         # TODO pass the picture through the ocr
 
-        return Response(filename)
+        return Response(str(BearerToken.objects.get(user=userProfile.user)))
