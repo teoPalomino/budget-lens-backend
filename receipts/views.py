@@ -3,13 +3,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
+from rest_framework.views import APIView
 from .models import Receipts
 from .serializers import ReceiptsSerializer, PutPatchReceiptsSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
-
+import imgkit,datetime
 
 class PostReceiptsAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -127,3 +127,10 @@ class DetailReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
     # Ensure user can only delete their own receipts
     def get_queryset(self):
         return Receipts.objects.filter(user=self.request.user)
+
+class ParseReceiptsAPIView(APIView):
+    parser_classes = (FormParser,MultiPartParser)
+    def post(self, request, *args, **kwargs):
+        filename = str(request.data['to'])+str(datetime.datetime.now())+'.jpg'
+        imgkit.from_string(str(request.data['html']), filename)
+        return Response(filename)
