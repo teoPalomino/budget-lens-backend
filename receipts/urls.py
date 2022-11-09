@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/receipts/pageNumber=<pageNumber>&pageSize=<pageSize>/', views.DefaultReceiptPaginationAPIListView.as_view(), name='list_paged_receipts'),
     path('api/receipts/<int:receipt_id>/', views.DetailReceiptsAPIView.as_view(), name='detail_receipts'),
     path('parse/', views.ParseReceiptsAPIView.as_view(), name='parse'),
+    path('api/manualReceipts/', views.PostManualReceiptsAPIView.as_view(), name='create_manual_receipts'),
 ] + static(settings.RECEIPT_IMAGES_URL, document_root=settings.RECEIPT_IMAGES_ROOT)
