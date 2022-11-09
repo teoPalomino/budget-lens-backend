@@ -18,6 +18,7 @@ class PostReceiptsAPIView(generics.CreateAPIView):
 
 
 class PostManualReceiptsAPIView(generics.CreateAPIView):
+    """This view is only for Posting new receipts"""
     permission_classes = [IsAuthenticated]
     serializer_class = ManualReceiptsSerializer
     parser_classes = (MultiPartParser, FormParser)
@@ -38,7 +39,7 @@ class ReceiptsFilter(django_filters.FilterSet):
 
 class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     """
-    (This view is only for Posting new receipts) ---- Add this instead to the doc string of this view
+    
     This view returns a list of all the receipts for the user.
 
     It also accepts optional query parameters to filter, order and search the receipts.
@@ -87,11 +88,15 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         #
         reciept_list_response = super().get(request, *args, **kwargs)
 
-        # Try to turn page number to an int value, otherwise set to default value of 1
+        # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
         except Exception:
-            kwargs['pageNumber'] = 1
+            return Response({
+                'page_list': [],
+                'total': 0,
+                'description': "Invalid Page Number"
+            }, status=HTTP_200_OK)
 
         # Try to turn page size to an int value, otherwise set to default value of 10
         try:
@@ -106,19 +111,30 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
 
         paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
 
-        # If page number is greater than page limit, set it to the last page
+        # If page number is greater than page limit, return an empty list
         if kwargs['pageNumber'] > paginator.num_pages:
-            kwargs['pageNumber'] = paginator.num_pages
+            return Response({
+                'page_list': [],
+                'total': 0,
+                'description': "Invalid Page Number"
+            }, status=HTTP_200_OK)
 
-        # If page number is less than 1, set it to the first page
+        # If page number is less than 1, return an empty list
         if kwargs['pageNumber'] <= 0:
-            kwargs['pageNumber'] = 1
+            return Response({
+                'page_list': [],
+                'total': 0,
+                'description': "Invalid Page Number"
+            }, status=HTTP_200_OK)
 
         page = paginator.page(kwargs['pageNumber'])
 
         return Response({
             'page_list': page.object_list,
-            'description': str(page)
+            'total': len(page.object_list),
+            'description': str(page),
+            'current_page_number': page.number,
+            'number_of_pages': page.paginator.num_pages
         }, status=HTTP_200_OK)
 
     def get_queryset(self):
