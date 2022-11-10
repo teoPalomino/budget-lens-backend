@@ -39,7 +39,6 @@ class ReceiptsFilter(django_filters.FilterSet):
 
 class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     """
-    
     This view returns a list of all the receipts for the user.
 
     It also accepts optional query parameters to filter, order and search the receipts.
