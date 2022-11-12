@@ -40,10 +40,6 @@ class Receipts(models.Model):
     coupon = models.FloatField(null=True, blank=True)
     currency = models.CharField(max_length=10, null=True, blank=True)
     important_dates = models.DateField(null=True, blank=True)
-    tip = models.FloatField(blank=True, null=True)
-    coupon = models.FloatField(blank=True, null=True)
-    currency = models.CharField(max_length=10, blank=True, null=True)
-    important_dates = models.DateField(blank=True, null=True)
     receipt_text = models.TextField(default=None, blank=True, null=True)
 
     def save(self, *args, **kwargs):

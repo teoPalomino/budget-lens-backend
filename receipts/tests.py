@@ -764,26 +764,31 @@ class PaginationReceiptsAPITest(APITestCase):
         # Get the size of the reciepts create for this user
         self.receipt_size = len(Receipts.objects.filter(user=self.user))
 
-    # def test_pagination_successful(self):
-    #     for i in range(1, self.receipt_size // 10 + 2):
-    #         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': i, 'pageSize': 10})
-    #
-    #         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-    #
-    #         response = self.client.get(
-    #             url_paged_receipts,
-    #             format='json'
-    #         )
-    #
-    #         if i == self.receipt_size // 10 + 1:
-    #             self.assertEqual(len(response.data['page_list']), self.receipt_size % 10)
-    #         else:
-    #             self.assertEqual(len(response.data['page_list']), 10)
-    #
-    #         if self.receipt_size % 10 == 0:
-    #             self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size // 10}>')
-    #         else:
-    #             self.assertEqual(response.data['description'], f'<Page {i} of {self.receipt_size // 10 + 1}>')
+    def test_pagination_successful(self):
+        # Calculates the number of pages. The num of pages wii return different results if the
+        # number of recipts is not perfectly divisible by the page size.
+        if (self.receipt_size % 10 == 0):
+            num_of_pages = self.receipt_size // 10
+        else:
+            num_of_pages = self.receipt_size // 10 + 1
+
+        for i in range(1, num_of_pages + 1):
+            url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': i, 'pageSize': 10})
+
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+            response = self.client.get(
+                url_paged_receipts,
+                format='json'
+            )
+
+            if i == num_of_pages:
+                # The last page will require a different check, it can return from 1 to 10 receipts
+                self.assertTrue(len(response.data['page_list']) <= 10)
+            else:
+                self.assertEqual(len(response.data['page_list']), 10)
+
+            self.assertEqual(response.data['description'], f'<Page {i} of {num_of_pages}>')
 
     def test_pagination_page_zero_error(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 0, 'pageSize': 10})
@@ -795,11 +800,8 @@ class PaginationReceiptsAPITest(APITestCase):
             format='json'
         )
 
-        self.assertTrue(len(response.data['page_list']) <= 10)
-        if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
-        else:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
+        self.assertTrue(len(response.data['page_list']) == 0)
+        self.assertEqual(response.data['description'], 'Invalid Page Number')
 
     def test_pagination_over_page_size_error(self):
         url_paged_receipts = reverse('list_paged_receipts',
@@ -812,13 +814,8 @@ class PaginationReceiptsAPITest(APITestCase):
             format='json'
         )
 
-        self.assertTrue(len(response.data['page_list']) <= 10)
-        if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'],
-                             f'<Page {self.receipt_size // 10} of {self.receipt_size // 10}>')
-        else:
-            self.assertEqual(response.data['description'],
-                             f'<Page {self.receipt_size // 10 + 1} of {self.receipt_size // 10 + 1}>')
+        self.assertTrue(len(response.data['page_list']) == 0)
+        self.assertEqual(response.data['description'], 'Invalid Page Number')
 
     def test_pagination_zero_page_size_error(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 0})
@@ -846,11 +843,8 @@ class PaginationReceiptsAPITest(APITestCase):
             format='json'
         )
 
-        self.assertTrue(len(response.data['page_list']) <= 10)
-        if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
-        else:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
+        self.assertTrue(len(response.data['page_list']) == 0)
+        self.assertEqual(response.data['description'], 'Invalid Page Number')
 
 
 class TestReceiptsFilteringOrderingSearching(APITestCase):
@@ -921,7 +915,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # ensure only 2 receipts are returned
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data['page_list']), 2)
 
     def test_partial_keyword_search(self):
         receipts_url = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=123'
