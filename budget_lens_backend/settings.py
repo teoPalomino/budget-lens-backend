@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'friends.apps.FriendsConfig',
     'merchant.apps.MerchantConfig',
     'category.apps.CategoryConfig',
+    'item.apps.ItemConfig',
 
     # Installed apps
     'rest_framework',
