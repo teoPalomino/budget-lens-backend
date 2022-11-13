@@ -5,7 +5,7 @@ class Category(models.Model):
     """
     The parent category models
     """
-    category_name = models.CharField(max_length=30, blank=True, default='')
+    category_name = models.CharField(max_length=30, blank=True, default='', unique=False)
     category_toggle_star = models.BooleanField(default=False)
 
 
@@ -16,5 +16,5 @@ class SubCategory(models.Model):
     """
     
     parent_category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
-    sub_category_name = models.CharField(max_length=30, blank=True, default='')
+    sub_category_name = models.CharField(max_length=30, blank=True, default='', unique=True)
     sub_category_toggle_star = models.BooleanField(default=False)
