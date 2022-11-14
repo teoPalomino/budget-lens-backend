@@ -1,18 +1,22 @@
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from item.models import Item
 
 
 
 from .models import Category, SubCategory
-from .serializers import BasicCategorySerializer, BasicSubCategorySerializer
+from .serializers import *
 
 # Create your views here.
 
 
-class CategoryView(generics.GenericAPIView):
-    """API for registering a new user"""
+class AddCategoryView(generics.GenericAPIView):
+    """API for adding a new category"""
     queryset = Category.objects.all()
+    permission_classes = (IsAuthenticated, )
     serializer_class = BasicCategorySerializer
 
     def post(self, request, *args, **kwargs):
@@ -25,10 +29,14 @@ class CategoryView(generics.GenericAPIView):
             "category_toggle_star": category.category_toggle_star,
         })
 
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
 
-class SubCategoryView(generics.GenericAPIView):
-    """API for registering a new user"""
+
+class AddSubCategoryView(generics.GenericAPIView):
+    """API for adding a new subcategory"""
     queryset = SubCategory.objects.all()
+    permission_classes = (IsAuthenticated, )
     serializer_class = BasicSubCategorySerializer
 
     def post(self, request, *args, **kwargs):
@@ -40,3 +48,36 @@ class SubCategoryView(generics.GenericAPIView):
             "sub_category_name": sub_category.sub_category_name,
             "sub_category_toggle_star": sub_category.sub_category_toggle_star,
         })
+
+    def get_queryset(self):
+        return SubCategory.objects.filter(user=self.request.user)
+
+
+class DeleteSubCategoryView(generics.DestroyAPIView):
+    """API for registering a new user"""
+    serializer_class = BasicSubCategorySerializer
+    permission_classes = (IsAuthenticated, )
+
+    def delete(self, request, *args, **kwargs):
+        print(kwargs["subCategoryName"])
+        try:
+            sub_category = SubCategory.objects.get(user=self.request.user, sub_category_name=kwargs['subCategoryName'])
+        except Exception:
+            return Response({
+                "Description": "SubCategory does not exist"
+            })
+        if Item.objects.filter(sub_category_id=sub_category).exists():
+            return Response({
+                "Description": "Cannot delete SubCategory, items exists in this subcategory"
+            })
+
+        SubCategory.objects.filter(user=self.request.user, sub_category_name=kwargs['subCategoryName']).delete()
+        # kwargs["pk"] = sub_category.pk
+        # print(kwargs)
+        return Response({
+            "Description": 'SubCategory succesfully deleted'
+        })
+        
+
+    def get_queryset(self):
+        return SubCategory.objects.filter(user=self.request.user)
