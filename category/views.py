@@ -72,12 +72,18 @@ class DeleteSubCategoryView(generics.DestroyAPIView):
             })
 
         SubCategory.objects.filter(user=self.request.user, sub_category_name=kwargs['subCategoryName']).delete()
-        # kwargs["pk"] = sub_category.pk
-        # print(kwargs)
         return Response({
             "Description": 'SubCategory succesfully deleted'
         })
         
 
+    def get_queryset(self):
+        return SubCategory.objects.filter(user=self.request.user)
+
+
+class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
+    serializer_class = ListCategoriesAndSubCategoriesSerializer
+    permission_classes = (IsAuthenticated, )
+    
     def get_queryset(self):
         return SubCategory.objects.filter(user=self.request.user)
