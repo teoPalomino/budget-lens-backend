@@ -1,4 +1,4 @@
-from django.shortcuts import render
+# from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -6,9 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from item.models import Item
 
 
-
 from .models import Category, SubCategory
-from .serializers import *
+from .serializers import BasicCategorySerializer, BasicSubCategorySerializer
 
 # Create your views here.
 
@@ -75,15 +74,36 @@ class DeleteSubCategoryView(generics.DestroyAPIView):
         return Response({
             "Description": 'SubCategory succesfully deleted'
         })
-        
 
     def get_queryset(self):
         return SubCategory.objects.filter(user=self.request.user)
 
 
 class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
-    serializer_class = ListCategoriesAndSubCategoriesSerializer
+    serializer_class = BasicCategorySerializer
     permission_classes = (IsAuthenticated, )
-    
+
+    def get(self, request, *args, **kwargs):
+        # Get the list of Categories
+        list_category = super().get(request, *args, **kwargs)
+
+        # Add a sub category list field in the dictionary
+        for category in list_category.data:
+            category['sub_category_list'] = []
+
+        # Loop through all the categories and subcategories
+        for count, category in enumerate(self.get_queryset()):
+            for sub_category in SubCategory.objects.filter(user=self.request.user):
+                # If the parent category id in the sub category matches the category id
+                if int(sub_category.parent_category.id) == int(category.pk):
+                    # append that sub category to the category as a dictionary
+                    list_category.data[count]['sub_category_list'].append(
+                        {
+                            'sub_category_name': sub_category.sub_category_name,
+                            'sub_category_toggle_star': sub_category.sub_category_toggle_star
+                        }
+                    )
+        return list_category
+
     def get_queryset(self):
-        return SubCategory.objects.filter(user=self.request.user)
+        return Category.objects.filter(user=self.request.user)

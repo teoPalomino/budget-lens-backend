@@ -14,9 +14,9 @@ class BasicCategorySerializer(serializers.ModelSerializer):
             category_toggle_star=validated_data['category_toggle_star'],
             user=self.context['request'].user
         )
-    
+
     def update(self, instance, validated_data):
-        
+
         return super().update(instance, validated_data)
 
 

@@ -3,6 +3,8 @@ from receipts.models import Receipts
 from category.models import Category, SubCategory
 
 # Create your models here.
+
+
 class Item(models.Model):
     """
     The parent category models

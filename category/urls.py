@@ -7,5 +7,5 @@ urlpatterns = [
     path('api/subcategory/subCategoryName=<subCategoryName>', views.DeleteSubCategoryView.as_view(), name='delete_subcategory'),
     path('api/subcategory/', views.DeleteSubCategoryView.as_view(), name='toggle_star_subcategory'),
     path('api/allcategories/', views.ListCategoriesAndSubCategoriesView.as_view(), name='list_all_categories'),
-    
+
 ]
