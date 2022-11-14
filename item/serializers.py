@@ -1,13 +1,10 @@
 from rest_framework import serializers
 from item.models import Item
 from receipts.models import Receipts
-
-
+from receipts.serializers import ReceiptsSerializer
 
 class ItemSerializer(serializers.ModelSerializer):
-    
-    receipt_id = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    
+    receipt_id = serializers.HiddenField(default=Receipts)
     class Meta:
         model = Item
         fields = '__all__'
@@ -21,3 +18,12 @@ class ItemSerializer(serializers.ModelSerializer):
             important_dates=validated_data['important_dates'],
         )
         return item
+
+class PutPatchItemSerializer(serializers.ModelSerializer):
+    '''Serializer for PutItems, used to update a users items in a receipt'''
+    
+    receipt = serializers.HiddenField(default=Receipts)
+
+    class Meta:
+        model = Item
+        fields = ('receipt_id', 'tax', 'name', 'price','important_dates')
