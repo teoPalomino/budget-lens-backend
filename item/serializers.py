@@ -4,10 +4,10 @@ from receipts.models import Receipts
 from receipts.serializers import ReceiptsSerializer
 
 class ItemSerializer(serializers.ModelSerializer):
-    receipt_id = serializers.HiddenField(default=Receipts)
+    receipt_id = serializers.IntegerField(required=True)
     class Meta:
         model = Item
-        fields = '__all__'
+        fields = ('receipt_id', 'tax', 'name', 'price', 'important_dates')
 
     def create(self, validated_data):
         item = Item.objects.create(
@@ -18,6 +18,7 @@ class ItemSerializer(serializers.ModelSerializer):
             important_dates=validated_data['important_dates'],
         )
         return item
+        
 
 class PutPatchItemSerializer(serializers.ModelSerializer):
     '''Serializer for PutItems, used to update a users items in a receipt'''

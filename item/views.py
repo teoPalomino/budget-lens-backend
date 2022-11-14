@@ -6,23 +6,29 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from item.serializers import ItemSerializer, PutPatchItemSerializer
+from receipts.models import Receipts
 
 from .models import Item
 
 class AddItemAPI(generics.CreateAPIView):
     """ Adds item to a receipt for a user """
     serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         item = serializer.save()
         
+        if Receipts.objects.filter(id=request.data["receipt_id"]).exists():
+            return Response({
+                "receipt_id": item.receipt_id,
+                "tax": item.tax,
+                "name": item.name,
+                "price": item.price,
+                "important_dates": item.important_dates,
+            })
         return Response({
-            "receipt_id": item.receipt_id,
-            "tax": item.tax,
-            "name": item.name,
-            "price": item.price,
-            "important_dates": item.important_dates,
+            "Error": "Receipt does not exist"
         })
 
 class GetItemsAPI(generics.ListCreateAPIView):
