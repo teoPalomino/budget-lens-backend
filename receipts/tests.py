@@ -112,8 +112,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tax=2.2,
             tip=3.3,
             coupon=4,
-            currency="CAD",
-            important_dates="2022-10-09"
+            currency="CAD"
         )
 
         # Now, I should expect the "user_id" sub-folder to exist in the "receipt_images" folder since a receipt has been added/created
@@ -154,8 +153,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tax=2.2,
             tip=3.3,
             coupon=4,
-            currency="CAD",
-            important_dates="2022-10-09"
+            currency="CAD"
         )
         receipt2 = Receipts.objects.create(
             user=self.user,
@@ -166,8 +164,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tax=2.2,
             tip=3.3,
             coupon=4,
-            currency="CAD",
-            important_dates="2022-10-09"
+            currency="CAD"
         )
 
         self.assertEqual(
@@ -195,8 +192,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tax=2.2,
             tip=3.3,
             coupon=4,
-            currency="CAD",
-            important_dates="2022-10-09"
+            currency="CAD"
         )
 
         self.assertTrue(os.path.exists(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.user.id}')))
@@ -257,8 +253,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -309,8 +304,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -328,8 +322,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -380,8 +373,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -398,8 +390,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -451,8 +442,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -469,8 +459,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -550,8 +539,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -568,8 +556,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -634,8 +621,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -652,8 +638,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                 'tax': 2.2,
                 'tip': 3.3,
                 'coupon': 4,
-                'currency': "CAD",
-                'important_dates': "2022-10-09"
+                'currency': "CAD"
             },
             format='multipart'
         )
@@ -705,8 +690,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             tax=2.2,
             tip=3.3,
             coupon=4,
-            currency="USD",
-            important_dates="2022-10-09"
+            currency="USD"
         )
 
         # Try to send a delete request for a receipt that is not theirs
@@ -757,8 +741,7 @@ class PaginationReceiptsAPITest(APITestCase):
                 tax=2.2,
                 tip=3.3,
                 coupon=4,
-                currency="CAD",
-                important_dates="2022-10-09"
+                currency="CAD"
             )
 
         # Get the size of the reciepts create for this user
@@ -876,8 +859,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
             tax=1,
             tip=1,
             coupon=1,
-            currency="CAD",
-            important_dates="2022-10-09"
+            currency="CAD"
         )
 
         Receipts.objects.create(
@@ -889,8 +871,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
             tax=2,
             tip=2,
             coupon=2,
-            currency="CAD",
-            important_dates="2022-10-09"
+            currency="CAD"
         )
 
         Receipts.objects.create(
@@ -902,8 +883,7 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
             tax=3,
             tip=3,
             coupon=3,
-            currency="USD",
-            important_dates="2022-10-09"
+            currency="USD"
         )
 
     def test_search(self):

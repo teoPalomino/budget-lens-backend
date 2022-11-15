@@ -25,7 +25,7 @@ class ReceiptsSerializer(serializers.ModelSerializer):
             tax=validated_data['tax'],
             tip=validated_data['tip'],
             coupon=validated_data['coupon'],
-            currency=validated_data['currency'],
+            currency=validated_data['currency']
         )
         return receipt
 
@@ -51,8 +51,7 @@ class ManualReceiptsSerializer(serializers.ModelSerializer):
             tax=validated_data['tax'],
             tip=validated_data['tip'],
             coupon=validated_data['coupon'],
-            currency=validated_data['currency'],
-            important_dates=validated_data['important_dates'],
+            currency=validated_data['currency']
         )
         return receipt
 
