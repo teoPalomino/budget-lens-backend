@@ -90,3 +90,30 @@ class DeleteItemAPI(generics.DestroyAPIView):
                 return Response({"response": "Item not found"}, status=HTTP_400_BAD_REQUEST)
         else:
             return Response({"response": "Item ID not specified"}, status=HTTP_400_BAD_REQUEST)
+
+
+class GetItemTotalCostView(generics.ListAPIView):
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        items = Item.objects.all()
+        item_costs_dict = {}
+        item_total_cost = 0
+        item_total_cost_taxed = 0
+
+        if items.exists():
+            for item in items:
+                item_costs_dict[item.id] = [item.price, item.tax]
+                item_total_cost += int(item.price) * (int(item.tax)) # We need to discuss in what format tax will be used ex: (price+actual_tax) or (1.15*price)
+            return Response({
+                "itemsCost":item_costs_dict,
+                "totalPrice": item_total_cost,
+                }, HTTP_200_OK)
+
+        return Response({
+            "Response": "The user has no items or something went wrong"
+            },HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        return Item.objects.filter(user=self.request.user)

@@ -26,7 +26,6 @@ class ReceiptsSerializer(serializers.ModelSerializer):
             tip=validated_data['tip'],
             coupon=validated_data['coupon'],
             currency=validated_data['currency'],
-            important_dates=validated_data['important_dates'],
         )
         return receipt
 
