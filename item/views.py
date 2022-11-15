@@ -105,10 +105,12 @@ class GetItemTotalCostView(generics.ListAPIView):
         if items.exists():
             for item in items:
                 item_costs_dict[item.id] = [item.price, item.tax]
-                item_total_cost += int(item.price) * (int(item.tax)) # We need to discuss in what format tax will be used ex: (price+actual_tax) or (1.15*price)
+                item_total_cost += int(item.price) # We need to discuss in what format tax will be used ex: (price+actual_tax) or (1.15*price)
+                item_total_cost_taxed += int(item.price) * (int(item.tax))
             return Response({
-                "itemsCost":item_costs_dict,
                 "totalPrice": item_total_cost,
+                "totalPriceTaxed": item_total_cost_taxed,
+                "itemsCost":item_costs_dict,
                 }, HTTP_200_OK)
 
         return Response({
