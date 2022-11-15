@@ -2,10 +2,15 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # For Category class
     path('api/category/', views.AddCategoryView.as_view(), name='add_category'),
+    path('api/category/categoryName=<categoryName>', views.ToggleStarCategoryView.as_view(), name='toggle_category'),
+    
+    # For SubCategory class
     path('api/subcategory/', views.AddSubCategoryView.as_view(), name='add_subcategory'),
-    path('api/subcategory/subCategoryName=<subCategoryName>', views.DeleteSubCategoryView.as_view(), name='delete_subcategory'),
-    path('api/subcategory/', views.DeleteSubCategoryView.as_view(), name='toggle_star_subcategory'),
+    path('api/subcategory/subCategoryName=<subCategoryName>', views.DeleteAndToggleStarSubCategoryView.as_view(), name='delete_and_toggle_subcategory'),
+
+    # For both classes
     path('api/allcategories/', views.ListCategoriesAndSubCategoriesView.as_view(), name='list_all_categories'),
 
 ]

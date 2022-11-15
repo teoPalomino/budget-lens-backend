@@ -36,27 +36,16 @@ class BasicSubCategorySerializer(serializers.ModelSerializer):
         )
 
 
-class ToogleStarCategorySerializer(serializers.ModelSerializer):
+class ToggleStarCategorySerializer(serializers.ModelSerializer):
     """category seriaizer with just the toggle star field"""
     class Meta:
         model = Category
         fields = ('category_toggle_star')
 
 
-class ToogleStarSubCategorySerializer(serializers.ModelSerializer):
-    """category seriaizer with just the toggle star field"""
-    class Meta:
-        model = Category
-        fields = ('category_toggle_star')
-
-
-class ListCategoriesAndSubCategoriesSerializer(serializers.ModelSerializer):
-    """
-    Serializer to list all the Categories and their nested sub categories in one response
-    """
-
-    parent_category = BasicCategorySerializer()
-
+class ToggleStarSubCategorySerializer(serializers.ModelSerializer):
+    """sub category seriaizer with just the toggle star field"""
     class Meta:
         model = SubCategory
-        fields = '__all__'
+        fields = ('sub_category_toggle_star')
+

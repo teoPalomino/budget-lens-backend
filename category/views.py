@@ -7,7 +7,7 @@ from item.models import Item
 
 
 from .models import Category, SubCategory
-from .serializers import BasicCategorySerializer, BasicSubCategorySerializer
+from .serializers import BasicCategorySerializer, BasicSubCategorySerializer, ToggleStarCategorySerializer, ToggleStarSubCategorySerializer
 
 # Create your views here.
 
@@ -107,3 +107,52 @@ class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
 
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
+
+
+class ToggleStarCategoryView(generics.UpdateAPIView):
+    serializer_class = ToggleStarCategorySerializer
+    permission_classes = (IsAuthenticated, )
+
+    def update(self, request, *args, **kwargs):
+        print(request.data)
+
+        if not self.get_queryset().filter(category_name=kwargs['categoryName']).exists():
+            return Response({
+            "Description": "Category does not exist"
+        })
+
+        self.get_queryset().filter(category_name=kwargs['categoryName']).update(category_toggle_star=self.request.data['category_toggle_star'])
+        return Response({
+            "Description": "Updated Succesfully"
+        })
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+
+
+class ToggleStarSubCategoryView(generics.UpdateAPIView):
+    serializer_class = ToggleStarSubCategorySerializer
+    permission_classes = (IsAuthenticated, )
+
+    def update(self, request, *args, **kwargs):
+        print(request.data)
+        # if SubCategory.objects.filter(sub_category_name=kwargs['subCategoryName'], user=self.request.user)
+        if not self.get_queryset().filter(sub_category_name=kwargs['subCategoryName']).exists():
+            return Response({
+            "Description": "SubCategory does not exist"
+        })
+
+        self.get_queryset().filter(sub_category_name=kwargs['subCategoryName']).update(sub_category_toggle_star=self.request.data['sub_category_toggle_star'])
+        return Response({
+            "Description": "Updated Succesfully"
+        })
+
+    def get_queryset(self):
+        return SubCategory.objects.filter(user=self.request.user)
+
+
+class DeleteAndToggleStarSubCategoryView(ToggleStarSubCategoryView, DeleteSubCategoryView):
+    """
+    This Class is only for using the same url to do both PUT and DELETE request methods with the same url
+    """
+    pass
