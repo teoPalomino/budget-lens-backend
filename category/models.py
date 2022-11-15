@@ -15,6 +15,9 @@ class Category(models.Model):
     class Meta:
         unique_together = ("user", "category_name")
 
+    def get_category_name(self):
+        return self.category_name
+
 
 class SubCategory(models.Model):
     """

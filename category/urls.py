@@ -5,7 +5,8 @@ urlpatterns = [
     # For Category class
     path('api/category/', views.AddCategoryView.as_view(), name='add_category'),
     path('api/category/categoryName=<categoryName>', views.ToggleStarCategoryView.as_view(), name='toggle_category'),
-    
+    path('api/category/costs/', views.GetCategoryCostsView.as_view(), name='get_category_costs'),
+
     # For SubCategory class
     path('api/subcategory/', views.AddSubCategoryView.as_view(), name='add_subcategory'),
     path('api/subcategory/subCategoryName=<subCategoryName>', views.DeleteAndToggleStarSubCategoryView.as_view(), name='delete_and_toggle_subcategory'),

@@ -2,12 +2,13 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from item.models import Item
 
-
 from .models import Category, SubCategory
-from .serializers import BasicCategorySerializer, BasicSubCategorySerializer, ToggleStarCategorySerializer, ToggleStarSubCategorySerializer
+from .serializers import BasicCategorySerializer, BasicSubCategorySerializer, ToggleStarCategorySerializer, \
+    ToggleStarSubCategorySerializer
+
 
 # Create your views here.
 
@@ -15,7 +16,7 @@ from .serializers import BasicCategorySerializer, BasicSubCategorySerializer, To
 class AddCategoryView(generics.GenericAPIView):
     """API for adding a new category"""
     queryset = Category.objects.all()
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = BasicCategorySerializer
 
     def post(self, request, *args, **kwargs):
@@ -35,7 +36,7 @@ class AddCategoryView(generics.GenericAPIView):
 class AddSubCategoryView(generics.GenericAPIView):
     """API for adding a new subcategory"""
     queryset = SubCategory.objects.all()
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = BasicSubCategorySerializer
 
     def post(self, request, *args, **kwargs):
@@ -55,7 +56,7 @@ class AddSubCategoryView(generics.GenericAPIView):
 class DeleteSubCategoryView(generics.DestroyAPIView):
     """API for registering a new user"""
     serializer_class = BasicSubCategorySerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def delete(self, request, *args, **kwargs):
         print(kwargs["subCategoryName"])
@@ -81,7 +82,7 @@ class DeleteSubCategoryView(generics.DestroyAPIView):
 
 class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
     serializer_class = BasicCategorySerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         # Get the list of Categories
@@ -111,17 +112,18 @@ class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
 
 class ToggleStarCategoryView(generics.UpdateAPIView):
     serializer_class = ToggleStarCategorySerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def update(self, request, *args, **kwargs):
         print(request.data)
 
         if not self.get_queryset().filter(category_name=kwargs['categoryName']).exists():
             return Response({
-            "Description": "Category does not exist"
-        })
+                "Description": "Category does not exist"
+            })
 
-        self.get_queryset().filter(category_name=kwargs['categoryName']).update(category_toggle_star=self.request.data['category_toggle_star'])
+        self.get_queryset().filter(category_name=kwargs['categoryName']).update(
+            category_toggle_star=self.request.data['category_toggle_star'])
         return Response({
             "Description": "Updated Succesfully"
         })
@@ -132,17 +134,18 @@ class ToggleStarCategoryView(generics.UpdateAPIView):
 
 class ToggleStarSubCategoryView(generics.UpdateAPIView):
     serializer_class = ToggleStarSubCategorySerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def update(self, request, *args, **kwargs):
         print(request.data)
         # if SubCategory.objects.filter(sub_category_name=kwargs['subCategoryName'], user=self.request.user)
         if not self.get_queryset().filter(sub_category_name=kwargs['subCategoryName']).exists():
             return Response({
-            "Description": "SubCategory does not exist"
-        })
+                "Description": "SubCategory does not exist"
+            })
 
-        self.get_queryset().filter(sub_category_name=kwargs['subCategoryName']).update(sub_category_toggle_star=self.request.data['sub_category_toggle_star'])
+        self.get_queryset().filter(sub_category_name=kwargs['subCategoryName']).update(
+            sub_category_toggle_star=self.request.data['sub_category_toggle_star'])
         return Response({
             "Description": "Updated Succesfully"
         })
@@ -156,3 +159,29 @@ class DeleteAndToggleStarSubCategoryView(ToggleStarSubCategoryView, DeleteSubCat
     This Class is only for using the same url to do both PUT and DELETE request methods with the same url
     """
     pass
+
+
+class GetCategoryCostsView(generics.ListAPIView):
+    serializer_class = BasicCategorySerializer
+    permission_classes = (IsAuthenticated,)
+
+    """ TODO: add tax to the total once proper item model is added """
+    def get(self, request, *args, **kwargs):
+        # Get the list of Items
+        """ TODO: filter by the user's item (i suggest having a user field in the item model) """
+        items = Item.objects.all()
+        category_costs_dict = {}
+
+        if items.exists():
+            for item in items:
+                if item.category_id.get_category_name() in category_costs_dict:
+                    category_costs_dict[item.category_id.get_category_name()] += item.price
+                else:
+                    category_costs_dict[item.category_id.get_category_name()] = item.price
+            return Response(category_costs_dict, HTTP_200_OK)
+
+        return Response({"Response": "The user either has no items created or something went wrong"},
+                        HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        return Item.objects.filter(user=self.request.user)
