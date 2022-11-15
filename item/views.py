@@ -47,13 +47,22 @@ class GetItemsAPI(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
-class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+class ItemDetailAPIView(generics.ListAPIView):
     """ details for an item """
     permission_classes = [IsAuthenticated]
     serializer_class = PutPatchItemSerializer
     lookup_url_kwarg = 'item_id'
 
-    # Check: User can only delete their own items
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('item_id'):
+            item = Item.objects.filter(id=kwargs.get('item_id'))
+            if item.exists():
+                serializer = ItemSerializer(item, many=True)
+                return Response(serializer.data, status=HTTP_200_OK)
+            return Response({
+                "Error": "Item does not exist"
+            }, status=HTTP_400_BAD_REQUEST)
+
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)
 
@@ -69,7 +78,7 @@ class DeleteItemAPI(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
-            item = self.get_queryset().filter(id=kwargs.get('item_id')).first()
+            item = Item.objects.filter(id=kwargs.get('item_id'))
             if item.exists():
                 item.delete()
                 return Response({"response": "Item deleted successfully"}, status=HTTP_200_OK)
