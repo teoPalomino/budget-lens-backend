@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from item.serializers import ItemSerializer, PutPatchItemSerializer
 from receipts.models import Receipts
@@ -26,12 +27,12 @@ class AddItemAPI(generics.CreateAPIView):
                 "name": item.name,
                 "price": item.price,
                 "important_dates": item.important_dates,
-            })
+            },  status=HTTP_200_OK)
         return Response({
             "Error": "Receipt does not exist"
         })
 
-class GetItemsAPI(generics.ListCreateAPIView):
+class GetItemsAPI(generics.ListAPIView):
     """ Gets list of items for a user """
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
@@ -40,15 +41,20 @@ class GetItemsAPI(generics.ListCreateAPIView):
     def list(self, request):
         queryset = self.get_queryset()
         serializer = ItemSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=HTTP_200_OK)
 
     
-class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+class ItemDetailAPIView(generics.ListAPIView):
     """ details for an item """
     permission_classes = [IsAuthenticated]
     serializer_class = PutPatchItemSerializer
-    lookup_url_kwarg = 'item_id'
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('item_id'):
+            return self.get_queryset().filter(item_id = kwargs.get('item_id'))
+        return Response({
+            "Response":"No item_id specified"
+        },  status=HTTP_400_BAD_REQUEST)
 
     # Check: User can only delete their own items
     def get_queryset(self):
-        return Item.objects.filter(user=self.request.user)
+        return Item.objects.filter(user=self.request.user,)
