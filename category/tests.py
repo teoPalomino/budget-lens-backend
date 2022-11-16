@@ -1,57 +1,107 @@
-# from django.test import TestCase
-# from users.models import User, UserProfile
-# from users.authentication import BearerToken
+from django.contrib.auth.models import User
+from django.urls import reverse
+from rest_framework.status import HTTP_200_OK
+from rest_framework.test import APITestCase
 
-# from item.models import Item
-
-# from receipts.models import Receipts
-# from receipts.tests import get_test_image_file
-
-# from merchant.models import Merchant
-
-# class CategoryAndSubCategoryTestCase(TestCase):
-#     def setUp(self) -> None:
-#         """
-#         Create a user, user profile, some Items, and some Categories and SubCategories
-#         """
-
-#         # Create a user to test with
-#         self.user = User.objects.create_user(
-#             username='johncena123@gmail.com',
-#             email='johncena123@gmail.com',
-#             first_name='John',
-#             last_name='Cena',
-#             password='wrestlingrules123'
-#         )
-#         self.user_profile = UserProfile.objects.create(
-#             user=self.user,
-#             telephone_number="+1-613-555-0187"
-#         )
-
-#         # Create login token
-#         self.token = BearerToken.objects.create(user=self.user)
-
-#         # Create 1 receipt from certain range for this 
-#         self.receipt = Receipts.objects.create(
-#             user=self.user,
-#             receipt_image=get_test_image_file(),
-#             merchant=Merchant.objects.create(name='Random Merchant'),
-#             location='123 Testing Street T1E 5T5',
-#             total=1.1,
-#             tax=2.2,
-#             tip=3.3,
-#             coupon=4,
-#             currency="CAD",
-#             important_dates="2022-10-09"
-#         )
-
-#         # Create an items from certain range for this user.
-#         self.item = Item.objects.create(
-#             name='TestSandwitch',
-#             price=5.99,
-#             receipt_id=self.receipt.pk,
-#             category_id=,
-#             sub_category_id=
-#         )
+from category.models import Category, SubCategory
+from item.models import Item
+from merchant.models import Merchant
+from receipts.models import Receipts
+from receipts.tests import get_test_image_file
+from users.authentication import BearerToken
+from users.models import UserProfile
 
 
+class CategoriesAPITESTS(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='johncena123@gmail.com',
+            email='momoamineahmadi@gmail.com',
+            first_name='John',
+            last_name='Cena',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-0187"
+        )
+        self.data = {
+            'username': 'johncena123@gmail.com',
+            'password': 'wrestlingrules123'
+        }
+
+        self.token = BearerToken.objects.create(user=self.user)
+
+        Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+
+"""        
+TODO: fix the test cases when final Category, SubCategory models are created
+        and when Items model is added
+        Category.objects.create(
+            user=self.user,
+            category_name='food',
+            category_toggle_star=True
+        )
+
+        Category.objects.create(
+            user=self.user,
+            category_name='car',
+            category_toggle_star=True
+        )
+
+        SubCategory.objects.create(
+            sub_category_name='food',
+            user=self.user,
+            parent_category_id=Category.objects.get(category_name='food')
+        )
+
+        SubCategory.objects.create(
+            sub_category_name='car',
+            user=self.user,
+            parent_category_id=Category.objects.get(category_name='car')
+        )
+
+        Item.objects.create(
+            receipt_id=Receipts.objects.get(user=self.user),
+            # tax=15,
+            name='poutine',
+            price=30,
+            sub_category_id=1
+            # important_dates="2022-10-09"
+        )
+
+        Item.objects.create(
+            receipt_id=Receipts.objects.get(user=self.user),
+            # tax=5,
+            name='shawarma',
+            price=25,
+            sub_category_id=1
+            # important_dates="2022-10-09"
+        )
+
+        Item.objects.create(
+            receipt_id=Receipts.objects.get(user=self.user),
+            # tax=200,
+            name='car',
+            price=20000,
+            category_id=Category.objects.get(category_name='car'),
+            sub_category_id=2
+            # important_dates="2022-10-09"
+        )
+
+    def test_get_category_costs(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        response = self.client.get(reverse('get_category_costs'))
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.data, {'food': 55, 'car': 20200})"""
