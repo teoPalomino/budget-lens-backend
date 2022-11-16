@@ -10,7 +10,6 @@ class Item(models.Model):
     """
     receipt = models.ForeignKey(Receipts, related_name='receipts', on_delete=models.CASCADE)
     # category_id = models.ForeignKey(Categories, related_name='categories', on_delete=models.DO_NOTHING)
-    # transaction = models.ForeignKey(Transactions, related_name='transactions', on_delete=models.CASCADE)
     tax = models.FloatField(blank=True, null=True)
     name = models.CharField(max_length=36)
     price = models.FloatField()
