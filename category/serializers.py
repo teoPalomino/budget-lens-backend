@@ -48,4 +48,3 @@ class ToggleStarSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
         fields = ('sub_category_toggle_star')
-
