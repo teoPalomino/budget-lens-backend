@@ -22,5 +22,4 @@ class ItemView(generics.GenericAPIView):
             "price": item.price,
             "receipt_id": str(item.receipt_id),
             "category_id": str(item.category_id),
-            "sub_category_id": str(item.sub_category_id)
         })
