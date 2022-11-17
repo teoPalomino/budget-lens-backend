@@ -8,9 +8,3 @@ from .models import Category
 class CategoryAdmin(admin.ModelAdmin):
     '''To view Categories in Django admin page'''
     pass
-
-
-# @admin.register(SubCategory)
-# class SubCategoryAdmin(admin.ModelAdmin):
-#     '''To view SubCategories in Django admin page'''
-#     pass

@@ -6,7 +6,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from item.models import Item
 
 from .models import Category
-from .serializers import BasicCategorySerializer, ToggleStarCategorySerializer
+from .serializers import BasicCategorySerializer
 
 
 # Create your views here.
