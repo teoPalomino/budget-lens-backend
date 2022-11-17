@@ -13,7 +13,13 @@ from .serializers import BasicCategorySerializer, ToggleStarCategorySerializer
 
 
 class AddCategoryView(generics.GenericAPIView):
-    """API for adding a new category"""
+    """
+    API for adding a new category (either a new parent category or adding a new sub category):
+    End users are not allowed to create a new parent category, but they can create a new sub category.
+    However, this route containes both functionalities so that when a new user is registered, we can call
+    this route to create the parent categories. The frontend should limit the user to only create subcategories
+    and not create parent categories.
+    """
     queryset = Category.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = BasicCategorySerializer
@@ -113,7 +119,6 @@ class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
 
 
 class ToggleStarCategoryView(generics.UpdateAPIView):
-    serializer_class = ToggleStarCategorySerializer
     permission_classes = (IsAuthenticated,)
 
     def update(self, request, *args, **kwargs):
@@ -124,8 +129,12 @@ class ToggleStarCategoryView(generics.UpdateAPIView):
                 "Description": "Category does not exist"
             })
 
+        # Get the current value of that star
+        star_value = self.get_queryset().filter(category_name=kwargs['categoryName']).get().category_toggle_star
+
+        # Update the star value to be the opposite of the current star value (not star_value)
         self.get_queryset().filter(category_name=kwargs['categoryName']).update(
-            category_toggle_star=self.request.data['category_toggle_star'])
+            category_toggle_star=not star_value)
         return Response({
             "Description": "Updated Succesfully"
         })
@@ -143,6 +152,6 @@ class DeleteAndToggleStarCategoryView(ToggleStarCategoryView, DeleteCategoryView
 
 class AddAndListCategoryView(AddCategoryView, ListCategoriesAndSubCategoriesView):
     """
-    This Class is only for using the same url to do both PUT and DELETE request methods with the same url
+    This Class is only for using the same url to do both GET and POST request methods with the same url
     """
     pass
