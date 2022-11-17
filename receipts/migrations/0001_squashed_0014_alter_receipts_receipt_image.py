@@ -9,7 +9,23 @@ import receipts.models
 
 class Migration(migrations.Migration):
 
-    replaces = [('receipts', '0001_initial'), ('receipts', '0002_receipts_merchant'), ('receipts', '0003_receipts_coupon_receipts_location_receipts_tax_and_more'), ('receipts', '0004_alter_receipts_merchant'), ('receipts', '0005_receipts_currency_receipts_important_dates'), ('receipts', '0006_alter_receipts_currency'), ('receipts', '0007_alter_receipts_location'), ('receipts', '0008_alter_receipts_coupon_alter_receipts_currency_and_more'), ('receipts', '0002_receipts_receipt_text'), ('receipts', '0007_merge_20221102_0238'), ('receipts', '0009_merge_20221104_2058'), ('receipts', '0010_alter_receipts_merchant_alter_receipts_scan_date_and_more'), ('receipts', '0010_alter_receipts_merchant_alter_receipts_receipt_image_and_more'), ('receipts', '0011_merge_20221112_1621'), ('receipts', '0012_alter_receipts_receipt_image'), ('receipts', '0013_remove_receipts_important_dates'), ('receipts', '0014_alter_receipts_receipt_image')]
+    replaces = [('receipts', '0001_initial'),
+                ('receipts', '0002_receipts_merchant'),
+                ('receipts', '0003_receipts_coupon_receipts_location_receipts_tax_and_more'),
+                ('receipts', '0004_alter_receipts_merchant'),
+                ('receipts', '0005_receipts_currency_receipts_important_dates'),
+                ('receipts', '0006_alter_receipts_currency'),
+                ('receipts', '0007_alter_receipts_location'),
+                ('receipts', '0008_alter_receipts_coupon_alter_receipts_currency_and_more'),
+                ('receipts', '0002_receipts_receipt_text'),
+                ('receipts', '0007_merge_20221102_0238'),
+                ('receipts', '0009_merge_20221104_2058'),
+                ('receipts', '0010_alter_receipts_merchant_alter_receipts_scan_date_and_more'),
+                ('receipts', '0010_alter_receipts_merchant_alter_receipts_receipt_image_and_more'),
+                ('receipts', '0011_merge_20221112_1621'),
+                ('receipts', '0012_alter_receipts_receipt_image'),
+                ('receipts', '0013_remove_receipts_important_dates'),
+                ('receipts', '0014_alter_receipts_receipt_image')]
 
     initial = True
 

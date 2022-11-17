@@ -7,7 +7,15 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('item', '0001_initial'), ('item', '0002_alter_item_tax'), ('item', '0003_alter_item_receipt_id'), ('item', '0004_alter_item_receipt_id'), ('item', '0005_alter_item_receipt_id'), ('item', '0006_rename_receipt_id_item_receipt'), ('item', '0007_remove_item_tax'), ('item', '0008_alter_item_price'), ('item', '0009_item_user')]
+    replaces = [('item', '0001_initial'),
+                ('item', '0002_alter_item_tax'),
+                ('item', '0003_alter_item_receipt_id'),
+                ('item', '0004_alter_item_receipt_id'),
+                ('item', '0005_alter_item_receipt_id'),
+                ('item', '0006_rename_receipt_id_item_receipt'),
+                ('item', '0007_remove_item_tax'),
+                ('item', '0008_alter_item_price'),
+                ('item', '0009_item_user')]
 
     initial = True
 

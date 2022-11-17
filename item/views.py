@@ -1,8 +1,6 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import render
 from rest_framework import filters, generics
-from rest_framework.decorators import api_view
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -36,8 +34,11 @@ class AddItemAPI(generics.CreateAPIView):
             "Error": "Receipt does not exist"
         }, HTTP_400_BAD_REQUEST)
 
+
 class ItemDetailAPIView(generics.ListAPIView):
+
     """ details for an item """
+
     permission_classes = [IsAuthenticated]
     serializer_class = PutPatchItemSerializer
 
@@ -93,23 +94,25 @@ class GetItemsAPI(generics.ListAPIView):
                 item_costs_dict[item.id] = [item.receipt,
                                             item.name,
                                             item.price,
-                                            item.important_dates,]
+                                            item.important_dates, ]
                 item_total_cost += item.price
             return Response({
                 "totalPrice": item_total_cost,
-                "items":item_costs_dict,
+                "items": item_costs_dict,
                 }, HTTP_200_OK)
         else:
             return Response({
                 "totalPrice": 0,
-                "items":item_costs_dict,
+                "items": item_costs_dict,
                 }, HTTP_200_OK)
+
 
 class ItemFilter(django_filters.FilterSet):
 
     class Meta:
         model = Item
         fields = ['id', 'receipt', 'name', 'price', 'important_dates', 'user']
+
 
 class PaginateFilterItemsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -118,7 +121,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-    search_fields =  ['receipt', 'name', 'price', 'important_dates', 'user']
+    search_fields = ['receipt', 'name', 'price', 'important_dates', 'user']
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated]
@@ -180,6 +183,6 @@ class PaginateFilterItemsView(generics.ListAPIView):
             'current_page_number': page.number,
             'number_of_pages': page.paginator.num_pages
         }, status=HTTP_200_OK)
-        
+
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)

@@ -1,25 +1,23 @@
-import pdb
 from random import randint
 from django.contrib.auth.models import User
 from rest_framework import status
 
 from item.models import Item
-from item.serializers import ItemSerializer
+
 from merchant.models import Merchant
 from receipts.models import Receipts
-from receipts.tests import create_image, get_test_image_file
-from users.authentication import BearerToken
-from django.core.files.images import ImageFile
+from receipts.tests import get_test_image_file
+from users.authentication import BearerToken\
+
 from django.urls import reverse
 from rest_framework.test import APITransactionTestCase, APITestCase
 
 from users.models import UserProfile
-from rest_framework.renderers import JSONRenderer
-from django.core import serializers
 
 
 # Create your tests here.
 class ItemsAPITest(APITransactionTestCase):
+
     reset_sequences = True
 
     def setUp(self):
@@ -83,8 +81,8 @@ class ItemsAPITest(APITransactionTestCase):
             important_dates="2022-10-09"
         )
 
-    def test_add_new_item(self):  
-    # This test checks if a new item is created and checks if the list of items is increased
+    def test_add_new_item(self):
+        # This test checks if a new item is created and checks if the list of items is increased
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
@@ -95,25 +93,21 @@ class ItemsAPITest(APITransactionTestCase):
             data={
                 "user": self.user.id,
                 "receipt": self.receipt1.id,
-                "name" : "potato",
+                "name": "potato",
                 "price": 1.0,
                 "important_dates": "1990-12-12",
             }, format='multipart')
-            
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(Item.objects.count(), original_item_count + 1)
-        
 
     def test_item_details(self):
-    # This test checks if the specific item is returned, it does this by checking if
-    # receipt_id, price, name and important_dates match the database
+        # This test checks if the specific item is returned, it does this by checking if
+        # receipt_id, price, name and important_dates match the database
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-        response = self.client.get(
-            reverse('item_details',
-            kwargs={'item_id': Item.objects.get(id=1).id}),
-            format='multipart')
+        response = self.client.get(reverse('item_details', kwargs={'item_id': Item.objects.get(id=1).id}), format='multipart')
         item = Item.objects.get(id=1)
         self.assertEquals(response.data[0]['receipt'], item.receipt.id)
         self.assertEquals(response.data[0]['price'], str(item.price))
@@ -139,10 +133,9 @@ class ItemsAPITest(APITransactionTestCase):
 
         self.assertEqual(Item.objects.count(), original_item_count - 1)
 
+
 class PaginationReceiptsAPITest(APITestCase):
-    '''
-    Test Cases for dividing the receipts of a user into pages
-    '''
+    '''Test Cases for dividing the receipts of a user into pages'''
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -228,8 +221,7 @@ class PaginationReceiptsAPITest(APITestCase):
         self.assertEqual(response.data['description'], 'Invalid Page Number')
 
     def test_pagination_over_page_size_error(self):
-        url_paged_items = reverse('list_paged_items',
-                                     kwargs={'pageNumber': self.item_size // 10 + 2, 'pageSize': 10})
+        url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': self.item_size // 10 + 2, 'pageSize': 10})
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
