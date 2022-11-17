@@ -91,10 +91,7 @@ class GetItemsAPI(generics.ListAPIView):
 
         if items.exists():
             for item in items:
-                item_costs_dict[item.id] = [item.receipt,
-                                            item.name,
-                                            item.price,
-                                            item.important_dates, ]
+                item_costs_dict[item.id] = [item.user.id, item.receipt.id, item.name, item.price, item.important_dates, ]
                 item_total_cost += item.price
             return Response({
                 "totalPrice": item_total_cost,
