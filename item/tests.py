@@ -1,4 +1,5 @@
 import pdb
+from random import randint
 from django.contrib.auth.models import User
 from rest_framework import status
 
@@ -59,23 +60,26 @@ class ItemsAPITest(APITransactionTestCase):
         )
 
         Item.objects.create(
+            user=self.user,
             receipt=Receipts.objects.get(user=self.user),
             name='coffee',
-            price=10,
+            price=10.15,
             important_dates="2022-10-09"
         )
 
         Item.objects.create(
+            user=self.user,
             receipt=Receipts.objects.get(user=self.user),
             name='poutine',
-            price=59,
+            price=59.99,
             important_dates="2022-10-09"
         )
 
         Item.objects.create(
+            user=self.user,
             receipt=Receipts.objects.get(user=self.user),
             name='mateo',
-            price=121423432543241524130,
+            price=12.99,
             important_dates="2022-10-09"
         )
 
@@ -89,14 +93,17 @@ class ItemsAPITest(APITransactionTestCase):
         response = self.client.post(
             reverse('add_item'),
             data={
-                "receipt_id": self.receipt1.id,
+                "user": self.user.id,
+                "receipt": self.receipt1.id,
                 "name" : "potato",
                 "price": 1.0,
                 "important_dates": "1990-12-12",
             }, format='multipart')
+            
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(Item.objects.count(), original_item_count + 1)
+        
 
     def test_item_details(self):
     # This test checks if the specific item is returned, it does this by checking if
@@ -105,39 +112,13 @@ class ItemsAPITest(APITransactionTestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
         response = self.client.get(
             reverse('item_details',
-            kwargs={'item_id': Item.objects.get(price=10).id}),
+            kwargs={'item_id': Item.objects.get(id=1).id}),
             format='multipart')
-            
-        item = Item.objects.get(price=10)
-        self.assertEquals(response.data[0]['receipt_id'], item.receipt_id)
-        self.assertEquals(response.data[0]['price'], item.price)
+        item = Item.objects.get(id=1)
+        self.assertEquals(response.data[0]['receipt'], item.receipt.id)
+        self.assertEquals(response.data[0]['price'], str(item.price))
         self.assertEquals(response.data[0]['name'], item.name)
         self.assertEquals(response.data[0]['important_dates'], str(item.important_dates))
-
-
-    def test_item_total(self):
-    # This test checks if the response of total price and the list of each item
-    # match with what is in our database. Same implementation as the api.
-
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-        
-        response = self.client.get(
-            reverse('items'),
-            format='multipart')
-
-        items = Item.objects.all()
-        item_costs_dict = {}
-        item_total_cost = 0
-        if items.exists():
-            for item in items:
-                item_costs_dict[item.id] = [item.receipt_id,
-                                            item.name,
-                                            item.price,
-                                            item.important_dates,]
-                item_total_cost += int(item.price)
-        
-        self.assertEquals(response.data['totalPrice'], item_total_cost)
-        self.assertEquals(response.data['items'], item_costs_dict)
 
     def test_delete_item(self):
         delete_item_url = reverse('delete_item', kwargs={'item_id': 1})
@@ -150,3 +131,134 @@ class ItemsAPITest(APITransactionTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(Item.objects.count(), original_item_count - 1)
+
+class PaginationReceiptsAPITest(APITestCase):
+    '''
+    Test Cases for dividing the receipts of a user into pages
+    '''
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='johncena123@gmail.com',
+            email='momoamineahmadi@gmail.com',
+            first_name='John',
+            last_name='Cena',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-0187"
+        )
+        self.data = {
+            'username': 'johncena123@gmail.com',
+            'password': 'wrestlingrules123'
+        }
+
+        self.token = BearerToken.objects.create(user=self.user)
+
+        self.receipt1 = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+        # Create random number of receipts from certain range for this user.
+        for i in range(randint(0, 100)):
+            Item.objects.create(
+                user=self.user,
+                receipt=Receipts.objects.get(user=self.user),
+                name='poutine',
+                price=59.99,
+                important_dates="2022-10-09"
+            )
+
+        # Get the size of the reciepts create for this user
+        self.item_size = len(Item.objects.filter(user=self.user))
+
+    def test_pagination_successful(self):
+        # Calculates the number of pages. The num of pages wii return different results if the
+        # number of recipts is not perfectly divisible by the page size.
+        if (self.item_size % 10 == 0):
+            num_of_pages = self.item_size // 10
+        else:
+            num_of_pages = self.item_size // 10 + 1
+
+        for i in range(1, num_of_pages + 1):
+            url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': i, 'pageSize': 10})
+
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+            response = self.client.get(
+                url_paged_items,
+                format='json'
+            )
+
+            if i == num_of_pages:
+                # The last page will require a different check, it can return from 1 to 10 receipts
+                self.assertTrue(len(response.data['page_list']) <= 10)
+            else:
+                self.assertEqual(len(response.data['page_list']), 10)
+
+            self.assertEqual(response.data['description'], f'<Page {i} of {num_of_pages}>')
+
+    def test_pagination_page_zero_error(self):
+        url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': 0, 'pageSize': 10})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_items,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) == 0)
+        self.assertEqual(response.data['description'], 'Invalid Page Number')
+
+    def test_pagination_over_page_size_error(self):
+        url_paged_items = reverse('list_paged_items',
+                                     kwargs={'pageNumber': self.item_size // 10 + 2, 'pageSize': 10})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_items,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) == 0)
+        self.assertEqual(response.data['description'], 'Invalid Page Number')
+
+    def test_pagination_zero_page_size_error(self):
+        url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 0})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_items,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) <= 10)
+        if (self.item_size % 10 == 0):
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.item_size // 10}>')
+        else:
+            self.assertEqual(response.data['description'], f'<Page {1} of {self.item_size // 10 + 1}>')
+
+    def test_pagination_invalid_type_string(self):
+        url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': 'test', 'pageSize': 'test'})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(
+            url_paged_items,
+            format='json'
+        )
+
+        self.assertTrue(len(response.data['page_list']) == 0)
+        self.assertEqual(response.data['description'], 'Invalid Page Number')

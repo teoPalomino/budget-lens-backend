@@ -24,10 +24,10 @@ class AddItemAPI(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         item = serializer.save()
-
-        if Receipts.objects.filter(id=request.data["receipt_id"]).exists():
+        if Receipts.objects.filter(id=request.data["receipt"]).exists():
             return Response({
-                "receipt_id": item.receipt_id,
+                "user": item.user.id,
+                "receipt": item.receipt.id,
                 "name": item.name,
                 "price": item.price,
                 "important_dates": item.important_dates,
@@ -90,7 +90,7 @@ class GetItemsAPI(generics.ListAPIView):
 
         if items.exists():
             for item in items:
-                item_costs_dict[item.id] = [item.receipt_id,
+                item_costs_dict[item.id] = [item.receipt,
                                             item.name,
                                             item.price,
                                             item.important_dates,]
@@ -118,7 +118,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-    search_fields =  ['receipt', 'name', 'price', 'important_dates', 'user_id']
+    search_fields =  ['receipt', 'name', 'price', 'important_dates', 'user']
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated]

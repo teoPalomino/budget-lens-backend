@@ -4,15 +4,14 @@ from receipts.models import Receipts
 from receipts.serializers import ReceiptsSerializer
 
 class ItemSerializer(serializers.ModelSerializer):
-    receipt_id = serializers.IntegerField(required=True)
     class Meta:
         model = Item
-        fields = ('receipt_id', 'name', 'price', 'important_dates')
+        fields = '__all__'
 
     def create(self, validated_data):
         item = Item.objects.create(
             user=validated_data['user'],
-            receipt_id=validated_data['receipt_id'],
+            receipt=validated_data['receipt'],
             name=validated_data['name'],
             price=validated_data['price'],
             important_dates=validated_data['important_dates'],
