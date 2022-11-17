@@ -7,12 +7,12 @@ class ItemSerializer(serializers.ModelSerializer):
     receipt_id = serializers.IntegerField(required=True)
     class Meta:
         model = Item
-        fields = ('receipt_id', 'tax', 'name', 'price', 'important_dates')
+        fields = ('receipt_id', 'name', 'price', 'important_dates')
 
     def create(self, validated_data):
         item = Item.objects.create(
+            user=validated_data['user'],
             receipt_id=validated_data['receipt_id'],
-            tax=validated_data['tax'],
             name=validated_data['name'],
             price=validated_data['price'],
             important_dates=validated_data['important_dates'],
@@ -27,4 +27,4 @@ class PutPatchItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ('receipt_id', 'tax', 'name', 'price','important_dates')
+        fields = ('receipt_id', 'name', 'price','important_dates')
