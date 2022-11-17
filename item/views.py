@@ -66,7 +66,7 @@ class DeleteItemAPI(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
-            item = Item.objects.filter(id=kwargs.get('item_id'))
+            item = self.get_queryset().filter(id=kwargs.get('item_id'))
             if item.exists():
                 item.delete()
                 return Response({"response": "Item deleted successfully"}, status=HTTP_200_OK)

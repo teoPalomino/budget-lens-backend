@@ -121,14 +121,21 @@ class ItemsAPITest(APITransactionTestCase):
         self.assertEquals(response.data[0]['important_dates'], str(item.important_dates))
 
     def test_delete_item(self):
-        delete_item_url = reverse('delete_item', kwargs={'item_id': 1})
+        # This test checks if the item is deleted and if the list of items is decreased
+        item_id = 1
+        delete_item_url = reverse('delete_item', kwargs={'item_id': item_id})
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         original_item_count = Item.objects.count()
 
         response = self.client.delete(delete_item_url, format='json')
 
+        items = Item.objects.all()
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        for item in items:
+            self.assertNotEqual(item.id, item_id)
 
         self.assertEqual(Item.objects.count(), original_item_count - 1)
 
