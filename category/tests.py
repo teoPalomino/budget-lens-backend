@@ -238,10 +238,8 @@ class CategoryAPITestCase(APITestCase):
             format='json'
         )
 
-        print(response.data)
-
         # Assert that the star was changed to true (initially false)
-        self.assertTrue(self.category_food.category_toggle_star)
+        self.assertTrue(Category.objects.get(category_name='Food').category_toggle_star)
 
         # Assert the message
         self.assertEqual(response.data['Description'], 'Updated Succesfully')
@@ -249,9 +247,27 @@ class CategoryAPITestCase(APITestCase):
         # Assert the status code
         self.assertEqual(response.status_code, HTTP_200_OK)
 
+    def test_toggle_category_star_invalid_category_name(self):
+        """
+        Test Case for toggling a category star when inputing and invalid category name
+        """
+        url_toggle_category_star = reverse('delete_and_toggle_category', kwargs={'categoryName': 'Giborish'})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.put(
+            url_toggle_category_star,
+            format='json'
+        )
+
+        # Assert that this category does not exist in Category model
+        self.assertFalse(Category.objects.filter(category_name='Giborish').exists())
+
+        # Assert the message
+        self.assertEqual(response.data['Description'], 'Category does not exist')
 
         # Assert the status code
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
 
 
