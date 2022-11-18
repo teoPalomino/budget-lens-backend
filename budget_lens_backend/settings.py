@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'receipts.apps.ReceiptsConfig',
     'friends.apps.FriendsConfig',
     'merchant.apps.MerchantConfig',
+    'item.apps.ItemConfig',
 
     # Installed apps
     'rest_framework',
