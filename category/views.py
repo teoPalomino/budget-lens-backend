@@ -155,3 +155,27 @@ class AddAndListCategoryView(AddCategoryView, ListCategoriesAndSubCategoriesView
     This Class is only for using the same url to do both GET and POST request methods with the same url
     """
     pass
+
+
+class GetCategoryCostsView(generics.ListAPIView):
+    serializer_class = BasicCategorySerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        # Get the list of Items
+        items = self.get_queryset()
+        category_costs_dict = {}
+
+        if items.exists():
+            for item in items:
+                if item.category_id.get_category_name() in category_costs_dict:
+                    category_costs_dict[item.category_id.get_category_name()] += item.price
+                else:
+                    category_costs_dict[item.category_id.get_category_name()] = item.price
+            return Response(category_costs_dict, HTTP_200_OK)
+
+        return Response({"Response": "The user either has no items created or something went wrong"},
+                        HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        return Item.objects.filter(user=self.request.user)

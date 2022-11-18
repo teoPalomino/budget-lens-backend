@@ -86,11 +86,31 @@ class CategoryAPITestCase(APITestCase):
         self.sub_category_list = [self.sub_category_list_food, self.sub_category_list_taxi]
 
         # Create the Item for testing which is in a particular subcategory
-        Item.objects.create(
+        self.fruit_item = Item.objects.create(
             name='Item test',
             price=5.99,
             receipt_id=Receipts.objects.get(user=self.user),
-            category_id=Category.objects.get(category_name='Fruits')
+            category_id=Category.objects.get(category_name='Fruits'),
+            important_dates='2020-01-01',
+            user=self.user
+        )
+
+        self.taxi_item = Item.objects.create(
+            name='Item test',
+            price=10,
+            receipt_id=Receipts.objects.get(user=self.user),
+            category_id=Category.objects.get(category_name='Taxi'),
+            important_dates='2020-01-01',
+            user=self.user
+        )
+
+        self.taxi_item2 = Item.objects.create(
+            name='Item test',
+            price=15,
+            receipt_id=Receipts.objects.get(user=self.user),
+            category_id=Category.objects.get(category_name='Taxi'),
+            important_dates='2020-01-01',
+            user=self.user
         )
 
     def test_add_category(self):
@@ -220,7 +240,8 @@ class CategoryAPITestCase(APITestCase):
 
             for count2, sub_category in enumerate(category['sub_category_list']):
                 self.assertEqual(sub_category['category_name'], self.sub_category_list[count1][count2].category_name)
-                self.assertEqual(sub_category['category_toggle_star'], self.sub_category_list[count1][count2].category_toggle_star)
+                self.assertEqual(sub_category['category_toggle_star'],
+                                 self.sub_category_list[count1][count2].category_toggle_star)
 
         # Assert the status code
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -269,11 +290,12 @@ class CategoryAPITestCase(APITestCase):
         # Assert the status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
-
-
-"""
     def test_get_category_costs(self):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
         response = self.client.get(reverse('get_category_costs'))
+
         self.assertEqual(response.status_code, HTTP_200_OK)
-        self.assertEqual(response.data, {'food': 55, 'car': 20200})"""
+
+        self.assertEqual(response.data,
+                         {'Fruits': self.fruit_item.price, 'Taxi': self.taxi_item.price + self.taxi_item2.price})
