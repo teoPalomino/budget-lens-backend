@@ -1,15 +1,17 @@
 from django.db import models
+
 from receipts.models import Receipts
 from category.models import Category
-
-# Create your models here.
+from django.contrib.auth.models import User
 
 
 class Item(models.Model):
     """
-    The parent category models
+    An Item from a receipt that contains a name, it's price, category and important dates
     """
-    name = models.CharField(max_length=30)
-    price = models.FloatField(default=0.0)
-    receipt_id = models.ForeignKey(Receipts, on_delete=models.DO_NOTHING)
-    category_id = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, related_name='item_user', on_delete=models.CASCADE)
+    receipt = models.ForeignKey(Receipts, related_name='receipts', on_delete=models.CASCADE)
+    category_id = models.ForeignKey(Category, related_name='category', on_delete=models.DO_NOTHING)
+    name = models.CharField(max_length=36)
+    price = models.DecimalField(max_digits=18, decimal_places=2)
+    important_dates = models.DateField(blank=True, null=True)

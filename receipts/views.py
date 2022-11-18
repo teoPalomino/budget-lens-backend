@@ -28,12 +28,10 @@ class ReceiptsFilter(django_filters.FilterSet):
     merchant_name = django_filters.CharFilter(field_name='merchant__name', lookup_expr='icontains')
     scan_date_start = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='gte')
     scan_date_end = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='lte')
-    important_date_start = django_filters.DateTimeFilter(field_name='important_date', lookup_expr='gte')
-    important_date_end = django_filters.DateTimeFilter(field_name='important_date', lookup_expr='lte')
 
     class Meta:
         model = Receipts
-        fields = ['id', 'scan_date_start', 'scan_date_end', 'important_date_start', 'important_date_end', 'user_id',
+        fields = ['id', 'scan_date_start', 'scan_date_end', 'user_id',
                   'merchant_name', 'coupon', 'location', 'total', 'tax', 'tip', 'currency']
 
 
@@ -76,8 +74,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ReceiptsFilter
     ordering_fields = '__all__'
-    search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip', 'currency',
-                     'important_dates']
+    search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip', 'currency']
 
     def get(self, request, *args, **kwargs):
         """

@@ -21,6 +21,9 @@ urlpatterns = [
     path('', include('users.urls')),
     path('', include('receipts.urls')),
     path('', include('friends.urls')),
+<<<<<<< HEAD
     path('', include('category.urls')),
+=======
+>>>>>>> master
     path('', include('item.urls')),
 ]
