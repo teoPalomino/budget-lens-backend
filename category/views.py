@@ -33,7 +33,7 @@ class AddCategoryView(generics.GenericAPIView):
             "category_name": category.category_name,
             "category_toggle_star": category.category_toggle_star,
             "parent_category_id": category.parent_category_id
-        })
+        }, status=HTTP_200_OK)
 
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
@@ -53,25 +53,25 @@ class DeleteCategoryView(generics.DestroyAPIView):
         except Exception:
             return Response({
                 "Description": "This sub category does not exist"
-            })
+            }, status=HTTP_400_BAD_REQUEST)
 
         # Make sure not to delete the parent category
         if self.get_queryset().filter(category_name=kwargs['categoryName'], parent_category_id=None).exists():
             return Response({
                 "Description": "This is a parent Category, it cannot be deleted"
-            })
+            }, status=HTTP_400_BAD_REQUEST)
 
         # Check not to delete the subcategory if items exists already
         if Item.objects.filter(category_id=category.id).exists():
             return Response({
                 "Description": "Cannot delete SubCategory, items exists in this subcategory"
-            })
+            }, status=HTTP_400_BAD_REQUEST)
 
         # If all condtions passed, then delete the item
         Category.objects.filter(user=self.request.user, category_name=kwargs['categoryName']).delete()
         return Response({
             "Description": 'SubCategory succesfully deleted'
-        })
+        }, status=HTTP_200_OK)
 
 
 class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
@@ -127,7 +127,7 @@ class ToggleStarCategoryView(generics.UpdateAPIView):
         if not self.get_queryset().filter(category_name=kwargs['categoryName']).exists():
             return Response({
                 "Description": "Category does not exist"
-            })
+            }, status=HTTP_400_BAD_REQUEST)
 
         # Get the current value of that star
         star_value = self.get_queryset().filter(category_name=kwargs['categoryName']).get().category_toggle_star
@@ -137,7 +137,7 @@ class ToggleStarCategoryView(generics.UpdateAPIView):
             category_toggle_star=not star_value)
         return Response({
             "Description": "Updated Succesfully"
-        })
+        }, status=HTTP_200_OK)
 
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
