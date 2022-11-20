@@ -12,6 +12,7 @@ class ItemSerializer(serializers.ModelSerializer):
         item = Item.objects.create(
             user=validated_data['user'],
             receipt=validated_data['receipt'],
+            category_id=validated_data['category_id'],
             name=validated_data['name'],
             price=validated_data['price'],
             important_dates=validated_data['important_dates'],
