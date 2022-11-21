@@ -110,7 +110,7 @@ class ItemFilter(django_filters.FilterSet):
 
     class Meta:
         model = Item
-        fields = ['id', 'receipt', 'name', 'price', 'important_dates', 'user']
+        fields = ['id', 'receipt', 'category_id', 'name', 'price', 'important_dates', 'user']
 
 
 class PaginateFilterItemsView(generics.ListAPIView):
@@ -120,10 +120,8 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-    search_fields = ['receipt', 'name', 'price', 'important_dates', 'user']
+    search_fields = ['receipt', 'category_id', 'name', 'price', 'important_dates', 'user']
     queryset = Item.objects.all()
-    serializer_class = ItemSerializer
-    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
         """

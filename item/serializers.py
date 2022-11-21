@@ -27,4 +27,4 @@ class PutPatchItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ('receipt_id', 'name', 'price', 'important_dates')
+        fields = ('receipt', 'category_id', 'name', 'price', 'important_dates')
