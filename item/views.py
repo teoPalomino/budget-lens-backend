@@ -27,7 +27,7 @@ class AddItemAPI(generics.CreateAPIView):
                 "user": item.user.id,
                 "receipt": item.receipt.id,
                 "name": item.name,
-                "category": item.category_id.get_category_name(),
+                "category_id": item.category_id.id if item.category_id != None else item.category_id,
                 "price": item.price,
                 "important_dates": item.important_dates,
             },  status=HTTP_200_OK)
@@ -92,8 +92,9 @@ class GetItemsAPI(generics.ListAPIView):
 
         if items.exists():
             for item in items:
-                item_costs_dict[item.id] = [item.user.id, item.receipt.id, item.category_id.get_category_name(),
-                                            item.name, item.price, item.important_dates]
+                item_costs_dict[item.id] = {'item': [item.user.id,item.name, item.price, item.important_dates],
+                                            'receipt_details': [item.receipt.id, item.receipt.merchant.name, item.receipt.scan_date],
+                                            'category_details': [item.category_id.category_name, item.category_id.parent_category_id] if item.category_id != None else []}
                 item_total_cost += item.price
             return Response({
                 "totalPrice": item_total_cost,

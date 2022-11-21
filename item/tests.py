@@ -6,6 +6,7 @@ from item.models import Item
 
 from merchant.models import Merchant
 from receipts.models import Receipts
+from category.models import Category
 from receipts.tests import get_test_image_file
 from users.authentication import BearerToken\
 
@@ -56,6 +57,13 @@ class ItemsAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
+        
+        self.category1 = Category.objects.create(
+                user=self.user,
+                category_name = "clothes",
+                category_toggle_star = False,
+                parent_category_id = None
+        )
 
         Item.objects.create(
             user=self.user,
@@ -93,12 +101,15 @@ class ItemsAPITest(APITransactionTestCase):
             data={
                 "user": self.user.id,
                 "receipt": self.receipt1.id,
+                "category_id": self.category1.id,
                 "name": "potato",
                 "price": 1.0,
                 "important_dates": "1990-12-12",
             }, format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertTrue(Item.objects.filter(name= "potato").exists())
 
         self.assertEqual(Item.objects.count(), original_item_count + 1)
 
@@ -167,12 +178,20 @@ class PaginationReceiptsAPITest(APITestCase):
             coupon=1,
             currency="CAD"
         )
+        
+        self.category1 = Category.objects.create(
+                user=self.user,
+                category_name = "clothes",
+                category_toggle_star = False,
+                parent_category_id = None
+        )
 
         # Create random number of receipts from certain range for this user.
         for i in range(randint(0, 100)):
             Item.objects.create(
                 user=self.user,
                 receipt=Receipts.objects.get(user=self.user),
+                category_id= self.category1,
                 name='poutine',
                 price=59.99,
                 important_dates="2022-10-09"
