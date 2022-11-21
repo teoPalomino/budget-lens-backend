@@ -27,6 +27,7 @@ class AddItemAPI(generics.CreateAPIView):
                 "user": item.user.id,
                 "receipt": item.receipt.id,
                 "name": item.name,
+                "category_id": item.category_id.id if item.category_id is not None else item.category_id,
                 "price": item.price,
                 "important_dates": item.important_dates,
             },  status=HTTP_200_OK)
@@ -91,7 +92,9 @@ class GetItemsAPI(generics.ListAPIView):
 
         if items.exists():
             for item in items:
-                item_costs_dict[item.id] = [item.user.id, item.receipt.id, item.name, item.price, item.important_dates, ]
+                item_costs_dict[item.id] = {'item': [item.user.id, item.name, item.price, item.important_dates],
+                                            'receipt_details': [item.receipt.id, item.receipt.merchant.name, item.receipt.scan_date],
+                                            'category_details': [item.category_id.category_name, item.category_id.parent_category_id] if item.category_id is not None else "Empty"}
                 item_total_cost += item.price
             return Response({
                 "totalPrice": item_total_cost,
@@ -108,7 +111,7 @@ class ItemFilter(django_filters.FilterSet):
 
     class Meta:
         model = Item
-        fields = ['id', 'receipt', 'name', 'price', 'important_dates', 'user']
+        fields = ['id', 'receipt', 'category_id', 'name', 'price', 'important_dates', 'user']
 
 
 class PaginateFilterItemsView(generics.ListAPIView):
@@ -118,10 +121,8 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-    search_fields = ['receipt', 'name', 'price', 'important_dates', 'user']
+    search_fields = ['receipt', 'category_id', 'name', 'price', 'important_dates', 'user']
     queryset = Item.objects.all()
-    serializer_class = ItemSerializer
-    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
         """
