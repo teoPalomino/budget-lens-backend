@@ -347,7 +347,7 @@ class UserAPITest(APITestCase):
         data = {
             'username': 'notjohncena@gmail.com',
             'first_name': 'Joey',
-            'last_name': 'Senorita'
+            'last_name': 'Senorita',
         }
         response = self.client.put(
             profile_edit_url,
@@ -360,3 +360,36 @@ class UserAPITest(APITestCase):
 
         # Assert the response was a failure
         self.assertEquals(response.content, b'{"response":"Missing field or value for [\'Email\', \'Phone Number\']."}')
+
+    def test_edit_user_profile_duplicate_username_or_email(self):
+        profile_edit_url = reverse('user_profile')
+
+        # Create user instance for the test
+        self.helper_create_user_instance()
+
+        # Create token for the test
+        token = BearerToken.objects.create(user_id=self.user.pk)
+
+        # Enter credentials for authentication using the Bearer token
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
+
+        data = {
+            # Notice that the username and email is the same as self.user2 this is the edge case to validate for
+            'username': 'bingbong@gmail.com',
+            'email': 'bingbong@gmail.com',
+            'first_name': 'Joey',
+            'last_name': 'Senorita',
+            'telephone_number': "+1-613-555-0187"
+        }
+
+        response = self.client.put(
+            profile_edit_url,
+            data=data,
+            format='multipart'
+        )
+
+        # Assert a 400 status code
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assert the response was a failure
+        self.assertEquals(response.data['response'], "Username and email already exist")
