@@ -57,12 +57,12 @@ class ItemsAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-        
+
         self.category1 = Category.objects.create(
                 user=self.user,
-                category_name = "clothes",
-                category_toggle_star = False,
-                parent_category_id = None
+                category_name="clothes",
+                category_toggle_star=False,
+                parent_category_id=None
         )
 
         Item.objects.create(
@@ -109,7 +109,7 @@ class ItemsAPITest(APITransactionTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertTrue(Item.objects.filter(name= "potato").exists())
+        self.assertTrue(Item.objects.filter(name="potato").exists())
 
         self.assertEqual(Item.objects.count(), original_item_count + 1)
 
@@ -178,12 +178,12 @@ class PaginationReceiptsAPITest(APITestCase):
             coupon=1,
             currency="CAD"
         )
-        
+
         self.category1 = Category.objects.create(
                 user=self.user,
-                category_name = "clothes",
-                category_toggle_star = False,
-                parent_category_id = None
+                category_name="clothes",
+                category_toggle_star=False,
+                parent_category_id=None
         )
 
         # Create random number of receipts from certain range for this user.
@@ -191,7 +191,7 @@ class PaginationReceiptsAPITest(APITestCase):
             Item.objects.create(
                 user=self.user,
                 receipt=Receipts.objects.get(user=self.user),
-                category_id= self.category1,
+                category_id=self.category1,
                 name='poutine',
                 price=59.99,
                 important_dates="2022-10-09"
