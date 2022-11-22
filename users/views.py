@@ -13,6 +13,7 @@ from friends.models import Friends
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, EmailSerializer, \
     ValidateDigitSerializer, ChangePasswordSerializer
 from .models import UserProfile
+from django.contrib.auth.models import User
 from .authentication import BearerToken
 from utility.sendEmail import sendEmail
 
@@ -121,7 +122,7 @@ class UserProfileAPI(generics.UpdateAPIView):
         telephone_number = request.data.get('telephone_number', "NONE")
 
         # Makes sure all request input is valid
-        result, status_code = self.is_valid_request(username, first_name, last_name, email, telephone_number)
+        result, status_code = self.is_valid_request(username, first_name, last_name, email, telephone_number, request.user)
 
         if result is None:  # no error, update can happen
             user_profile = UserProfile.objects.get(user=request.user)
@@ -138,7 +139,7 @@ class UserProfileAPI(generics.UpdateAPIView):
         return Response(result, status=status_code)
 
     @staticmethod
-    def is_valid_request(username, first_name, last_name, email, telephone_number):
+    def is_valid_request(username, first_name, last_name, email, telephone_number, user_instance):
         """Checks if the request is valid by looking at the form data key/values and email format"""
 
         # Ensure no missing key or values for the form data
@@ -156,6 +157,10 @@ class UserProfileAPI(generics.UpdateAPIView):
         valid_telephone_number = PhoneNumber.from_string(telephone_number)
         if not valid_telephone_number.is_valid():
             return {"response": "Invalid phone number."}, HTTP_400_BAD_REQUEST
+
+        user_queryset = User.objects.filter().exclude(id=user_instance.id)
+        if user_queryset.filter(username=username).exists() or user_queryset.filter(email=email).exists():
+            return {"response": "Username and email already exist"}, HTTP_400_BAD_REQUEST
 
         # Validate the email is a correct format
         try:
