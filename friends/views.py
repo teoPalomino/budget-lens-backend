@@ -1,7 +1,8 @@
+
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_404_NOT_FOUND
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Friends
@@ -80,18 +81,21 @@ class FriendsAPI(generics.ListAPIView):
         if kwargs.get('user_id'):
             user = User.objects.filter(id=kwargs.get('user_id')).values().first()
             if user:
-                return Response({"response": UserSerializer(user).data}, status=HTTP_200_OK)
+                return Response({"response": UserSerializer(user).data}, status=status.HTTP_200_OK)
             else:
-                return Response({"response": "User not found"}, status=HTTP_404_NOT_FOUND)
+                return Response({"response": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Return all user's friends
         else:
-            friends = Friends.objects.filter(main_user=self.request.user.id, confirmed=True)
+            query1 = Friends.objects.filter(main_user=self.request.user.id, confirmed=True)
+            query2 = Friends.objects.filter(friend_user=self.request.user.id, confirmed=True)
             friends_list_users = []
-            for friend in friends:
+            for friend in query1:
+                friends_list_users.append(UserSerializer(User.objects.get(id=friend.friend_user.id)).data)
+            for friend in query2:
                 friends_list_users.append(UserSerializer(User.objects.get(id=friend.friend_user.id)).data)
 
-            return Response({"response": friends_list_users}, status=HTTP_200_OK)
+            return Response({"response": friends_list_users}, status=status.HTTP_200_OK)
 
 
 class RemoveFriendsAPI(generics.DestroyAPIView):
@@ -101,10 +105,15 @@ class RemoveFriendsAPI(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         if kwargs.get('friend_id'):
-            friend = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'),
+            friend1 = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'),
                                             confirmed=True)
-            if friend.exists():
-                friend.delete()
+            friend2 = Friends.objects.filter(friend_user=request.user.id, main_user=kwargs.get('friend_id'),
+                                             confirmed=True)
+            if friend1.exists():
+                friend1.delete()
+                return Response({"response": "Friend removed successfully"}, status=HTTP_200_OK)
+            elif friend2.exists():
+                friend2.delete()
                 return Response({"response": "Friend removed successfully"}, status=HTTP_200_OK)
             else:
                 return Response({"response": "Friend not found"}, status=HTTP_400_BAD_REQUEST)
@@ -119,7 +128,8 @@ class FriendRequestResponseAPI(generics.UpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         if kwargs.get('friend_id'):
-            friend = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'),
+
+            friend = Friends.objects.filter(friend_user=request.user.id, main_user=kwargs.get('friend_id'),
                                             confirmed=False)
             if friend.exists():
                 # requestResponse of 0 = reject, 1 = accept
@@ -176,8 +186,8 @@ class InviteFriendsAPI(generics.GenericAPIView):
             return Response({"response": "An invitation has been sent to the following email"}, status=HTTP_200_OK)
 
 
-class FriendRequestsAPI(generics.ListAPIView):
-    """Returns a user's friend requests"""
+class FriendRequestsSentAPI(generics.ListAPIView):
+    """Returns a user's friend requests that he has sent"""
     permission_classes = [IsAuthenticated, ]
     serializer_class = FriendSerializer
 
@@ -186,5 +196,19 @@ class FriendRequestsAPI(generics.ListAPIView):
         friend_requests_list = []
         for friend_request in friend_requests:
             friend_requests_list.append(UserSerializer(User.objects.get(id=friend_request.friend_user.id)).data)
+
+        return Response({"response": friend_requests_list}, status=HTTP_200_OK)
+
+
+class FriendRequestsReceivedAPI(generics.ListAPIView):
+    """Returns a user's friend requests that he has received"""
+    permission_classes = [IsAuthenticated, ]
+    serializer_class = FriendSerializer
+
+    def get(self, request, *args, **kwargs):
+        friend_requests = Friends.objects.filter(friend_user=request.user.id, confirmed=False, temp_email=None)
+        friend_requests_list = []
+        for friend_request in friend_requests:
+            friend_requests_list.append(UserSerializer(User.objects.get(id=friend_request.main_user.id)).data)
 
         return Response({"response": friend_requests_list}, status=HTTP_200_OK)
