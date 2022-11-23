@@ -3,9 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.authentication import BearerToken
-
 from users.models import UserProfile
-from users.serializers import UserSerializer
 from .models import Friends
 
 
@@ -397,7 +395,6 @@ class FriendsAPITest(APITestCase):
         # Enter credentials for authentication using the Bearer token
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token1.key)
 
-
         # Getting all friend objects from the db
         friend1 = Friends.objects.all()
 
@@ -465,10 +462,8 @@ class FriendsAPITest(APITestCase):
         # accept friend request from user using response 1
         accept_friend_url = reverse('friend_request_response', kwargs={'friend_id': self.user.id, 'requestResponse': 1})
 
-
         # Enter credentials for authentication using the Bearer token
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token1.key)
-
 
         # Getting all friend objects from the db
         friend1 = Friends.objects.all()
@@ -483,7 +478,6 @@ class FriendsAPITest(APITestCase):
         data2 = {
             'email': 'johnnybravo@gmail.com'
         }
-
 
         # send a friend request
         response1 = self.client.post(
@@ -530,7 +524,6 @@ class FriendsAPITest(APITestCase):
         """
         add_friend_url = reverse('add_friends')
 
-
         # Create 2 users in the database for testing
         self.helper_create_user_instance()
 
@@ -556,7 +549,6 @@ class FriendsAPITest(APITestCase):
         data2 = {
             'email': 'johnnybravo@gmail.com'
         }
-
 
         # send a friend request
         response1 = self.client.post(
@@ -631,7 +623,6 @@ class FriendsAPITest(APITestCase):
             'email': 'johnnybravo@gmail.com'
         }
 
-
         # send a friend request
         response1 = self.client.post(
             add_friend_url,
@@ -685,4 +676,3 @@ class FriendsAPITest(APITestCase):
             format='json'
         )
         self.assertEquals(response5.status_code, status.HTTP_200_OK)
-
