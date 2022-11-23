@@ -132,22 +132,11 @@ class PaginateFilterItemsView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = ItemSerializer(queryset, many=True)
         item_list_response = serializer.data
-        receipt_id_date = {}
         item_total_cost = 0
-        counter = 0
+
         if queryset.exists():
             for item in queryset:
                 item_total_cost += item.price
-                if len(receipt_id_date) == 0:
-                    receipt_id_date.update({'id': item.receipt.id,
-                                            'scan_date': item.receipt.scan_date})
-                    counter+=1
-                elif len(receipt_id_date) > 0:
-                    for i in receipt_id_date:
-                        if i[0] != item.receipt.id:
-                            receipt_id_date.update({'id': item.receipt.id,
-                                                    'scan_date': item.receipt.scan_date})
-                    counter+=1
 
 
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
@@ -191,11 +180,14 @@ class PaginateFilterItemsView(generics.ListAPIView):
 
         page = paginator.page(kwargs['pageNumber'])
 
+        # Append the scan date from the receipt into the page item in question
+        for i, item in zip(queryset, page.object_list):
+            item['scan_date'] = i.receipt.scan_date
+            
         return Response({
             'page_list': page.object_list,
             'total': len(page.object_list),
             'total Cost': item_total_cost,
-            'scan_dates': receipt_id_date,
             'description': str(page),
             'current_page_number': page.number,
             'number_of_pages': page.paginator.num_pages
