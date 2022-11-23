@@ -93,7 +93,7 @@ class FriendsAPI(generics.ListAPIView):
             for friend in query1:
                 friends_list_users.append(UserSerializer(User.objects.get(id=friend.friend_user.id)).data)
             for friend in query2:
-                friends_list_users.append(UserSerializer(User.objects.get(id=friend.friend_user.id)).data)
+                friends_list_users.append(UserSerializer(User.objects.get(id=friend.main_user.id)).data)
 
             return Response({"response": friends_list_users}, status=status.HTTP_200_OK)
 
