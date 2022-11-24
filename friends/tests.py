@@ -3,9 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.authentication import BearerToken
-
 from users.models import UserProfile
-from users.serializers import UserSerializer
 from .models import Friends
 
 
@@ -580,7 +578,6 @@ class FriendsAPITest(APITestCase):
             'email': 'johnnybravo@gmail.com'
         }
 
-
         # send a friend request
         response1 = self.client.post(
             friend_requests_url,
@@ -670,7 +667,6 @@ class FriendsAPITest(APITestCase):
             'email': 'johnnybravo@gmail.com'
         }
 
-
         # send a friend request
         response1 = self.client.post(
             friend_requests_url,
@@ -729,6 +725,3 @@ class FriendsAPITest(APITestCase):
         friend_requests3 = Friends.objects.filter(main_user=self.user.id, confirmed=True)
         self.assertEquals(len(friend_requests3), 0)
         self.assertFalse(friend_requests3)
-
-
-
