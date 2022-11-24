@@ -17,5 +17,3 @@ class FriendSerializer(serializers.ModelSerializer):
             temp_email=validated_data['temp_email'],
         )
         return friend
-
-
