@@ -196,4 +196,3 @@ class FriendRequestAPI(generics.UpdateAPIView):
         return Response({"requests_sent": friend_requests_sent_list,
                          "requests_received": friend_requests_received_list,
                          "friends": friend_list}, status=status.HTTP_200_OK)
-
