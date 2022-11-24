@@ -2,13 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('friend/', views.FriendsAPI.as_view(), name='get_friends'),
-    path('friend/<int:user_id>/', views.FriendsAPI.as_view(), name='get_friends'),
-    path('friend/add/', views.AddFriendsAPI.as_view(), name='add_friends'),
-    path('friend/requestResponse/<int:friend_id>/<int:requestResponse>/', views.FriendRequestResponseAPI.as_view(),
-         name='friend_request_response'),
+    path('friend/', views.FriendsAPI.as_view(), name='friends'),
+    path('friend/<int:friend_id>/', views.FriendsAPI.as_view(), name='friends'),
+    path('friend/request/', views.FriendRequestAPI.as_view(), name='friend_requests'),
+    path('friend/request/<int:friend_id>/<int:answer>/', views.FriendRequestAPI.as_view(),
+         name='friend_requests'),
     path('friend/invite/', views.InviteFriendsAPI.as_view(), name='invite_friends'),
-    path('friend/remove/<int:friend_id>/', views.RemoveFriendsAPI.as_view(), name='remove_friends'),
-    path('friend/requests/sent/', views.FriendRequestsSentAPI.as_view(), name='friend_requests_sent'),
-    path('friend/requests/received/', views.FriendRequestsReceivedAPI.as_view(), name='friend_requests_received'),
 ]
