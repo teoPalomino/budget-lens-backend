@@ -12,6 +12,7 @@ from django.utils import timezone
 from merchant.models import Merchant
 
 from utility.analyze_receipt import analyze_receipts
+from utility.create_update_receipt import create_update_receipt
 
 
 def upload_to(instance, filename):
@@ -55,17 +56,7 @@ class Receipts(models.Model):
     # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
     @receiver(pre_save, sender='receipts.Receipts')
     def pre_save_image(sender, instance, *args, **kwargs):
-        try:
-            old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
-            try:
-                new_updated_receipt_image = instance.receipt_image
-            except ValueError:
-                new_updated_receipt_image = None
-            if new_updated_receipt_image != old_receipt_image:
-                if os.path.exists(old_receipt_image.path):
-                    os.remove(old_receipt_image.path)
-        except instance.DoesNotExist:
-            pass
+        response = create_update_receipt(sender, instance)
 
     @receiver(post_save, sender='receipts.Receipts')
     def post_save_receipt(sender, instance, created, *args, **kwargs):
