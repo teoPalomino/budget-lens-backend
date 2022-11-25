@@ -11,7 +11,7 @@ from utility.sendEmail import sendEmail
 
 
 class FriendsAPI(generics.ListAPIView):
-    """Returns a user's friend's User information if the user_id is specified, otherwise returns all friends"""
+    """Returns a user's friend's User information if the friend_id is specified, otherwise returns all friends"""
     permission_classes = [IsAuthenticated, ]
     serializer_class = FriendSerializer
 
@@ -36,6 +36,7 @@ class FriendsAPI(generics.ListAPIView):
 
             return Response({"response": friends_list_users}, status=status.HTTP_200_OK)
 
+    # used to remove/delete a friend, friend_id needs to be specified in the url
     def delete(self, request, *args, **kwargs):
         if kwargs.get('friend_id'):
             friend1 = Friends.objects.filter(main_user=request.user.id, friend_user=kwargs.get('friend_id'),
@@ -59,6 +60,7 @@ class InviteFriendsAPI(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, ]
     serializer_class = FriendSerializer
 
+    # send an email invitation to non existing user with email passed as data
     def post(self, request, *args, **kwargs):
 
         try:
@@ -98,6 +100,7 @@ class FriendRequestAPI(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, ]
     serializer_class = FriendSerializer
 
+    # sends a friend request to user with email sent as data
     def post(self, request, *args, **kwargs):
 
         friend_user = User.objects.filter(email=request.data.get('email')).values().first()
@@ -148,7 +151,7 @@ class FriendRequestAPI(generics.UpdateAPIView):
         else:
             return None
 
-    # friend request response
+    # friend request response, depending on answer = 0(reject) or 1(accept) sent as data
     def put(self, request, *args, **kwargs):
         if kwargs.get('friend_id'):
 
@@ -156,10 +159,10 @@ class FriendRequestAPI(generics.UpdateAPIView):
                                             confirmed=False)
             if friend.exists():
                 # answer of 0 = reject, 1 = accept
-                if kwargs.get('answer') == 1:
+                if request.data.get('answer') == 1:
                     friend.update(confirmed=True)
                     return Response({"response": "Friend request accepted"}, status=status.HTTP_200_OK)
-                elif kwargs.get('answer') == 0:
+                elif request.data.get('answer') == 0:
                     friend.delete()
                     return Response({"response": "Friend request rejected"}, status=status.HTTP_200_OK)
                 else:
@@ -169,7 +172,7 @@ class FriendRequestAPI(generics.UpdateAPIView):
 
         return Response({"response": "User ID or answer not specified correctly"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # friends page with requests
+    # friends page with requests sent and received
     def get(self, request, *args, **kwargs):
 
         friend_requests_sent = Friends.objects.filter(main_user=request.user.id, confirmed=False, temp_email=None)

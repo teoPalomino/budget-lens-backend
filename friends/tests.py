@@ -415,7 +415,7 @@ class FriendsAPITest(APITestCase):
         token1 = BearerToken.objects.create(user_id=self.user.pk)
 
         # accept friend request from user using response 1
-        accept_friend_url = reverse('friend_requests', kwargs={'friend_id': self.user.id, 'answer': 1})
+        accept_friend_url = reverse('friend_requests', kwargs={'friend_id': self.user.id})
 
         # Enter credentials for authentication using the Bearer token
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token1.key)
@@ -432,6 +432,10 @@ class FriendsAPITest(APITestCase):
 
         data2 = {
             'email': 'johnnybravo@gmail.com'
+        }
+
+        data3 = {
+            'answer': 1
         }
 
         # send a friend request
@@ -461,6 +465,7 @@ class FriendsAPITest(APITestCase):
 
         response3 = self.client.put(
             accept_friend_url,
+            data=data3,
             format='json'
         )
         self.assertEquals(response3.status_code, status.HTTP_200_OK)
@@ -489,7 +494,7 @@ class FriendsAPITest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token1.key)
 
         # reject friend request from user using answer: 0
-        reject_friend_url = reverse('friend_requests', kwargs={'friend_id': self.user.id, 'answer': 0})
+        reject_friend_url = reverse('friend_requests', kwargs={'friend_id': self.user.id})
 
         # Getting all friend objects from the db
         friend1 = Friends.objects.all()
@@ -503,6 +508,10 @@ class FriendsAPITest(APITestCase):
 
         data2 = {
             'email': 'johnnybravo@gmail.com'
+        }
+
+        data3 = {
+            'answer': 0
         }
 
         # send a friend request
@@ -532,6 +541,7 @@ class FriendsAPITest(APITestCase):
 
         response3 = self.client.put(
             reject_friend_url,
+            data = data3,
             format='json'
         )
         self.assertEquals(response3.status_code, status.HTTP_200_OK)
@@ -561,7 +571,7 @@ class FriendsAPITest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
 
         # accept friend request from user using response 1
-        accept_request_url = reverse('friend_requests', kwargs={'friend_id': self.user.id, 'answer': 1})
+        accept_request_url = reverse('friend_requests', kwargs={'friend_id': self.user.id})
         get_friend_url = reverse('friends', kwargs={'friend_id': self.user.id})
 
         # Getting all friend objects from the db
@@ -576,6 +586,10 @@ class FriendsAPITest(APITestCase):
 
         data2 = {
             'email': 'johnnybravo@gmail.com'
+        }
+
+        data3 = {
+            'answer': 1
         }
 
         # send a friend request
@@ -606,6 +620,7 @@ class FriendsAPITest(APITestCase):
         # accept friend request
         response3 = self.client.put(
             accept_request_url,
+            data=data3,
             format='json'
         )
         self.assertEquals(response3.status_code, status.HTTP_200_OK)
@@ -648,7 +663,7 @@ class FriendsAPITest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
 
         # accept friend request from user using response 1
-        accept_request_url = reverse('friend_requests', kwargs={'friend_id': self.user.id, 'answer': 1})
+        accept_request_url = reverse('friend_requests', kwargs={'friend_id': self.user.id})
 
         # delete friend url
         delete_friend_url = reverse('friends', kwargs={'friend_id': self.user.id})
@@ -665,6 +680,10 @@ class FriendsAPITest(APITestCase):
 
         data2 = {
             'email': 'johnnybravo@gmail.com'
+        }
+
+        data3 = {
+            'answer': 1
         }
 
         # send a friend request
@@ -695,16 +714,17 @@ class FriendsAPITest(APITestCase):
         # accept friend request
         response3 = self.client.put(
             accept_request_url,
+            data=data3,
             format='json'
         )
         self.assertEquals(response3.status_code, status.HTTP_200_OK)
 
-        # showing the new confirmed friend table with friend user user2
+        # showing the new confirmed friend table with friend user, user2
         friend_requests2 = Friends.objects.filter(friend_user=self.user2.id, confirmed=True)
         self.assertEquals(len(friend_requests2), 1)
         self.assertTrue(friend_requests2)
 
-        # showing the new confirmed friend table with main user user
+        # showing the new confirmed friend table with main user, user
         friend_requests3 = Friends.objects.filter(main_user=self.user.id, confirmed=True)
         self.assertEquals(len(friend_requests3), 1)
         self.assertTrue(friend_requests3)
