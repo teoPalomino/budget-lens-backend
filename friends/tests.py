@@ -541,7 +541,7 @@ class FriendsAPITest(APITestCase):
 
         response3 = self.client.put(
             reject_friend_url,
-            data = data3,
+            data=data3,
             format='json'
         )
         self.assertEquals(response3.status_code, status.HTTP_200_OK)
