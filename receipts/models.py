@@ -56,7 +56,8 @@ class Receipts(models.Model):
     # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
     @receiver(pre_save, sender='receipts.Receipts')
     def pre_save_image(sender, instance, *args, **kwargs):
-        response = create_update_receipt(sender, instance)
+        create_update_receipt(sender, instance)
+        pass
 
     @receiver(post_save, sender='receipts.Receipts')
     def post_save_receipt(sender, instance, created, *args, **kwargs):
