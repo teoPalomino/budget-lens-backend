@@ -2,6 +2,7 @@ from veryfi import Client
 import json
 from item.models import Item
 from category.models import Category
+import os
 
 client_id = 'vrfSF8foCT17EJT3UgcSLY3YUbztTJOCnbA6wXM'
 client_secret = 'S07fCdCCPIUa2wrCapt3COCaWIFsItrevAnVzTnglaxXI8EO7F1FvEcVy0riH8zZ3U2YkkVy21hKo6wgIu0zuNKWH0jSemV0bhXTiztNGUMrwnRuoPGK3WTdKkswyJEf'
