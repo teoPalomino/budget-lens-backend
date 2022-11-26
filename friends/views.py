@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from utility.sendEmail import sendEmail
 
 
-class FriendsAPI(generics.ListAPIView):
+class FriendsAPI(generics.GenericAPIView):
     """Returns a user's friend's User information if the friend_id is specified, otherwise returns all friends"""
     permission_classes = [IsAuthenticated, ]
     serializer_class = FriendSerializer
@@ -95,7 +95,7 @@ class InviteFriendsAPI(generics.GenericAPIView):
             return Response({"response": "An invitation has been sent to the following email"}, status=status.HTTP_200_OK)
 
 
-class FriendRequestAPI(generics.UpdateAPIView):
+class FriendRequestAPI(generics.GenericAPIView):
     """Accept or reject a friend request"""
     permission_classes = [IsAuthenticated, ]
     serializer_class = FriendSerializer
