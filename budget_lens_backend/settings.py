@@ -32,7 +32,8 @@ ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
             'budgetlens.tech',
-            'api.budgetlens.tech'
+            'api.budgetlens.tech',
+            'localhost',
     ]
 ALLOWED_HOSTS.append(os.getenv('ADDRESS'))
 STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
@@ -63,7 +64,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
-    'django_filters'
+    'django_filters',
+    'django_extensions', #run: python manage.py show_urls
 ]
 
 REST_FRAMEWORK = {
@@ -133,9 +135,9 @@ DATABASES = {
 
 if 'test' in sys.argv or 'test\\coverage' in sys.argv:  # Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
-    DATABASES['default']['NAME'] = 'bud_local_db'
+    DATABASES['default']['NAME'] = 'bud_local_db_test'
     DATABASES['default']['USER'] = 'postgres'
-    DATABASES['default']['PASSWORD'] = '9876'
+    DATABASES['default']['PASSWORD'] = '25082001'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

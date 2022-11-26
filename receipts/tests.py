@@ -406,6 +406,18 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.response = self.client.get(
             reverse('detail_receipts', kwargs={'receipt_id': Receipts.objects.get(id=1).id})
         )
+        # Asserts a Successful 2XX OK status message
+        self.assertEquals(
+            self.response.status_code,
+            status.HTTP_200_OK
+        )
+        # Are there all the keys in response that I expect?
+        assert set(self.response.data.keys()).issubset(
+            {'scan_date', 'receipt_image','merchant_name', 'total', 'currency'}
+        )
+        self.assertEquals(
+            self.response.data['total'], '1.1'
+        )
         self.assertEqual(
             self.response.data['receipt_image'].split('/')[4],
             str(self.user.id)
@@ -420,11 +432,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
                          f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         )
 
-        # Asserts a Successful 2XX OK status message
-        self.assertEquals(
-            self.response.status_code,
-            status.HTTP_200_OK
-        )
+        
 
     def test_update_specific_receipt_image_with_receipt_id_using_put_request_from_Detail_Receipts_API_View(self):
         # Here, I am testing the API client for the case where a user tries to update a specific receipt they have already added/created using a PUT request
