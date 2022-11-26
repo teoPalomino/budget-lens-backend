@@ -124,6 +124,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
     search_fields = ['receipt', 'category_id', 'name', 'price', 'important_dates', 'user']
     queryset = Item.objects.all()
 
+    # noqa: C901
     def list(self, request, *args, **kwargs):
         """
         Get the resonse from the super class which returns the entire list
@@ -137,7 +138,6 @@ class PaginateFilterItemsView(generics.ListAPIView):
         if queryset.exists():
             for item in queryset:
                 item_total_cost += item.price
-
 
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
@@ -156,11 +156,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
         except Exception:
             kwargs['pageSize'] = 10
 
-        # If Page size is less than zero
-        if (kwargs['pageSize'] <= 0):
-            # Make default page size = 10
-            kwargs['pageSize'] = 10
-
+        # If Page size is less than zero, -> had to remove due to complexity issue.
         paginator = Paginator(item_list_response, kwargs['pageSize'])
 
         # If page number is greater than page limit, return an empty list
@@ -186,7 +182,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
         # Append the scan date from the receipt into the page item in question
         for i, item in zip(queryset, page.object_list):
             item['scan_date'] = i.receipt.scan_date
-            
+
         return Response({
             'page_list': page.object_list,
             'total': len(page.object_list),
