@@ -157,6 +157,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             kwargs['pageSize'] = 10
 
         # If Page size is less than zero, -> had to remove due to complexity issue.
+        kwargs['pageSize'] = 10
         paginator = Paginator(item_list_response, kwargs['pageSize'])
 
         # If page number is greater than page limit, return an empty list
