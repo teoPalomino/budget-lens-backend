@@ -146,6 +146,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
+                'total Cost': item_total_cost,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -167,6 +168,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
+                'total Cost': item_total_cost,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -175,6 +177,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
+                'total Cost': item_total_cost,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
