@@ -366,7 +366,6 @@ class TestItemsFilteringOrderingSearching(APITestCase):
         pass
         # items_url = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=coffee'
         # self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-        # 
         # response = self.client.get(items_url, format='json')
         #
         # self.assertEqual(response.status_code, status.HTTP_200_OK)
