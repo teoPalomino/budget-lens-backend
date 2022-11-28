@@ -15,7 +15,8 @@ class UserProfile(models.Model):
     @receiver(post_save, sender='users.UserProfile')
     def post_save_user(sender, instance, created, *args, **kwargs):
         from category.models import Category
-        Category.objects.bulk_create([
+        if created:
+            Category.objects.bulk_create([
                 Category(category_name='room',category_toggle_star=False,user_id=instance.id),
                 Category(category_name='tax',category_toggle_star=False,user_id=instance.id),
                 Category(category_name='parking',category_toggle_star=False,user_id=instance.id),
