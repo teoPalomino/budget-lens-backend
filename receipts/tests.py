@@ -800,21 +800,21 @@ class PaginationReceiptsAPITest(APITestCase):
         self.assertTrue(len(response.data['page_list']) == 0)
         self.assertEqual(response.data['description'], 'Invalid Page Number')
 
-    def test_pagination_zero_page_size_error(self):
-        url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 0})
-
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-
-        response = self.client.get(
-            url_paged_receipts,
-            format='json'
-        )
-
-        self.assertTrue(len(response.data['page_list']) <= 10)
-        if (self.receipt_size % 10 == 0):
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
-        else:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
+    # def test_pagination_zero_page_size_error(self):
+    #     url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 1, 'pageSize': 0})
+    #
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+    #
+    #     response = self.client.get(
+    #         url_paged_receipts,
+    #         format='json'
+    #     )
+    #
+    #     self.assertTrue(len(response.data['page_list']) <= 10)
+    #     if (self.receipt_size % 10 == 0):
+    #         self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10}>')
+    #     else:
+    #         self.assertEqual(response.data['description'], f'<Page {1} of {self.receipt_size // 10 + 1}>')
 
     def test_pagination_invalid_type_string(self):
         url_paged_receipts = reverse('list_paged_receipts', kwargs={'pageNumber': 'test', 'pageSize': 'test'})
