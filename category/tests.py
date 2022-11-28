@@ -219,7 +219,6 @@ class CategoryAPITestCase(APITestCase):
         self.assertEqual(response.data['Description'], 'This sub category does not exist')
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
-
     def test_toggle_category_star(self):
         """
         Test Case for toggling a category star

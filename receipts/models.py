@@ -12,14 +12,11 @@ from django.utils import timezone
 from merchant.models import Merchant
 
 
-
-
 def upload_to(instance, filename):
     image_file_types = ['.png', '.jpg', '.jpeg']
     image_file_extension = os.path.splitext(filename)[1]
 
     if image_file_extension in image_file_types:
-
         # Here, I am simply assigning the image file name by getting the current Unix timestamp version
         # of the current scan date, which is initially of type datetime.datetime, and truncating it
         # to remove any extra decimals
@@ -72,6 +69,6 @@ class Receipts(models.Model):
         from utility.analyze_receipt import analyze_receipts
         from utility.categorize_line_items import categorize_line_items
         if created:
-            instance.receipt_text = analyze_receipts(instance.receipt_image.path,instance)
+            instance.receipt_text = analyze_receipts(instance.receipt_image.path, instance)
             categorize_line_items(instance)
             instance.save()
