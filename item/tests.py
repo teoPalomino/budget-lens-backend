@@ -421,7 +421,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(items_url, format='json')
-    
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # two items were contained in a receipt with a scan_date on or after 2022-10-30
