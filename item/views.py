@@ -30,14 +30,13 @@ class AddItemAPI(generics.CreateAPIView):
                 "category_id": item.category_id.id if item.category_id is not None else item.category_id,
                 "price": item.price,
                 "important_dates": item.important_dates,
-            },  status=HTTP_200_OK)
+            }, status=HTTP_200_OK)
         return Response({
             "Error": "Receipt does not exist"
         }, HTTP_400_BAD_REQUEST)
 
 
 class ItemDetailAPIView(generics.ListAPIView):
-
     """ details for an item """
 
     permission_classes = [IsAuthenticated]
@@ -93,25 +92,32 @@ class GetItemsAPI(generics.ListAPIView):
         if items.exists():
             for item in items:
                 item_costs_dict[item.id] = {'item': [item.user.id, item.name, item.price, item.important_dates],
-                                            'receipt_details': [item.receipt.id, item.receipt.merchant.name, item.receipt.scan_date],
-                                            'category_details': [item.category_id.category_name, item.category_id.parent_category_id] if item.category_id is not None else "Empty"}
+                                            'receipt_details': [item.receipt.id, item.receipt.merchant.name,
+                                                                item.receipt.scan_date],
+                                            'category_details': [item.category_id.category_name,
+                                                                 item.category_id.parent_category_id] if item.category_id is not None else "Empty"}
                 item_total_cost += item.price
             return Response({
                 "totalPrice": item_total_cost,
                 "items": item_costs_dict,
-                }, HTTP_200_OK)
+            }, HTTP_200_OK)
         else:
             return Response({
                 "totalPrice": 0,
                 "items": item_costs_dict,
-                }, HTTP_200_OK)
+            }, HTTP_200_OK)
 
 
 class ItemFilter(django_filters.FilterSet):
+    start_date = django_filters.DateFilter(field_name="important_dates", lookup_expr='gte')
+    end_date = django_filters.DateFilter(field_name="important_dates", lookup_expr='lte')
+    min_price = django_filters.NumberFilter(field_name="price", lookup_expr='gte')
+    max_price = django_filters.NumberFilter(field_name="price", lookup_expr='lte')
 
     class Meta:
         model = Item
-        fields = ['id', 'receipt', 'category_id', 'name', 'price', 'important_dates', 'user']
+        fields = ['id', 'receipt', 'category_id', 'name', 'price', 'min_price', 'max_price',
+                  'important_dates', 'start_date', 'end_date', 'user']
 
 
 class PaginateFilterItemsView(generics.ListAPIView):
@@ -121,18 +127,21 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-    search_fields = ['receipt', 'category_id', 'name', 'price', 'important_dates', 'user']
-    queryset = Item.objects.all()
+
+    '''
+    TODO: fix search, for some reason not working
+    '''
+
+    # search_fields = ['name', 'price', 'important_dates', 'user']
 
     # noqa: C901
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """
-        Get the resonse from the super class which returns the entire list
+        Get the response from the super class which returns the entire list
         and then paginate the results
         """
         queryset = self.get_queryset()
-        serializer = ItemSerializer(queryset, many=True)
-        item_list_response = serializer.data
+        item_list_response = super().get(request, *args, **kwargs)
         item_total_cost = 0
 
         if queryset.exists():
@@ -158,7 +167,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
 
         # If Page size is less than zero, -> had to remove due to complexity issue.
         kwargs['pageSize'] = 10
-        paginator = Paginator(item_list_response, kwargs['pageSize'])
+        paginator = Paginator(item_list_response.data, kwargs['pageSize'])
 
         # If page number is greater than page limit, return an empty list
         if kwargs['pageNumber'] > paginator.num_pages:
