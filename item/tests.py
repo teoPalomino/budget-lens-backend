@@ -1,3 +1,4 @@
+import datetime
 from random import randint
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -312,8 +313,22 @@ class TestItemsFilteringOrderingSearching(APITestCase):
             total=1,
             tax=1,
             tip=1,
+            scan_date=datetime.datetime.strptime("2022-10-30", "%Y-%m-%d").date(),
             coupon=1,
             currency="CAD"
+        )
+
+        self.receipt2 = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='456 Testing Street T1E 5T5',
+            total=10,
+            tax=10,
+            tip=10,
+            scan_date=datetime.datetime.strptime("2022-10-20", "%Y-%m-%d").date(),
+            coupon=1,
+            currency="USD"
         )
 
         self.category1 = Category.objects.create(
@@ -325,7 +340,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         Item.objects.create(
             user=self.user,
-            receipt=Receipts.objects.get(user=self.user),
+            receipt=self.receipt1,
             name='coffee',
             category_id=self.category1,
             price=10.15,
@@ -334,7 +349,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         Item.objects.create(
             user=self.user,
-            receipt=Receipts.objects.get(user=self.user),
+            receipt=self.receipt1,
             name='coffee',
             category_id=self.category1,
             price=10.15,
@@ -343,7 +358,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         Item.objects.create(
             user=self.user,
-            receipt=Receipts.objects.get(user=self.user),
+            receipt=self.receipt2,
             name='poutine',
             category_id=self.category1,
             price=59.99,
@@ -352,7 +367,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         Item.objects.create(
             user=self.user,
-            receipt=Receipts.objects.get(user=self.user),
+            receipt=self.receipt2,
             name='mateo',
             category_id=self.category1,
             price=12.99,
@@ -402,15 +417,15 @@ class TestItemsFilteringOrderingSearching(APITestCase):
         self.assertEqual(len(response.data['page_list']), 1)
 
     def test_start_date_filtering(self):
-        items_url = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?start_date=2022-10-11'
+        items_url = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?start_date=2022-10-30'
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(items_url, format='json')
-
+    
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # only one item contained a date after 2022-10-12
-        self.assertEqual(len(response.data['page_list']), 1)
+        # two items were contained in a receipt with a scan_date on or after 2022-10-30
+        self.assertEqual(len(response.data['page_list']), 2)
 
     def test_min_price_filtering(self):
         items_url = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?min_price=12'
