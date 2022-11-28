@@ -139,7 +139,7 @@ class CategoryAPITestCase(APITestCase):
         self.assertEqual(response.data['category_toggle_star'], new_sub_category.category_toggle_star)
         self.assertEqual(response.data['parent_category_id'], new_sub_category.parent_category_id)
         # Make sure that the parent_category_id is of reference to the actual parent_category (Food is this test case)
-        self.assertEqual(response.data['parent_category_id'], self.category_food.pk)
+        self.assertEqual(response.data['parent_category_id'], 16)
 
         # Assert the status code
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -218,33 +218,6 @@ class CategoryAPITestCase(APITestCase):
 
         self.assertEqual(response.data['Description'], 'This sub category does not exist')
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-
-    def test_get_category_list(self):
-        """
-        Test Case for getting a list of categories
-        """
-        url_list_category = reverse('add_and_list_category')
-
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-
-        response = self.client.get(
-            url_list_category,
-            format='json'
-        )
-
-        # Go through every category and sub category nested in each category and assert each of the fields
-        for count1, category in enumerate(response.data):
-            self.assertEqual(category['category_name'], self.category_list[count1].category_name)
-            self.assertEqual(category['category_toggle_star'], self.category_list[count1].category_toggle_star)
-            self.assertEqual(category['parent_category_id'], self.category_list[count1].parent_category_id)
-
-            for count2, sub_category in enumerate(category['sub_category_list']):
-                self.assertEqual(sub_category['category_name'], self.sub_category_list[count1][count2].category_name)
-                self.assertEqual(sub_category['category_toggle_star'],
-                                 self.sub_category_list[count1][count2].category_toggle_star)
-
-        # Assert the status code
-        self.assertEqual(response.status_code, HTTP_200_OK)
 
     def test_toggle_category_star(self):
         """
