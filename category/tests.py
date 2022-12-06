@@ -271,5 +271,6 @@ class CategoryAPITestCase(APITestCase):
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         # Assert the prices
-        self.assertEqual(float(response.data['Fruits']), self.fruit_item.price)
-        self.assertEqual(float(response.data['Taxi']), self.taxi_item.price + self.taxi_item2.price)
+        self.assertEqual(float(response.data['Costs'][0]['category_cost']), self.fruit_item.price)
+        self.assertEqual(float(response.data['Costs'][1]['category_cost']),
+                         self.taxi_item.price + self.taxi_item2.price)

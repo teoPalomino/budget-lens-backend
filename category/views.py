@@ -165,6 +165,7 @@ class GetCategoryCostsView(generics.ListAPIView):
         # Get the list of Items
         items = self.get_queryset()
         category_costs_dict = {}
+        category_costs_list = []
 
         if items.exists():
             for item in items:
@@ -172,10 +173,16 @@ class GetCategoryCostsView(generics.ListAPIView):
                     category_costs_dict[item.category_id.get_category_name()] += item.price
                 else:
                     category_costs_dict[item.category_id.get_category_name()] = item.price
-            return Response(category_costs_dict, HTTP_200_OK)
+        else:
+            return Response({"Response": "The user either has no items created or something went wrong"},
+                            HTTP_400_BAD_REQUEST)
 
-        return Response({"Response": "The user either has no items created or something went wrong"},
-                        HTTP_400_BAD_REQUEST)
+        for key, value in category_costs_dict.items():
+            category_costs_list.append({
+                "category_name": key,
+                "category_cost": value
+            })
+        return Response({"Costs": category_costs_list}, HTTP_200_OK)
 
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)
