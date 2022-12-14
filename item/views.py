@@ -113,11 +113,12 @@ class ItemFilter(django_filters.FilterSet):
     end_date = django_filters.DateFilter(field_name="receipt__scan_date", lookup_expr='lte')
     min_price = django_filters.NumberFilter(field_name="price", lookup_expr='gte')
     max_price = django_filters.NumberFilter(field_name="price", lookup_expr='lte')
+    merchant_name = django_filters.CharFilter(field_name="receipt__merchant__name", lookup_expr='icontains')
 
     class Meta:
         model = Item
         fields = ['id', 'receipt', 'category_id', 'name', 'price', 'min_price', 'max_price',
-                  'important_dates', 'start_date', 'end_date', 'user']
+                  'important_dates', 'start_date', 'end_date', 'user', 'merchant_name']
 
 
 class PaginateFilterItemsView(generics.ListAPIView):
@@ -192,6 +193,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
         # Append the scan date from the receipt into the page item in question
         for i, item in zip(queryset, page.object_list):
             item['scan_date'] = i.receipt.scan_date
+            item['merchant_name'] = i.receipt.merchant.name
 
         return Response({
             'page_list': page.object_list,
