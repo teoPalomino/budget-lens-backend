@@ -55,46 +55,6 @@ class FriendsAPI(generics.GenericAPIView):
             return Response({"response": "User ID not specified"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class InviteFriendsAPI(generics.GenericAPIView):
-    """Sends an invite to join the app, and a pending friend request associated with the email invited"""
-    permission_classes = [IsAuthenticated, ]
-    serializer_class = FriendSerializer
-
-    # send an email invitation to non existing user with email passed as data
-    def post(self, request, *args, **kwargs):
-
-        try:
-            validate_email(request.data.get('email'))
-        except ValidationError:
-            return Response({"response": "Invalid email address"}, status=status.HTTP_400_BAD_REQUEST)
-
-        friend_user = User.objects.filter(email=request.data.get('email')).values().first()
-
-        if friend_user:
-            return Response('This email is already registered as a user', status=status.HTTP_400_BAD_REQUEST)
-
-        friendInv = Friends.objects.filter(main_user=request.user.id, confirmed=False,
-                                           temp_email=request.data.get('email'))
-
-        if friendInv:
-            return Response('U have already sent an invite to this email', status=status.HTTP_400_BAD_REQUEST)
-
-        else:
-            # Create entry in FRIENDS database for friend request using temp_email
-            serializer = self.get_serializer(data={
-                "main_user": request.user.id,
-                "friend_user": None,
-                "confirmed": False,
-                "temp_email": request.data.get('email')
-            })
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            sendEmail(request.data.get('email'), 'BudgetLens Invitation',
-                      request.user.first_name + ' ' + request.user.last_name + 'has invited you to download BudgetLens')
-
-            return Response({"response": "An invitation has been sent to the following email"}, status=status.HTTP_200_OK)
-
-
 class FriendRequestAPI(generics.GenericAPIView):
     """Accept or reject a friend request"""
     permission_classes = [IsAuthenticated, ]
@@ -124,7 +84,29 @@ class FriendRequestAPI(generics.GenericAPIView):
 
                 return Response({"response": "Friend request sent successfully"}, status=status.HTTP_200_OK)
 
-        return Response({"response": "The user does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        friendInv = Friends.objects.filter(main_user=request.user.id, confirmed=False,
+                                           temp_email=request.data.get('email'))
+
+        if friendInv:
+            return Response('U have already sent an invite to this email', status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            # Create entry in FRIENDS database for friend request using temp_email
+            serializer = self.get_serializer(data={
+                "main_user": request.user.id,
+                "friend_user": None,
+                "confirmed": False,
+                "temp_email": request.data.get('email')
+            })
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            sendEmail(request.data.get('email'), 'BudgetLens Invitation',
+                      request.user.first_name + ' ' + request.user.last_name + 'has added you as a friend on '
+                                                                               'BudgetLens, download the app to get '
+                                                                               'started!')
+
+            return Response({"response": "An invitation has been sent to the following email"},
+                            status=status.HTTP_200_OK)
 
     @staticmethod
     def validateFriendRequest(request_user, friend_user):
@@ -159,10 +141,10 @@ class FriendRequestAPI(generics.GenericAPIView):
                                             confirmed=False)
             if friend.exists():
                 # answer of 0 = reject, 1 = accept
-                if request.data.get('answer') == 1:
+                if request.data.get('answer') == "1":
                     friend.update(confirmed=True)
                     return Response({"response": "Friend request accepted"}, status=status.HTTP_200_OK)
-                elif request.data.get('answer') == 0:
+                elif request.data.get('answer') == "0":
                     friend.delete()
                     return Response({"response": "Friend request rejected"}, status=status.HTTP_200_OK)
                 else:
