@@ -191,7 +191,7 @@ class FriendsAPITest(APITestCase):
         """
         Test Case for user.InviteFriendsAPI
         """
-        invitefriend_url = reverse('invite_friends')
+        invitefriend_url = reverse('friend_requests')
 
         # Create 2 users in the database for testing
         self.helper_create_user_instance()
@@ -227,48 +227,11 @@ class FriendsAPITest(APITestCase):
         # Showing the existence of the friend object (friend invite)
         self.assertTrue(friend2)
 
-    def test_invite_friend_existing_user(self):
-        """
-        Test Case for user.InviteFriendsAPI
-        """
-        invitefriend_url = reverse('invite_friends')
-
-        # Create 2 users in the database for testing
-        self.helper_create_user_instance()
-
-        # Create token for the test
-        token = BearerToken.objects.create(user_id=self.user.pk)
-
-        # Enter credentials for authentication using the Bearer token
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
-
-        # Getting all friend objects from the db
-        friend1 = Friends.objects.all()
-
-        # Showing the absence of friend objects in the db
-        self.assertFalse(friend1)
-
-        data = {
-            'email': 'bingbong@gmail.com'
-        }
-
-        response = self.client.post(
-            invitefriend_url,
-            data=data,
-            format='json'
-        )
-
-        # Assert a bad request status message
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        # Assert the response was a failure
-        self.assertEquals(response.content, b'"This email is already registered as a user"')
-
     def test_invite_friend_duplicate_invite(self):
         """
         Test Case for user.InviteFriendsAPI
         """
-        invitefriend_url = reverse('invite_friends')
+        invitefriend_url = reverse('friend_requests')
 
         # Create 2 users in the database for testing
         self.helper_create_user_instance()
@@ -435,7 +398,7 @@ class FriendsAPITest(APITestCase):
         }
 
         data3 = {
-            'answer': 1
+            'answer': '1'
         }
 
         # send a friend request
@@ -511,7 +474,7 @@ class FriendsAPITest(APITestCase):
         }
 
         data3 = {
-            'answer': 0
+            'answer': '0'
         }
 
         # send a friend request
@@ -589,7 +552,7 @@ class FriendsAPITest(APITestCase):
         }
 
         data3 = {
-            'answer': 1
+            'answer': '1'
         }
 
         # send a friend request
@@ -683,7 +646,7 @@ class FriendsAPITest(APITestCase):
         }
 
         data3 = {
-            'answer': 1
+            'answer': '1'
         }
 
         # send a friend request
