@@ -22,7 +22,7 @@ class FriendsAPI(generics.GenericAPIView):
             if user:
                 return Response({"response": UserSerializer(user).data}, status=status.HTTP_200_OK)
             else:
-                return Response({"response": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"response": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Return all user's friends
         else:
@@ -45,12 +45,12 @@ class FriendsAPI(generics.GenericAPIView):
                                              confirmed=True)
             if friend1.exists():
                 friend1.delete()
-                return Response({"response": "Friend removed successfully"}, status=status.HTTP_200_OK)
+                return Response({"response": "Friend removed successfully."}, status=status.HTTP_200_OK)
             elif friend2.exists():
                 friend2.delete()
-                return Response({"response": "Friend removed successfully"}, status=status.HTTP_200_OK)
+                return Response({"response": "Friend removed successfully."}, status=status.HTTP_200_OK)
             else:
-                return Response({"response": "Friend not found"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"response": "Friend not found."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"response": "User ID not specified"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -82,13 +82,13 @@ class FriendRequestAPI(generics.GenericAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-                return Response({"response": "Friend request sent successfully"}, status=status.HTTP_200_OK)
+                return Response({"response": "Friend request sent successfully."}, status=status.HTTP_200_OK)
 
         friendInv = Friends.objects.filter(main_user=request.user.id, confirmed=False,
                                            temp_email=request.data.get('email'))
 
         if friendInv:
-            return Response('U have already sent an invite to this email', status=status.HTTP_400_BAD_REQUEST)
+            return Response('You have already sent an invite to this email.', status=status.HTTP_400_BAD_REQUEST)
 
         else:
             # Create entry in FRIENDS database for friend request using temp_email
@@ -105,7 +105,7 @@ class FriendRequestAPI(generics.GenericAPIView):
                                                                                'BudgetLens, download the app to get '
                                                                                'started!')
 
-            return Response({"response": "An invitation has been sent to the following email"},
+            return Response({"response": "An invitation has been sent to the following email."},
                             status=status.HTTP_200_OK)
 
     @staticmethod
@@ -114,7 +114,7 @@ class FriendRequestAPI(generics.GenericAPIView):
         try:
             validate_email(friend_user.get('email'))
         except ValidationError:
-            return {"response": "Invalid email address"}
+            return {"response": "Invalid email address."}
 
         if request_user.get('id') == friend_user.get('id'):
             return {"response": "You cannot add yourself as a friend."}
@@ -143,16 +143,16 @@ class FriendRequestAPI(generics.GenericAPIView):
                 # answer of 0 = reject, 1 = accept
                 if request.data.get('answer') == "1":
                     friend.update(confirmed=True)
-                    return Response({"response": "Friend request accepted"}, status=status.HTTP_200_OK)
+                    return Response({"response": "Friend request accepted."}, status=status.HTTP_200_OK)
                 elif request.data.get('answer') == "0":
                     friend.delete()
-                    return Response({"response": "Friend request rejected"}, status=status.HTTP_200_OK)
+                    return Response({"response": "Friend request rejected."}, status=status.HTTP_200_OK)
                 else:
-                    return Response({"response": "Invalid answer"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"response": "Invalid answer."}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({"response": "Friend request not found"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"response": "Friend request not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"response": "User ID or answer not specified correctly"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"response": "User ID or answer not specified correctly."}, status=status.HTTP_400_BAD_REQUEST)
 
     # friends page with requests sent and received
     def get(self, request, *args, **kwargs):
