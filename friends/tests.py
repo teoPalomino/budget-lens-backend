@@ -278,7 +278,7 @@ class FriendsAPITest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Assert the response was a failure
-        self.assertEquals(response.content, b'"U have already sent an invite to this email"')
+        self.assertEquals(response.content, b'"You have already sent an invite to this email."')
 
     def test_pending_friend_requests_sent_and_received(self):
         """
