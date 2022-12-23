@@ -36,21 +36,12 @@ class AddItemAPI(generics.CreateAPIView):
         }, HTTP_400_BAD_REQUEST)
 
 
-class ItemDetailAPIView(generics.ListAPIView):
+class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """ details for an item """
 
     permission_classes = [IsAuthenticated]
     serializer_class = PutPatchItemSerializer
-
-    def get(self, request, *args, **kwargs):
-        if kwargs.get('item_id'):
-            item = self.get_queryset().filter(id=kwargs.get('item_id'))
-            if item.exists():
-                serializer = ItemSerializer(item, many=True)
-                return Response(serializer.data, status=HTTP_200_OK)
-            return Response({
-                "Error": "Item does not exist"
-            }, status=HTTP_400_BAD_REQUEST)
+    lookup_url_kwarg = 'item_id'
 
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)
