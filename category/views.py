@@ -1,5 +1,4 @@
 # from django.shortcuts import render
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -19,6 +18,7 @@ class CategoryFilter(django_filters.FilterSet):
     class Meta:
         model = Category
         fields = ['category_toggle_star']
+
 
 class AddCategoryView(generics.GenericAPIView):
     """
@@ -95,7 +95,6 @@ class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
     filterset_class = CategoryFilter
     ordering_fields = '__all__'
     search_fields = ['category_toggle_star']
-
 
     def get(self, request, *args, **kwargs):
         # Get the list of Categories
