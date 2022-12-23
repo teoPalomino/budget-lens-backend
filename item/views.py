@@ -114,7 +114,7 @@ class ItemFilter(django_filters.FilterSet):
     min_price = django_filters.NumberFilter(field_name="price", lookup_expr='gte')
     max_price = django_filters.NumberFilter(field_name="price", lookup_expr='lte')
     merchant_name = django_filters.CharFilter(field_name="receipt__merchant__name", lookup_expr='icontains')
-    merchant_id = django_filters.CharFilter(field_name="receipt__merchant__id", lookup_expr='icontains')
+    merchant_id = django_filters.CharFilter(field_name="receipt__merchant__id", lookup_expr='exact')
 
     class Meta:
         model = Item
