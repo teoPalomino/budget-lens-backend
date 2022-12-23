@@ -11,6 +11,4 @@ urlpatterns = [
     # PUT: accept/reject friend request
     path('friend/request/<int:friend_id>/', views.FriendRequestAPI.as_view(),
          name='friend_requests'),
-    # POST: send an email invite when user tries to add an email not corresponding to an existing user
-    path('friend/invite/', views.InviteFriendsAPI.as_view(), name='invite_friends'),
 ]

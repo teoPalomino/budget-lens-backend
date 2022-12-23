@@ -5,7 +5,7 @@ from .models import Merchant
 class MerchantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Merchant
-        fields = ('name',)
+        fields = ('id', 'name')
 
     def create(self, validated_data):
         return Merchant.objects.create(
