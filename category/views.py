@@ -1,5 +1,4 @@
 # from django.shortcuts import render
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -8,8 +7,17 @@ from item.models import Item
 from .models import Category
 from .serializers import BasicCategorySerializer
 
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, filters
 
-# Create your views here.
+
+class CategoryFilter(django_filters.FilterSet):
+    category_toggle_star = django_filters.BooleanFilter(field_name='category_toggle_star', lookup_expr='icontains')
+
+    class Meta:
+        model = Category
+        fields = ['category_toggle_star']
 
 
 class AddCategoryView(generics.GenericAPIView):
@@ -75,8 +83,18 @@ class DeleteCategoryView(generics.DestroyAPIView):
 
 
 class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
+    """
+    List all categories and subcategories.
+    To filter basted on stared on unstared categories type the url in the following
+        /api/category/?category_toggle_star=true  --> list of only stared categories and subcategories
+        /api/category/?category_toggle_star=false --> list of only unstared categories and subcategories
+    """
     serializer_class = BasicCategorySerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = CategoryFilter
+    ordering_fields = '__all__'
+    search_fields = ['category_toggle_star']
 
     def get(self, request, *args, **kwargs):
         # Get the list of Categories
