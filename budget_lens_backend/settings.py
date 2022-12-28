@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'merchant.apps.MerchantConfig',
     'category.apps.CategoryConfig',
     'item.apps.ItemConfig',
+    'rules.apps.RulesConfig',
 
     # Installed apps
     'rest_framework',
