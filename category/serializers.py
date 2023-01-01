@@ -6,7 +6,7 @@ class BasicCategorySerializer(serializers.ModelSerializer):
     """Basic category seriaizer which contains all fields except the user field"""
     class Meta:
         model = Category
-        fields = ('id', 'category_name', 'category_toggle_star', 'parent_category_id')
+        fields = ('id', 'category_name', 'category_toggle_star', 'parent_category_id', 'icon')
 
     def create(self, validated_data):
         return Category.objects.create(
