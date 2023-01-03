@@ -123,9 +123,10 @@ class ItemsAPITest(APITransactionTestCase):
         response = self.client.get(reverse('item_details', kwargs={'item_id': Item.objects.get(id=1).id}),
                                    format='multipart')
         item = Item.objects.get(id=1)
-        self.assertEquals(response.data['price'], str(item.price))
-        self.assertEquals(response.data['name'], item.name)
-        self.assertEquals(response.data['important_dates'], str(item.important_dates))
+        self.assertEquals(response.data[0]['receipt'], item.receipt.id)
+        self.assertEquals(response.data[0]['price'], str(item.price))
+        self.assertEquals(response.data[0]['name'], item.name)
+        self.assertEquals(response.data[0]['important_dates'], str(item.important_dates))
 
     def test_delete_item(self):
         # This test checks if the item is deleted and if the list of items is decreased
