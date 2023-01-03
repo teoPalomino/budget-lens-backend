@@ -43,6 +43,16 @@ class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PutPatchItemSerializer
     lookup_url_kwarg = 'item_id'
 
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('item_id'):
+            item = self.get_queryset().filter(id=kwargs.get('item_id'))
+            if item.exists():
+                serializer = ItemSerializer(item, many=True)
+                return Response(serializer.data, status=HTTP_200_OK)
+            return Response({
+                "Error": "Item does not exist"
+            }, status=HTTP_400_BAD_REQUEST)
+
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)
 
