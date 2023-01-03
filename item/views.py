@@ -36,11 +36,12 @@ class AddItemAPI(generics.CreateAPIView):
         }, HTTP_400_BAD_REQUEST)
 
 
-class ItemDetailAPIView(generics.ListAPIView):
+class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """ details for an item """
 
     permission_classes = [IsAuthenticated]
     serializer_class = PutPatchItemSerializer
+    lookup_url_kwarg = 'item_id'
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
