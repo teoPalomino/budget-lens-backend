@@ -1,0 +1,31 @@
+
+
+public void getupload(String type, String str) {
+    File file = new File(str);//filePath file path
+    SharedPreferencesHelper sharedPreferencesHelper = new SharedPreferencesHelper();
+    String  token= (String) sharedPreferencesHelper.get("token","");
+
+    // RequestBody imageBody = RequestBody.create(MediaType.parse("image/jpg"), file);
+    RequestBody imageBody = RequestBody.create(MediaType.parse("*/*"), file);
+
+    MultipartBody.Part imageBodyPart = MultipartBody.Part.createFormData("file", file.getName(), imageBody);
+
+    GetDataFromServerInterface mFromServerInterface = GetDataFromServer.getInstance(content).getService();
+    Call<JSONObject> indexdata = mFromServerInterface.getupload(token, imageBodyPart);
+    indexdata.enqueue(new Callback<JSONObject>() {
+        @Override
+        public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+
+            if (response.body() == null) {
+                return;
+            }
+            messageView.MessageSuccess(type, response.body());
+
+        }
+
+        @Override
+        public void onFailure(Call<JSONObject> call, Throwable t) {
+
+        }
+    });
+}

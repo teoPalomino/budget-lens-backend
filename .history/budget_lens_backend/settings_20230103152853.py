@@ -31,7 +31,6 @@ SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
 ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
-            '192.168.2.15',
             'budgetlens.tech',
             'api.budgetlens.tech'
     ]
@@ -59,7 +58,6 @@ INSTALLED_APPS = [
     'merchant.apps.MerchantConfig',
     'category.apps.CategoryConfig',
     'item.apps.ItemConfig',
-    'filemanagement',
 
     # Installed apps
     'rest_framework',

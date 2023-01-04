@@ -33,7 +33,7 @@ class ManualReceiptsSerializer(serializers.ModelSerializer):
         )
         receipt = Receipts.objects.create(
             user=validated_data['user'],
-            receipt_image=validated_data.get('receipt_image', None),
+            receipt_image=validated_data['receipt_image'],
             merchant=merchant,
             location=validated_data['location'],
             total=validated_data['total'],

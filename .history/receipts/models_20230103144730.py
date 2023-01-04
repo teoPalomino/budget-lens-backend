@@ -28,8 +28,7 @@ class Receipts(models.Model):
     """A Receipts model with a user model"""
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
     scan_date = models.DateTimeField(default=timezone.now, null=True, blank=True)
-    # receipt_image = models.ImageField(upload_to=upload_to)
-    receipt_image = models.TextField(null=True, blank=True)
+    receipt_image = models.ImageField(upload_to=upload_to)
     merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING, null=True, blank=True)
     location = models.CharField(max_length=200, null=True, blank=True)
     total = models.FloatField(null=True, blank=True)
@@ -51,25 +50,25 @@ class Receipts(models.Model):
         super().delete()
 
     # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
-    # @receiver(pre_save, sender='receipts.Receipts')
-    # def pre_save_image(sender, instance, *args, **kwargs):
-    #     try:
-    #         old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
-    #         try:
-    #             new_updated_receipt_image = instance.receipt_image
-    #         except ValueError:
-    #             new_updated_receipt_image = None
-    #         if new_updated_receipt_image != old_receipt_image:
-    #             if os.path.exists(old_receipt_image.path):
-    #                 os.remove(old_receipt_image.path)
-    #     except instance.DoesNotExist:
-    #         pass
+    @receiver(pre_save, sender='receipts.Receipts')
+    def pre_save_image(sender, instance, *args, **kwargs):
+        try:
+            old_receipt_image = instance.__class__.objects.get(id=instance.id).receipt_image
+            try:
+                new_updated_receipt_image = instance.receipt_image
+            except ValueError:
+                new_updated_receipt_image = None
+            if new_updated_receipt_image != old_receipt_image:
+                if os.path.exists(old_receipt_image.path):
+                    os.remove(old_receipt_image.path)
+        except instance.DoesNotExist:
+            pass
 
-    # @receiver(post_save, sender='receipts.Receipts')
-    # def post_save_receipt(sender, instance, created, *args, **kwargs):
-    #     from utility.analyze_receipt import analyze_receipts
-    #     from utility.categorize_line_items import categorize_line_items
-    #     if created:
-    #         instance.receipt_text = analyze_receipts(instance.receipt_image.path, instance)
-    #         categorize_line_items(instance)
-    #         instance.save()
+    @receiver(post_save, sender='receipts.Receipts')
+    def post_save_receipt(sender, instance, created, *args, **kwargs):
+        from utility.analyze_receipt import analyze_receipts
+        from utility.categorize_line_items import categorize_line_items
+        if created:
+            instance.receipt_text = analyze_receipts(instance.receipt_image.path, instance)
+            categorize_line_items(instance)
+            instance.save()
