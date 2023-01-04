@@ -23,8 +23,9 @@ class ItemSerializer(serializers.ModelSerializer):
 class PutPatchItemSerializer(serializers.ModelSerializer):
     '''Serializer for PutItems, used to update a users items in a receipt'''
 
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     receipt = serializers.HiddenField(default=Receipts)
 
     class Meta:
         model = Item
-        fields = ('receipt', 'category_id', 'name', 'price', 'important_dates')
+        fields = ('user', 'receipt', 'category_id', 'name', 'price', 'important_dates')
