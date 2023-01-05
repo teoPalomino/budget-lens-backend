@@ -47,7 +47,8 @@ class Receipts(models.Model):
 
     # When a receipt image is deleted from the database, the receipt image file is also deleted from the file system/server
     def delete(self, using=None, keep_parents=False):
-        self.receipt_image.delete()
+        # self.receipt_image.delete()
+        self.receipt_image = ''
         super().delete()
 
     # If the receipt image is being updated using the PUT or PATCH requests, delete the old receipt image file
