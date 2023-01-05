@@ -27,5 +27,7 @@ urlpatterns = [
     path('', include('category.urls')),
     path('', include('item.urls')),
     path('', include('merchant.urls')),
+    path('', include('rules.urls')),
     path('file/', include('filemanagement.urls'), name='file'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL)  # static files
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL)  # static files
+

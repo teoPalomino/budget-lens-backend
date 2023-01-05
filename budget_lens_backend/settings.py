@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'category.apps.CategoryConfig',
     'item.apps.ItemConfig',
     'filemanagement',
+    'rules.apps.RulesConfig',
+
 
     # Installed apps
     'rest_framework',
