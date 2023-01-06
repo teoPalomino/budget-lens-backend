@@ -9,7 +9,7 @@ from .serializers import BasicCategorySerializer
 
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, filters
+from rest_framework import generics, filters, status
 
 
 class CategoryFilter(django_filters.FilterSet):
