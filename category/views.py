@@ -204,3 +204,21 @@ class GetCategoryCostsView(generics.ListAPIView):
 
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)
+
+
+class EditCategoryAPIView(generics.UpdateAPIView):
+    serializer_class = BasicCategorySerializer
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request, *args, **kwargs):
+
+        if kwargs.get('categoryName'):
+
+            category = Category.objects.filter(user=request.user.id, category_name=kwargs.get('categoryName'))
+
+            if category.exists():
+                category.update(category_name=request.data.get('category_name'))
+
+                return Response({"response": "Category name has been updated."}, status=status.HTTP_200_OK)
+
+        return Response({"response": "The current category does not exist."}, status=status.HTTP_404_NOT_FOUND)

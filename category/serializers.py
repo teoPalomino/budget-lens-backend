@@ -13,5 +13,6 @@ class BasicCategorySerializer(serializers.ModelSerializer):
             category_name=validated_data['category_name'],
             category_toggle_star=validated_data['category_toggle_star'],
             parent_category_id=validated_data['parent_category_id'],
-            user=self.context['request'].user
+            user=self.context['request'].user,
+            icon=validated_data['icon']
         )
