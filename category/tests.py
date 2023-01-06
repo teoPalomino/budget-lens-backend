@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
+from rest_framework import status
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.test import APITestCase
 
@@ -274,3 +275,38 @@ class CategoryAPITestCase(APITestCase):
         self.assertEqual(float(response.data['Costs'][0]['category_cost']), self.fruit_item.price)
         self.assertEqual(float(response.data['Costs'][1]['category_cost']),
                          self.taxi_item.price + self.taxi_item2.price)
+
+    def test_edit_category(self):
+        """
+        Test Case for adding a new subcategory, adding a category is also possible but would be redundant to do in this test case
+        """
+        url_edit_category = reverse('edit_category', kwargs={'categoryName': 'food'})
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.put(
+            url_edit_category,
+            data={
+                'category_name': 'edited food'
+            },
+            format='json'
+        )
+
+        # Assert the status code
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        # Get the value of category using the new name in the Category table
+        edited_category = Category.objects.filter(category_name='edited food')
+
+        # Assert there is only 1 category with the new edited name
+        self.assertEquals(len(edited_category), 1)
+        self.assertTrue(edited_category)
+
+        # Get the value of category using the old name in the Category table
+        old_category = Category.objects.filter(category_name='food')
+
+        # Assert there is no category with the old name
+        self.assertEquals(len(old_category), 0)
+        self.assertFalse(old_category)
+
+
