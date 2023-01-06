@@ -31,6 +31,7 @@ SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
 ALLOWED_HOSTS = [
             '127.0.0.1',
             '206.81.3.66',
+            '192.168.2.15',
             'budgetlens.tech',
             'api.budgetlens.tech'
     ]
@@ -58,7 +59,9 @@ INSTALLED_APPS = [
     'merchant.apps.MerchantConfig',
     'category.apps.CategoryConfig',
     'item.apps.ItemConfig',
+    'filemanagement',
     'rules.apps.RulesConfig',
+
 
     # Installed apps
     'rest_framework',
@@ -181,3 +184,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 PHONENUMBER_DEFAULT_REGION = 'CA'
+
+# Media Files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
