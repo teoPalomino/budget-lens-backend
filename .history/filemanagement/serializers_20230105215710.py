@@ -3,7 +3,6 @@ from .models import Files
 
 class FilesSerializer(serializers.ModelSerializer):
 
-
     """File Upload"""
     class Meta:
         model = Files

@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from budget_lens_backend import settings
 
 urlpatterns = [
-    path('api-auth/', include('rest_framework.urls')),  # rest_framework
+    path('api-auth/', include('rest_framework.urls')),# rest_framework
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
     path('', include('receipts.urls')),
@@ -30,4 +30,3 @@ urlpatterns = [
     path('', include('rules.urls')),
     path('file/', include('filemanagement.urls'), name='file'),
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL)  # static files
-    

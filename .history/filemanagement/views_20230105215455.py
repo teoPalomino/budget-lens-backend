@@ -5,7 +5,8 @@ from .serializers import FilesSerializer
 
 
 class FilesViewset(viewsets.ModelViewSet):
+    
 
- """ upload files """
- queryset = Files.objects.all()
- serializer_class = FilesSerializer
+    """ upload files """
+    queryset = Files.objects.all()
+    serializer_class = FilesSerializer
