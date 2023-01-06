@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import *
+from .views import FilesViewset
 
 app_name = 'file'
 

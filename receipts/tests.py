@@ -4,7 +4,6 @@ from random import randint
 import shutil
 import tempfile
 import time
-from math import trunc
 
 from PIL import Image
 from django.conf import settings
@@ -107,7 +106,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
         # I then create a new receipt and add it to the database
         receipt = Receipts.objects.create(
-            user=self.user, 
+            user=self.user,
             receipt_image=get_test_image_file(),
             merchant=Merchant.objects.create(name='Random Merchant'),
             location='123 Testing Street T1E 5T5',
