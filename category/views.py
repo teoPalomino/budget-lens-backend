@@ -40,7 +40,8 @@ class AddCategoryView(generics.GenericAPIView):
         return Response({
             "category_name": category.category_name,
             "category_toggle_star": category.category_toggle_star,
-            "parent_category_id": category.parent_category_id
+            "parent_category_id": category.parent_category_id,
+            "icon": category.icon
         }, status=HTTP_200_OK)
 
     def get_queryset(self):
@@ -200,7 +201,7 @@ class GetCategoryCostsView(generics.ListAPIView):
                 "category_name": key,
                 "category_cost": value
             })
-        return Response({"Costs": category_costs_list}, HTTP_200_OK)
+        return Response({"Costs": category_costs_list}, status=HTTP_200_OK)
 
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)

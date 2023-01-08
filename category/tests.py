@@ -127,7 +127,8 @@ class CategoryAPITestCase(APITestCase):
             data={
                 'category_name': 'Veggies',
                 'category_toggle_star': False,
-                'parent_category_id': 16
+                'parent_category_id': 16,
+                'icon': ''
             },
             format='json'
         )
@@ -139,8 +140,10 @@ class CategoryAPITestCase(APITestCase):
         self.assertEqual(response.data['category_name'], new_sub_category.category_name)
         self.assertEqual(response.data['category_toggle_star'], new_sub_category.category_toggle_star)
         self.assertEqual(response.data['parent_category_id'], new_sub_category.parent_category_id)
+        self.assertEqual(response.data['icon'], new_sub_category.icon)
         # Make sure that the parent_category_id is of reference to the actual parent_category (Food is this test case)
         self.assertEqual(response.data['parent_category_id'], self.category_food.pk)
+
 
         # Assert the status code
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -265,7 +268,8 @@ class CategoryAPITestCase(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
     def test_get_category_costs(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(reverse('get_category_costs'))
 
