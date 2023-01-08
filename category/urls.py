@@ -11,6 +11,4 @@ urlpatterns = [
 
     # Use the PUT method to edit category name
     path('api/category/<str:categoryName>/', views.EditCategoryAPIView.as_view(), name='edit_category'),
-
-    path('api/category/costs/', views.GetCategoryCostsView.as_view(), name='get_category_costs'),
 ]

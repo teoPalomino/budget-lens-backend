@@ -65,21 +65,24 @@ class CategoryAPITestCase(APITestCase):
             category_name='Fruits',
             category_toggle_star=False,
             user=self.user,
-            parent_category_id=Category.objects.get(category_name='Food').pk
+            parent_category_id=Category.objects.get(category_name='Food').pk,
+            icon=''
         )
 
         self.sub_category_uber = Category.objects.create(
             category_name='Uber',
             category_toggle_star=False,
             user=self.user,
-            parent_category_id=Category.objects.get(category_name='Taxi').pk
+            parent_category_id=Category.objects.get(category_name='Taxi').pk,
+            icon=''
         )
 
         self.sub_category_meats = Category.objects.create(
             category_name='Meats',
             category_toggle_star=False,
             user=self.user,
-            parent_category_id=Category.objects.get(category_name='Food').pk
+            parent_category_id=Category.objects.get(category_name='Food').pk,
+            icon=''
         )
 
         self.sub_category_list_food = [self.sub_category_fruit, self.sub_category_meats]
