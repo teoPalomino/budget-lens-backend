@@ -67,13 +67,23 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
-    'django_filters'
+    'django_filters',
+    'drf_spectacular',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'users.authentication.BearerAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'BudgetLens API',
+    'DESCRIPTION': 'BudgetLens:',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
 }
 
 MIDDLEWARE = [

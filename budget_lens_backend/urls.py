@@ -18,6 +18,8 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from budget_lens_backend import settings
 
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),  # rest_framework
     path('admin/', admin.site.urls),
@@ -29,4 +31,9 @@ urlpatterns = [
     path('', include('merchant.urls')),
     path('', include('rules.urls')),
     path('file/', include('filemanagement.urls'), name='file'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Optional UI:
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL)  # static files
