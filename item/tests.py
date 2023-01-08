@@ -150,7 +150,7 @@ class ItemsAPITest(APITransactionTestCase):
 
 
 class PaginationReceiptsAPITest(APITestCase):
-    '''Test Cases for dividing the receipts of a user into pages'''
+    """Test Cases for dividing the receipts of a user into pages"""
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -438,6 +438,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         # two items contained prices >=12
         self.assertEqual(len(response.data['page_list']), 2)
+
 
 class CategoryCostsAPITest(APITransactionTestCase):
     reset_sequences = True

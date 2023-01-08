@@ -147,7 +147,6 @@ class CategoryAPITestCase(APITestCase):
         # Make sure that the parent_category_id is of reference to the actual parent_category (Food is this test case)
         self.assertEqual(response.data['parent_category_id'], self.category_food.pk)
 
-
         # Assert the status code
         self.assertEqual(response.status_code, HTTP_200_OK)
 
@@ -315,5 +314,3 @@ class CategoryAPITestCase(APITestCase):
         # Assert there is no category with the old name
         self.assertEquals(len(old_category), 0)
         self.assertFalse(old_category)
-
-
