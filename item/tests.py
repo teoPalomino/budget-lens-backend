@@ -517,7 +517,6 @@ class CategoryCostsAPITest(APITransactionTestCase):
 
     def test_get_category_costs(self):
 
-
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(reverse('get_category_costs'), format='json')
