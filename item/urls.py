@@ -8,5 +8,6 @@ urlpatterns = [
     path('items/delete/<int:item_id>/', views.DeleteItemAPI.as_view(), name='delete_item'),  # Delete an item
     path('items/pageNumber=<pageNumber>&pageSize=<pageSize>/', views.PaginateFilterItemsView.as_view(),
          name='list_paged_items'),
+    path('items/category/costs/', views.GetCategoryCostsView.as_view(), name='get_category_costs')
 
 ]

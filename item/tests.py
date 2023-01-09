@@ -2,6 +2,7 @@ import datetime
 from random import randint
 from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.status import HTTP_200_OK
 
 from item.models import Item
 
@@ -149,7 +150,7 @@ class ItemsAPITest(APITransactionTestCase):
 
 
 class PaginationReceiptsAPITest(APITestCase):
-    '''Test Cases for dividing the receipts of a user into pages'''
+    """Test Cases for dividing the receipts of a user into pages"""
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -437,3 +438,92 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         # two items contained prices >=12
         self.assertEqual(len(response.data['page_list']), 2)
+
+
+class CategoryCostsAPITest(APITransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='therock123@gmail.com',
+            email='therock123@gmail.com',
+            first_name='The',
+            last_name='Rock',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-1234"
+        )
+        self.data = {
+            'username': 'therock123@gmail.com',
+            'password': 'wrestlingrules123'
+        }
+
+        self.token = BearerToken.objects.create(user=self.user)
+
+        self.receipt1 = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+        self.category1 = Category.objects.create(
+            user=self.user,
+            category_name="clothes",
+            category_toggle_star=False,
+            parent_category_id=None
+        )
+
+        self.shirt = Item.objects.create(
+            user=self.user,
+            receipt=Receipts.objects.get(user=self.user),
+            name='shirt',
+            category_id=self.category1,
+            price=10.15,
+            important_dates="2022-10-09"
+        )
+
+        self.category2 = Category.objects.create(
+            user=self.user,
+            category_name="drinks",
+            category_toggle_star=False,
+            parent_category_id=None
+        )
+
+        self.coffee = Item.objects.create(
+            user=self.user,
+            receipt=Receipts.objects.get(user=self.user),
+            name='coffee',
+            category_id=self.category2,
+            price=10.15,
+            important_dates="2022-10-09"
+        )
+
+        self.tea = Item.objects.create(
+            user=self.user,
+            receipt=Receipts.objects.get(user=self.user),
+            name='tea',
+            category_id=self.category2,
+            price=10.15,
+            important_dates="2022-10-09"
+        )
+
+    def test_get_category_costs(self):
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(reverse('get_category_costs'), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Assert the prices
+        self.assertEqual(float(response.data['Costs'][0]['category_cost']), self.shirt.price)
+        self.assertEqual(float(response.data['Costs'][1]['category_cost']),
+                         self.coffee.price + self.tea.price)
