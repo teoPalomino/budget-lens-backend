@@ -10,6 +10,7 @@ class Category(models.Model):
     category_toggle_star = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     parent_category_id = models.IntegerField(blank=True, null=True)
+    icon = models.CharField(max_length=100, blank=True, default='')
 
     class Meta:
         unique_together = ("user", "category_name")

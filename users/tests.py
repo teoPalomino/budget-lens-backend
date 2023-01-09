@@ -226,7 +226,7 @@ class UserAPITest(APITestCase):
         # Assert that there are no more tokens in the database
         self.assertEqual(BearerToken.objects.count(), 0)
 
-    def test_edit_user_profile_success(self):
+    def test_edit_user_profile_success(self) -> object:
         profile_edit_url = reverse('user_profile')
 
         # Create user instance for the test
