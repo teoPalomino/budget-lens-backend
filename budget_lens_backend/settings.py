@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'category.apps.CategoryConfig',
     'item.apps.ItemConfig',
     'important_dates.apps.ImportantDatesConfig',
+    'item_split.apps.ItemSplitConfig',
     'filemanagement',
     'rules.apps.RulesConfig',
 
