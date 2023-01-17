@@ -214,15 +214,47 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        print(response.data)
-
-        # self.assertEqual(response.data['original_user'], self.item.user.first_name)
-
-        # # Loop and assert that all of the shared users are correct
-        # user_id_list = list(map(int, itemsplit.shared_user_ids.split(',')))
-        # for count, user_id in enumerate(user_id_list):
-        #     user = User.objects.get(id=user_id)
-        #     self.assertEqual(response.data['shared_users'][count], user.first_name)
+        self.assertEqual(response.data['shared_amount'], itemsplit.shared_amount)
+        self.assertEqual(response.data['is_shared_with_item_user'], itemsplit.is_shared_with_item_user)
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_200_OK)
+
+    def test_get_shared_amount_invalid_id(self):
+        # Create a new ItemSplit object using the post request
+        self.client.post(
+            self.url_add_item_split,
+            data={
+                'item': self.item.pk,
+                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
+                'is_shared_with_item_user': False
+            },
+            format='json'
+        )
+
+        # The url using kwargs itemsplit_id with invalid id number eg. 100
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'itemsplit_id': 100})
+
+        response = self.client.get(
+            self.url_shared_amount,
+            format='json'
+        )
+
+        self.assertEqual(response.data['message'], f"ItemSplit object with id '{100}' does not exist")
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        # Do the same request but with invalid parameters
+        # The url using kwargs itemsplit_id with invalid id number eg. a
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'itemsplit_id': 'a'})
+
+        response = self.client.get(
+            self.url_shared_amount,
+            format='json'
+        )
+
+        self.assertEqual(response.data['message'], f"ItemSplit object with id '{'a'}' does not exist")
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
