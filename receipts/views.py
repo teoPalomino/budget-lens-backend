@@ -78,7 +78,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         """
-        Get the resonse from the super class which returns the entire list
+        Get the response from the super class which returns the entire list
         and then paginate the results
         """
         #

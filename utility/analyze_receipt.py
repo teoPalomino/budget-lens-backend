@@ -1,5 +1,8 @@
 import os
-def analyze_receipts(file):
+from django.db import models
+from merchant.models import Merchant
+from item.models import Item
+def analyze_receipts(file,passed_receipt):
     if os.getenv('APP_ENV') != 'test':
         path_to_sample_documents = file
         from azure.core.credentials import AzureKeyCredential
@@ -23,6 +26,9 @@ def analyze_receipts(file):
             receipt_text +=  "Receipt type: {}".format(receipt.doc_type or "N/A")
             merchant_name = receipt.fields.get("MerchantName")
             if merchant_name:
+                receipt_merchant, created = Merchant.objects.get_or_create(name=merchant_name.value)
+                passed_receipt.merchant = receipt_merchant
+                passed_receipt.save()
                 receipt_text +=  (
                     "Merchant Name: {} has confidence: {}".format(
                         merchant_name.value, merchant_name.confidence
@@ -60,6 +66,8 @@ def analyze_receipts(file):
                                 item_price.value, item_price.confidence
                             )
                         )
+
+
                     item_total_price = item.value.get("TotalPrice")
                     if item_total_price:
                         receipt_text +=(
@@ -67,6 +75,20 @@ def analyze_receipts(file):
                                 item_total_price.value, item_total_price.confidence
                             )
                         )
+                        if item_price is not None:
+                            Item.objects.create(
+                                user=passed_receipt.user,
+                                receipt=passed_receipt,
+                                name=item_description.value,
+                                price=item_price.value,
+                            )
+                        else:
+                            Item.objects.create(
+                                user=passed_receipt.user,
+                                receipt=passed_receipt,
+                                name=item_description.value,
+                                price=item_total_price.value,
+                            )
             subtotal = receipt.fields.get("Subtotal")
             if subtotal:
                 receipt_text +=(

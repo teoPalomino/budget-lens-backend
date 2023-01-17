@@ -1,5 +1,4 @@
 # from django.shortcuts import render
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -8,8 +7,17 @@ from item.models import Item
 from .models import Category
 from .serializers import BasicCategorySerializer
 
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, filters, status
 
-# Create your views here.
+
+class CategoryFilter(django_filters.FilterSet):
+    category_toggle_star = django_filters.BooleanFilter(field_name='category_toggle_star', lookup_expr='icontains')
+
+    class Meta:
+        model = Category
+        fields = ['category_toggle_star']
 
 
 class AddCategoryView(generics.GenericAPIView):
@@ -32,7 +40,8 @@ class AddCategoryView(generics.GenericAPIView):
         return Response({
             "category_name": category.category_name,
             "category_toggle_star": category.category_toggle_star,
-            "parent_category_id": category.parent_category_id
+            "parent_category_id": category.parent_category_id,
+            "icon": category.icon
         }, status=HTTP_200_OK)
 
     def get_queryset(self):
@@ -75,8 +84,18 @@ class DeleteCategoryView(generics.DestroyAPIView):
 
 
 class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
+    """
+    List all categories and subcategories.
+    To filter basted on stared on unstared categories type the url in the following
+        /api/category/?category_toggle_star=true  --> list of only stared categories and subcategories
+        /api/category/?category_toggle_star=false --> list of only unstared categories and subcategories
+    """
     serializer_class = BasicCategorySerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = CategoryFilter
+    ordering_fields = '__all__'
+    search_fields = ['category_toggle_star']
 
     def get(self, request, *args, **kwargs):
         # Get the list of Categories
@@ -157,25 +176,19 @@ class AddAndListCategoryView(AddCategoryView, ListCategoriesAndSubCategoriesView
     pass
 
 
-class GetCategoryCostsView(generics.ListAPIView):
+class EditCategoryAPIView(generics.UpdateAPIView):
     serializer_class = BasicCategorySerializer
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
-        # Get the list of Items
-        items = self.get_queryset()
-        category_costs_dict = {}
+    def put(self, request, *args, **kwargs):
 
-        if items.exists():
-            for item in items:
-                if item.category_id.get_category_name() in category_costs_dict:
-                    category_costs_dict[item.category_id.get_category_name()] += item.price
-                else:
-                    category_costs_dict[item.category_id.get_category_name()] = item.price
-            return Response(category_costs_dict, HTTP_200_OK)
+        if kwargs.get('categoryName'):
 
-        return Response({"Response": "The user either has no items created or something went wrong"},
-                        HTTP_400_BAD_REQUEST)
+            category = Category.objects.filter(user=request.user.id, category_name=kwargs.get('categoryName'))
 
-    def get_queryset(self):
-        return Item.objects.filter(user=self.request.user)
+            if category.exists():
+                category.update(category_name=request.data.get('category_name'))
+
+                return Response({"response": "Category name has been updated."}, status=status.HTTP_200_OK)
+
+        return Response({"response": "The current category does not exist."}, status=status.HTTP_404_NOT_FOUND)
