@@ -1,6 +1,7 @@
 from django.db import models
 from item.models import Item
 
+
 class ItemSplit(models.Model):
     """
     Model for Splitting a single item accross many users.

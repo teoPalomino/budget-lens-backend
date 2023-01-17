@@ -1,11 +1,8 @@
-import django_filters
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from django.core.paginator import Paginator
+from rest_framework.status import HTTP_400_BAD_REQUEST
+
 
 from .serializers import ItemSplitSerializer
 
@@ -15,10 +12,10 @@ from users.models import User
 
 
 class AddItemSplitAPI(generics.ListCreateAPIView):
-    """ 
-    Adds item to a receipt for a user 
+    """
+    Adds item to a receipt for a user
     The list of shared user IDs are a string that represents the list of user IDs (List of integers).
-    Therefore the list must be separated by commas. 
+    Therefore the list must be separated by commas.
     """
     serializer_class = ItemSplitSerializer
     permission_classes = [IsAuthenticated]
@@ -31,12 +28,12 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
             # Try to convert the string into the list of integers. If not then its not a valid string list
             user_ids_list = list(map(int, request.data['shared_user_ids'].split(',')))
         except Exception:
-            return Response({"message", "Invalid list of user IDs. Please enter numbers separated by commas."}, status=HTTP_400_BAD_REQUEST)
+            return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."}, status=HTTP_400_BAD_REQUEST)
 
         # Check if the user ids are valid (they exist)
         for user_id in user_ids_list:
-            if User.objects.filter(id=user_id).exists() != True:
-                return Response({"message", "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
+            if User.objects.filter(id=user_id).exists() is not True:
+                return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
 
         # If the users exists add the new Item Split object
         return super().post(request, *args, **kwargs)
