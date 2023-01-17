@@ -148,9 +148,8 @@ DATABASES = {
 
 if 'test' in sys.argv or 'test\\coverage' in sys.argv:  # Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
-    DATABASES['default']['NAME'] = 'bud_local_db1'
+    DATABASES['default']['NAME'] = 'bud_local_db'
     DATABASES['default']['USER'] = 'postgres'
-    DATABASES['default']['PASSWORD'] = '25082001'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
