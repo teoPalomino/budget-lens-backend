@@ -1,4 +1,4 @@
-from important_dates.serializers import ImportantDatesSerializer
+from important_dates.serializers import ImportantDatesSerializer, PutPatchImportantDatesSerializer
 from .models import ImportantDates
 from rest_framework import generics
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -55,7 +55,7 @@ class AddImportantDate(generics.CreateAPIView):
 class DeleteImportantDate(generics.DestroyAPIView):
     """ Deletes an important date """
     permission_classes = [IsAuthenticated]
-    serializer_class = ImportantDatesSerializer
+    serializer_class = PutPatchImportantDatesSerializer
 
     def delete(self, request, *args, **kwargs):
         if kwargs.get('important_date_id'):
@@ -64,3 +64,8 @@ class DeleteImportantDate(generics.DestroyAPIView):
                 important_date.delete()
                 return Response({"Success": "Important date deleted"}, status=HTTP_200_OK)
             return Response({"Error": "Important date does not exist"}, status=HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"Error": "No important date id provided"}, status=HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        return ImportantDates.objects.filter(user=self.request.user)
