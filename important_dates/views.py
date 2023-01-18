@@ -46,7 +46,7 @@ class AddImportantDate(generics.CreateAPIView):
                 "date": important_date.date,
                 "description": important_date.description,
             }, status=HTTP_200_OK)
-        return Response({"Error" : "Item does not exist"}, status=HTTP_400_BAD_REQUEST)
+        return Response({"Error": "Item does not exist"}, status=HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
         return ImportantDates.objects.filter(user=self.request.user)

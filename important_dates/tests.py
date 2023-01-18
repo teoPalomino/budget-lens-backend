@@ -171,5 +171,3 @@ class ImportantDatesTests(APITransactionTestCase):
         self.assertEqual(response.data[0]['description'], "first")
         self.assertEqual(response.data[0]['item'], self.item1.id)
         self.assertEqual(response.data[0]['date'], "2020-12-12")
-
-
