@@ -28,8 +28,7 @@ class AddItemAPI(generics.CreateAPIView):
                 "receipt": item.receipt.id,
                 "name": item.name,
                 "category_id": item.category_id.id if item.category_id is not None else item.category_id,
-                "price": item.price,
-                "important_dates": item.important_dates,
+                "price": item.price
             }, status=HTTP_200_OK)
         return Response({
             "Error": "Receipt does not exist"
@@ -92,7 +91,7 @@ class GetItemsAPI(generics.ListAPIView):
 
         if items.exists():
             for item in items:
-                item_costs_dict[item.id] = {'item': [item.user.id, item.name, item.price, item.important_dates],
+                item_costs_dict[item.id] = {'item': [item.user.id, item.name, item.price],
                                             'receipt_details': [item.receipt.id, item.receipt.merchant.name,
                                                                 item.receipt.scan_date],
                                             'category_details': [item.category_id.category_name,
@@ -120,7 +119,7 @@ class ItemFilter(django_filters.FilterSet):
     class Meta:
         model = Item
         fields = ['id', 'receipt', 'category_id', 'name', 'price', 'min_price', 'max_price',
-                  'important_dates', 'start_date', 'end_date', 'user', 'merchant_name', 'merchant_id']
+                  'start_date', 'end_date', 'user', 'merchant_name', 'merchant_id']
 
 
 class PaginateFilterItemsView(generics.ListAPIView):
@@ -135,7 +134,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
     TODO: fix search, for some reason not working
     '''
 
-    # search_fields = ['name', 'price', 'important_dates', 'user']
+    # search_fields = ['name', 'price','user']
 
     # noqa: C901
     def get(self, request, *args, **kwargs):

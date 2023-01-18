@@ -95,7 +95,6 @@ class CategoryAPITestCase(APITestCase):
             price=5.99,
             receipt_id=Receipts.objects.get(user=self.user).pk,
             category_id=Category.objects.get(category_name='Fruits'),
-            important_dates='2020-01-01',
             user=self.user
         )
 
@@ -104,7 +103,6 @@ class CategoryAPITestCase(APITestCase):
             price=10,
             receipt_id=Receipts.objects.get(user=self.user).pk,
             category_id=Category.objects.get(category_name='Taxi'),
-            important_dates='2020-01-01',
             user=self.user
         )
 
@@ -113,7 +111,6 @@ class CategoryAPITestCase(APITestCase):
             price=15,
             receipt_id=Receipts.objects.get(user=self.user).pk,
             category_id=Category.objects.get(category_name='Taxi'),
-            important_dates='2020-01-01',
             user=self.user
         )
 
