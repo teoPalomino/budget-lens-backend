@@ -70,8 +70,7 @@ class ItemsAPITest(APITransactionTestCase):
             receipt=Receipts.objects.get(user=self.user),
             name='coffee',
             category_id=self.category1,
-            price=10.15,
-            important_dates="2022-10-09"
+            price=10.15
         )
 
         Item.objects.create(
@@ -79,8 +78,7 @@ class ItemsAPITest(APITransactionTestCase):
             receipt=Receipts.objects.get(user=self.user),
             name='poutine',
             category_id=self.category1,
-            price=59.99,
-            important_dates="2022-10-09"
+            price=59.99
         )
 
         Item.objects.create(
@@ -88,8 +86,7 @@ class ItemsAPITest(APITransactionTestCase):
             receipt=Receipts.objects.get(user=self.user),
             name='mateo',
             category_id=self.category1,
-            price=12.99,
-            important_dates="2022-10-09"
+            price=12.99
         )
 
     def test_add_new_item(self):
@@ -106,8 +103,7 @@ class ItemsAPITest(APITransactionTestCase):
                 "receipt": self.receipt1.id,
                 "category_id": self.category1.id,
                 "name": "potato",
-                "price": 1.0,
-                "important_dates": "1990-12-12",
+                "price": 1.0
             }, format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -118,7 +114,7 @@ class ItemsAPITest(APITransactionTestCase):
 
     def test_item_details(self):
         # This test checks if the specific item is returned, it does this by checking if
-        # receipt_id, price, name and important_dates match the database
+        # receipt_id, price, and name match the database
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
         response = self.client.get(reverse('item_details', kwargs={'item_id': Item.objects.get(id=1).id}),
@@ -127,7 +123,6 @@ class ItemsAPITest(APITransactionTestCase):
         self.assertEquals(response.data[0]['receipt'], item.receipt.id)
         self.assertEquals(response.data[0]['price'], str(item.price))
         self.assertEquals(response.data[0]['name'], item.name)
-        self.assertEquals(response.data[0]['important_dates'], str(item.important_dates))
 
     def test_delete_item(self):
         # This test checks if the item is deleted and if the list of items is decreased
@@ -197,8 +192,7 @@ class PaginationReceiptsAPITest(APITestCase):
                 receipt=Receipts.objects.get(user=self.user),
                 category_id=self.category1,
                 name='poutine',
-                price=59.99,
-                important_dates="2022-10-09"
+                price=59.99
             )
 
         # Get the size of the reciepts create for this user
@@ -344,8 +338,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
             receipt=self.receipt1,
             name='coffee',
             category_id=self.category1,
-            price=10.15,
-            important_dates="2022-10-09"
+            price=10.15
         )
 
         Item.objects.create(
@@ -353,8 +346,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
             receipt=self.receipt1,
             name='coffee',
             category_id=self.category1,
-            price=10.15,
-            important_dates="2022-10-09"
+            price=10.15
         )
 
         Item.objects.create(
@@ -362,8 +354,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
             receipt=self.receipt2,
             name='poutine',
             category_id=self.category1,
-            price=59.99,
-            important_dates="2022-10-09"
+            price=59.99
         )
 
         Item.objects.create(
@@ -371,8 +362,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
             receipt=self.receipt2,
             name='mateo',
             category_id=self.category1,
-            price=12.99,
-            important_dates="2022-10-12"
+            price=12.99
         )
 
     '''
@@ -486,8 +476,7 @@ class CategoryCostsAPITest(APITransactionTestCase):
             receipt=Receipts.objects.get(user=self.user),
             name='shirt',
             category_id=self.category1,
-            price=10.15,
-            important_dates="2022-10-09"
+            price=10.15
         )
 
         self.category2 = Category.objects.create(
@@ -502,8 +491,7 @@ class CategoryCostsAPITest(APITransactionTestCase):
             receipt=Receipts.objects.get(user=self.user),
             name='coffee',
             category_id=self.category2,
-            price=10.15,
-            important_dates="2022-10-09"
+            price=10.15
         )
 
         self.tea = Item.objects.create(
@@ -511,8 +499,7 @@ class CategoryCostsAPITest(APITransactionTestCase):
             receipt=Receipts.objects.get(user=self.user),
             name='tea',
             category_id=self.category2,
-            price=10.15,
-            important_dates="2022-10-09"
+            price=10.15
         )
 
     def test_get_category_costs(self):

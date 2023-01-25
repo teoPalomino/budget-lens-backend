@@ -14,8 +14,7 @@ class ItemSerializer(serializers.ModelSerializer):
             receipt=validated_data['receipt'],
             category_id=validated_data['category_id'],
             name=validated_data['name'],
-            price=validated_data['price'],
-            important_dates=validated_data['important_dates'],
+            price=validated_data['price']
         )
         return item
 
@@ -28,4 +27,4 @@ class PutPatchItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ('user', 'receipt', 'category_id', 'name', 'price', 'important_dates')
+        fields = ('user', 'receipt', 'category_id', 'name', 'price')
