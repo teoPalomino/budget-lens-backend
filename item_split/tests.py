@@ -139,8 +139,8 @@ class ItemSplitAPITestCase(APITestCase):
             is_shared_with_item_user=False
         )
 
-        # The url using kwargs itemsplit_id
-        self.url_shared_users_list = reverse('get_user_list', kwargs={'itemsplit_id': itemsplit.pk})
+        # The url using kwargs item_id
+        self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': self.item.pk})
 
         response = self.client.get(
             self.url_shared_users_list,
@@ -166,29 +166,29 @@ class ItemSplitAPITestCase(APITestCase):
             is_shared_with_item_user=False
         )
 
-        # The url using kwargs itemsplit_id with invalid id number eg. 100
-        self.url_shared_users_list = reverse('get_user_list', kwargs={'itemsplit_id': 100})
+        # The url using kwargs item_id with invalid id number eg. 100
+        self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': 100})
 
         response = self.client.get(
             self.url_shared_users_list,
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with id '{100}' does not exist")
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{100}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         # Do the same request but with invalid parameters
-        # The url using kwargs itemsplit_id with invalid id number eg. a
-        self.url_shared_users_list = reverse('get_user_list', kwargs={'itemsplit_id': 'a'})
+        # The url using kwargs item_id with invalid id number eg. a
+        self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': 'a'})
 
         response = self.client.get(
             self.url_shared_users_list,
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with id '{'a'}' does not exist")
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{'a'}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
@@ -205,8 +205,8 @@ class ItemSplitAPITestCase(APITestCase):
         ).data['id']
         itemsplit = ItemSplit.objects.get(id=itemsplit_data_id)
 
-        # The url using kwargs itemsplit_id
-        self.url_shared_amount = reverse('get_shared_amount', kwargs={'itemsplit_id': itemsplit.pk})
+        # The url using kwargs item_id
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': self.item.pk})
 
         response = self.client.get(
             self.url_shared_amount,
@@ -231,29 +231,29 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        # The url using kwargs itemsplit_id with invalid id number eg. 100
-        self.url_shared_amount = reverse('get_shared_amount', kwargs={'itemsplit_id': 100})
+        # The url using kwargs item_id with invalid id number eg. 100
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': 100})
 
         response = self.client.get(
             self.url_shared_amount,
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with id '{100}' does not exist")
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{100}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         # Do the same request but with invalid parameters
-        # The url using kwargs itemsplit_id with invalid id number eg. a
-        self.url_shared_amount = reverse('get_shared_amount', kwargs={'itemsplit_id': 'a'})
+        # The url using kwargs item_id with invalid id number eg. a
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': 'a'})
 
         response = self.client.get(
             self.url_shared_amount,
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with id '{'a'}' does not exist")
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{'a'}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)

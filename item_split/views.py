@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
+from item.models import Item
+
 
 from .serializers import ItemSplitSerializer
 
@@ -43,7 +45,7 @@ class GetSharedUsersList(generics.GenericAPIView):
     """
     Get a list of the shared users as well as the original user (the user with the item) for a specific shared item.
     Put in place as a parameter a shared item id like so:
-        `api/itemsplit/sharedUsers/itemsplit_id=<itemsplit_id>`
+        `api/itemsplit/sharedUsers/item_id=<item_id>`
     """
 
     serializer_class = ItemSplitSerializer
@@ -53,10 +55,12 @@ class GetSharedUsersList(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         # Try the ID of the item split parameter if there exists an object with that ID.
         try:
-            item_split = self.get_queryset().filter(id=kwargs['itemsplit_id']).get()
+            item = Item.objects.get(id=kwargs['item_id'])
+            item_split = self.get_queryset().filter(item=item.id).get()
+
         except Exception:
             return Response({
-                'message': f"ItemSplit object with id '{kwargs['itemsplit_id']}' does not exist"
+                'message': f"ItemSplit object with item id of '{kwargs['item_id']}' does not exist"
             }, status=HTTP_400_BAD_REQUEST)
 
         # Create the list of user ids from the string list
@@ -83,10 +87,11 @@ class GetSharedAmount(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         # Try the ID of the item split parameter if there exists an object with that ID.
         try:
-            item_split = self.get_queryset().filter(id=kwargs['itemsplit_id']).get()
+            item = Item.objects.get(id=kwargs['item_id'])
+            item_split = self.get_queryset().filter(item=item.id).get()
         except Exception:
             return Response({
-                'message': f"ItemSplit object with id '{kwargs['itemsplit_id']}' does not exist"
+                'message': f"ItemSplit object with item id of '{kwargs['item_id']}' does not exist"
             }, status=HTTP_400_BAD_REQUEST)
 
         return Response({
