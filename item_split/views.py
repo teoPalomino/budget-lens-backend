@@ -90,6 +90,7 @@ class GetSharedAmount(generics.GenericAPIView):
             }, status=HTTP_400_BAD_REQUEST)
 
         return Response({
-            "shared_amount": item_split.shared_amount,  # From the item object, get the user
+            # `shared_amount` is based off the amount of the item divided by number of users being shared with
+            "shared_amount": item_split.shared_amount,
             "is_shared_with_item_user": item_split.is_shared_with_item_user,
         }, status=HTTP_200_OK)

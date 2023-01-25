@@ -200,7 +200,6 @@ class ItemSplitAPITestCase(APITestCase):
             data={
                 'item': self.item.pk,
                 'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
-                'is_shared_with_item_user': False
             },
             format='json'
         ).data['id']
