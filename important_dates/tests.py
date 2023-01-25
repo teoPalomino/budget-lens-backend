@@ -106,7 +106,7 @@ class ImportantDatesTests(APITransactionTestCase):
         original_count = ImportantDates.objects.count()
 
         response = self.client.post(
-            reverse('add_important_date'),
+            reverse('important_dates'),
             data={
                 "user": self.user.id,
                 "item": self.item1.id,
@@ -128,8 +128,8 @@ class ImportantDatesTests(APITransactionTestCase):
         date_id = self.date1.id
 
         response = self.client.delete(
-            reverse('delete_important_date',
-                    kwargs={'important_date_id': self.date1.id}),
+            reverse('delete_important_dates',
+                    kwargs={'important_date_id': date_id}),
             format='multipart')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -147,7 +147,7 @@ class ImportantDatesTests(APITransactionTestCase):
         count = ImportantDates.objects.count()
 
         response = self.client.get(
-            reverse('get_important_dates'),
+            reverse('important_dates'),
             format='multipart')
 
         self.assertEqual(response.status_code, HTTP_200_OK)

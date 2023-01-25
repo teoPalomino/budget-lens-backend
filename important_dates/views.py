@@ -6,11 +6,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
-class GetImportantDates(generics.ListAPIView):
-    """ Gets all or a specific important dates for a user """
-
+class RetrieveUpdateImportantDates(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ImportantDatesSerializer
+
+    """ Gets all or a specific important dates for a user """
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
@@ -26,14 +26,7 @@ class GetImportantDates(generics.ListAPIView):
             serializer = ImportantDatesSerializer(important_dates, many=True)
             return Response(serializer.data, status=HTTP_200_OK)
 
-    def get_queryset(self):
-        return ImportantDates.objects.filter(user=self.request.user)
-
-
-class AddImportantDate(generics.CreateAPIView):
     """ Adds an important date to an item for a user """
-    permission_classes = [IsAuthenticated]
-    serializer_class = ImportantDatesSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -54,6 +47,7 @@ class AddImportantDate(generics.CreateAPIView):
 
 class DeleteImportantDate(generics.DestroyAPIView):
     """ Deletes an important date """
+
     permission_classes = [IsAuthenticated]
     serializer_class = PutPatchImportantDatesSerializer
 
