@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
-class RetrieveUpdateImportantDates(generics.RetrieveUpdateDestroyAPIView):
+class RetrieveUpdateImportantDates(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ImportantDatesSerializer
 
