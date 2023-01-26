@@ -6,11 +6,11 @@ from item.models import Item
 class ImportantDatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImportantDates
-        fields = '__all__'
+        fields = ('item', 'date', 'description')
 
     def create(self, validated_data):
         important_date = ImportantDates.objects.create(
-            user=validated_data['user'],
+            user=self.context['request'].user,
             item=validated_data['item'],
             date=validated_data['date'],
             description=validated_data['description'],
