@@ -99,6 +99,7 @@ class ItemSplitAPITestCase(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
     def test_add_item_split_invalid_string(self):
+        # Case1:  Where shared_user_ids string has letters
         response = self.client.post(
             self.url_add_item_split,
             data={
@@ -111,6 +112,22 @@ class ItemSplitAPITestCase(APITestCase):
 
         # Assert that the item split object was created successfully
         self.assertEqual(response.data['message'], "Invalid list of user IDs. Please enter numbers separated by commas.")
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        # Case2:  Where shared_user_ids string has duplicate numbers
+        response = self.client.post(
+            self.url_add_item_split,
+            data={
+                'item': self.item.pk,
+                'shared_user_ids': '3, 3',
+                'is_shared_with_item_user': False
+            },
+            format='json'
+        )
+
+        # Assert that the item split object was created successfully
+        self.assertEqual(response.data['message'], "List of user IDs contains duplicates.")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
