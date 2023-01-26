@@ -21,8 +21,8 @@ class AddItemAPI(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        item = serializer.save()
         if Receipts.objects.filter(id=request.data["receipt"]).exists():
+            item = serializer.save()
             return Response({
                 "user": item.user.id,
                 "receipt": item.receipt.id,

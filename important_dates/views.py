@@ -1,4 +1,5 @@
 from important_dates.serializers import ImportantDatesSerializer, PutPatchImportantDatesSerializer
+from item.models import Item
 from .models import ImportantDates
 from rest_framework import generics
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -31,10 +32,9 @@ class RetrieveUpdateImportantDates(generics.RetrieveUpdateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        important_date = serializer.save()
-        if ImportantDates.objects.filter(id=request.data["item"]).exists():
+        if Item.objects.filter(id=request.data["item"]).exists():
+            important_date = serializer.save()
             return Response({
-                "user": important_date.user.id,
                 "item": important_date.item.id,
                 "date": important_date.date,
                 "description": important_date.description,

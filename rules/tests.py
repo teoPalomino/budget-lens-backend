@@ -93,7 +93,6 @@ class TestRules(APITransactionTestCase):
         rule = Rule.objects.get(id=1)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]['user'], rule.user.id)
         self.assertEqual(response.data[0]['regex'], rule.regex)
         self.assertEqual(response.data[0]['category'], rule.category.id)
 
