@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 from item.models import Item
 
@@ -38,7 +38,14 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
                 return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
 
         # If the users exists add the new Item Split object
-        return super().post(request, *args, **kwargs)
+        response_data = super().post(request, *args, **kwargs).data
+        item_response = Item.objects.get(id=response_data['item'])
+        response_data['item'] = {
+            "item_id": item_response.pk,
+            "item_name": item_response.name,
+            "item_price": item_response.price
+        }
+        return Response(response_data, status=HTTP_201_CREATED)
 
 
 class GetSharedUsersList(generics.GenericAPIView):
