@@ -6,7 +6,7 @@ from item.models import Item
 class ImportantDatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImportantDates
-        fields = ('item', 'date', 'description')
+        fields = ('id', 'item', 'date', 'description')
 
     def create(self, validated_data):
         important_date = ImportantDates.objects.create(
