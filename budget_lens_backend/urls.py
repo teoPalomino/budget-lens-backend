@@ -32,6 +32,7 @@ urlpatterns = [
     path('', include('rules.urls')),
     path('', include('important_dates.urls')),
     path('', include('item_split.urls')),
+    path('', include('receipt_split.urls')),
     path('file/', include('filemanagement.urls'), name='file'),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
