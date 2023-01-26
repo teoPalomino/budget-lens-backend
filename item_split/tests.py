@@ -126,7 +126,9 @@ class ItemSplitAPITestCase(APITestCase):
         )
 
         # Assert that the item split object was created successfully
-        self.assertEqual(response.data['item'], self.item.pk)
+        self.assertEqual(response.data['item']['item_id'], self.item.pk)
+        self.assertEqual(response.data['item']['item_name'], self.item.name)
+        self.assertEqual(float(response.data['item']['item_price']), float(self.item.price))
         self.assertEqual(response.data['shared_user_ids'], f'{self.user2.pk}, {self.user3.pk}')
 
         self.assertEqual(response.status_code, HTTP_201_CREATED)
