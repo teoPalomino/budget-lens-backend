@@ -1,6 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 
 from receipts.models import Receipts
@@ -36,7 +37,6 @@ class AddReceiptSplitAPI(generics.ListCreateAPIView):
         try:
             # Try to convert the string into the list of integers. If not then it's not a valid string list
             user_ids_list = list(map(int, request.data['shared_user_ids'].split(',')))
-
         except Exception:
             return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."},
                             status=HTTP_400_BAD_REQUEST)
