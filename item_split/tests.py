@@ -72,8 +72,7 @@ class ItemSplitAPITestCase(APITestCase):
             user=self.user1,
             receipt=Receipts.objects.get(user=self.user1),
             name='coffee',
-            price=10.15,
-            important_dates="2022-10-09"
+            price=10.15
         )
 
         # the urls

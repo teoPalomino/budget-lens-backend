@@ -6,7 +6,8 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('item_split', '0001_initial'), ('item_split', '0002_itemsplit_is_shared_with_item_user_and_more'), ('item_split', '0003_alter_itemsplit_shared_amount'), ('item_split', '0004_alter_itemsplit_shared_amount'), ('item_split', '0005_alter_itemsplit_shared_amount'), ('item_split', '0006_alter_itemsplit_item')]
+    replaces = [('item_split', '0001_initial'), ('item_split', '0002_itemsplit_is_shared_with_item_user_and_more'), ('item_split', '0003_alter_itemsplit_shared_amount'),
+                ('item_split', '0004_alter_itemsplit_shared_amount'), ('item_split', '0005_alter_itemsplit_shared_amount'), ('item_split', '0006_alter_itemsplit_item')]
 
     initial = True
 
