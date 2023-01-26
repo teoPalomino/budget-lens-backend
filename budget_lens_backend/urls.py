@@ -30,6 +30,7 @@ urlpatterns = [
     path('', include('item.urls')),
     path('', include('merchant.urls')),
     path('', include('rules.urls')),
+    path('', include('receipt_split.urls')),
     path('file/', include('filemanagement.urls'), name='file'),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
