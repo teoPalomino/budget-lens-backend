@@ -32,6 +32,13 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
         except Exception:
             return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."}, status=HTTP_400_BAD_REQUEST)
 
+        # Try to check for uniqueness of the list of user ids since a user can't have a same item shared more than
+        # once as it creates multiple instances of the same item
+        user_ids_list_as_set = set(user_ids_list)
+        if len(user_ids_list_as_set) != len(user_ids_list):
+            return Response({"message": "List of user IDs contains duplicates."},
+                            status=HTTP_400_BAD_REQUEST)
+
         # Check if the user ids are valid (they exist)
         for user_id in user_ids_list:
             if User.objects.filter(id=user_id).exists() is not True:
