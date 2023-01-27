@@ -7,8 +7,6 @@ from django.contrib.auth.models import User
 
 class Item(models.Model):
 
-    class Meta:
-        managed = False
     """
     An Item from a receipt that contains a name, it's price, and category
     """
