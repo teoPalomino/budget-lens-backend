@@ -422,8 +422,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         #                  f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         # )
 
-        
-
     def test_update_specific_receipt_image_with_receipt_id_using_put_request_from_Detail_Receipts_API_View(self):
         # Here, I am testing the API client for the case where a user tries to update a specific receipt they have already added/created using a PUT request
         # I am also making use of the "force_authenticate" method to authenticate the user before making the PUT request since

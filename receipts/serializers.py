@@ -58,8 +58,8 @@ class PutPatchReceiptsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Receipts
         fields = (
-            'user', 
-            'scan_date', 
+            'user',
+            'scan_date',
             'receipt_image',
             'merchant_name',
             'total',
