@@ -35,6 +35,7 @@ class RetrieveUpdateImportantDates(generics.RetrieveUpdateAPIView):
         if Item.objects.filter(id=request.data["item"]).exists():
             important_date = serializer.save()
             return Response({
+                "id": important_date.id,
                 "item": important_date.item.id,
                 "date": important_date.date,
                 "description": important_date.description,
