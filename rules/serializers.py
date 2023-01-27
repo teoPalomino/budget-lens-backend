@@ -5,11 +5,11 @@ from rules.models import Rule
 class RuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
-        fields = '__all__'
+        fields = ('regex', 'category', 'created_at')
 
     def create(self, validated_data):
         rule = Rule.objects.create(
-            user=validated_data['user'],
+            user=self.context['request'].user,
             regex=validated_data['regex'],
             category=validated_data['category'],
             created_at=validated_data['created_at']
