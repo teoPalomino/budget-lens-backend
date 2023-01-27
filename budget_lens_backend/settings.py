@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'merchant.apps.MerchantConfig',
     'category.apps.CategoryConfig',
     'item.apps.ItemConfig',
+    'important_dates.apps.ImportantDatesConfig',
+    'item_split.apps.ItemSplitConfig',
     'filemanagement',
     'rules.apps.RulesConfig',
 
