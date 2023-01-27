@@ -10,7 +10,7 @@ from django.db.models.signals import pre_save
 
 from merchant.models import Merchant
 
-from utility.analyze_receipt import analyze_receipts
+# from utility.analyze_receipt import analyze_receipts
 from utility.create_update_receipt import create_update_receipt
 
 
@@ -59,7 +59,6 @@ class Receipts(models.Model):
     def pre_save_image(sender, instance, *args, **kwargs):
         create_update_receipt(sender, instance)
         pass
-
 
     # @receiver(post_save, sender='receipts.Receipts')
     # def post_save_receipt(sender, instance, created, *args, **kwargs):

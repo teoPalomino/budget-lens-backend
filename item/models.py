@@ -1,6 +1,4 @@
 from django.db import models
-
-#from receipts.models import Receipts
 from category.models import Category
 from django.contrib.auth.models import User
 
