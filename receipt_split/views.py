@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 
 from receipts.models import Receipts
 from .serializers import ReceiptSplitSerializer
@@ -37,14 +37,15 @@ class AddReceiptSplitAPI(generics.ListCreateAPIView):
             # Try to convert the string into the list of integers. If not then it's not a valid string list
             user_ids_list = list(map(int, request.data['shared_user_ids'].split(',')))
 
-            # Try to check for uniqueness of the list of user ids since a user can't have a same receipt shared more than
-            # once as it creates multiple instances of the same receipt
-            user_ids_list_as_set = set(user_ids_list)
-            if len(user_ids_list_as_set) != len(user_ids_list):
-                return Response({"message": "List of user IDs contains duplicates."},
-                                status=HTTP_400_BAD_REQUEST)
         except Exception:
             return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."},
+                            status=HTTP_400_BAD_REQUEST)
+
+        # Try to check for uniqueness of the list of user ids since a user can't have a same receipt shared more than
+        # once as it creates multiple instances of the same receipt
+        user_ids_list_as_set = set(user_ids_list)
+        if len(user_ids_list_as_set) != len(user_ids_list):
+            return Response({"message": "List of user IDs contains duplicates."},
                             status=HTTP_400_BAD_REQUEST)
 
         # Check if the user ids are valid (they exist)
@@ -54,7 +55,14 @@ class AddReceiptSplitAPI(generics.ListCreateAPIView):
                                 status=HTTP_400_BAD_REQUEST)
 
         # If the users exist add the new Receipt Split object
-        return super().post(request, *args, **kwargs)
+        response_data = super().post(request, *args, **kwargs).data
+        receipt_response = Receipts.objects.get(id=response_data['receipt'])
+        response_data['receipt'] = {
+            "receipt_id": receipt_response.pk,
+            "receipt_scan_date": receipt_response.scan_date,
+            "receipt_total": receipt_response.total
+        }
+        return Response(response_data, status=HTTP_201_CREATED)
 
 
 class GetSharedUsersList(generics.GenericAPIView):
