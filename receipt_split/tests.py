@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.models import User
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
@@ -57,6 +59,7 @@ class ReceiptSplitAPITestCase(APITestCase):
         # Create the receipt
         self.receipt = Receipts.objects.create(
             user=self.user1,
+            scan_date=datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
             receipt_image=get_test_image_file(),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
@@ -90,6 +93,7 @@ class ReceiptSplitAPITestCase(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
     def test_add_receipt_split_invalid_string(self):
+        # Case1:  Where shared_user_ids string has letters
         response = self.client.post(
             self.url_add_receipt_split,
             data={
@@ -102,6 +106,22 @@ class ReceiptSplitAPITestCase(APITestCase):
 
         # Assert that the receipt split object was created successfully
         self.assertEqual(response.data['message'], "Invalid list of user IDs. Please enter numbers separated by commas.")
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        # Case2:  Where shared_user_ids string has duplicate numbers
+        response = self.client.post(
+            self.url_add_receipt_split,
+            data={
+                'receipt': self.receipt.pk,
+                'shared_user_ids': '3, 3',
+                'is_shared_with_receipt_user': False
+            },
+            format='json'
+        )
+
+        # Assert that the receipt split object was created successfully
+        self.assertEqual(response.data['message'], "List of user IDs contains duplicates.")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -118,7 +138,9 @@ class ReceiptSplitAPITestCase(APITestCase):
         )
 
         # Assert that the receipt split object was created successfully
-        self.assertEqual(response.data['receipt'], self.receipt.pk)
+        self.assertEqual(response.data['receipt']['receipt_id'], self.receipt.pk)
+        self.assertEqual(response.data['receipt']['receipt_scan_date'], self.receipt.scan_date)
+        self.assertEqual(response.data['receipt']['receipt_total'], self.receipt.total)
         self.assertEqual(response.data['shared_user_ids'], f'{self.user2.pk}, {self.user3.pk}')
 
         self.assertEqual(response.status_code, HTTP_201_CREATED)
