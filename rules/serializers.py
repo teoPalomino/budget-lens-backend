@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rules.models import Rule
-
+from datetime import datetime
 
 class RuleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,7 +12,7 @@ class RuleSerializer(serializers.ModelSerializer):
             user=self.context['request'].user,
             regex=validated_data['regex'],
             category=validated_data['category'],
-            created_at=validated_data['created_at']
+            created_at=datetime.now()
         )
         return rule
 
