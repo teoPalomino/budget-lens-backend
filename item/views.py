@@ -47,16 +47,16 @@ class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             try:
                 item = self.get_queryset().get(id=kwargs.get('item_id'))
 
-                response = {'item': {'user id': item.user.id,
-                                     'item name': item.name,
-                                     'price': item.price},
-                            'receipt_details': {'receipt id': item.receipt.id,
-                                                'merchant name': item.receipt.merchant.name,
-                                                'scan date': item.receipt.scan_date},
-                            'category_details': {'category id': item.category_id.id,
-                                                 'user id': item.category_id.user_id,
-                                                 'category name': item.category_id.category_name,
-                                                 'parent category id': item.category_id.parent_category_id}}
+                response = {'id': item.id,
+                            'user': item.user.id,
+                            'name': item.name,
+                            'price': item.price,
+                            'receipt': item.receipt.id,
+                            'merchant_name': item.receipt.merchant.name,
+                            'scan_date': item.receipt.scan_date,
+                            'category_id': item.category_id.id,
+                            'category_name': item.category_id.category_name,
+                            'parent_category_id': item.category_id.parent_category_id}
 
                 return Response(response, status=HTTP_200_OK)
 
