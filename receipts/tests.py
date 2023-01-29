@@ -22,7 +22,6 @@ from merchant.models import Merchant
 
 # This function is used when I want to directly create/add a new scanned receipt in the database
 def get_test_image_file():
-    return 'uploads/test.png'
     receipt_image_file = tempfile.NamedTemporaryFile(suffix='.png')
     return ImageFile(receipt_image_file, name=receipt_image_file.name)
 
@@ -30,7 +29,6 @@ def get_test_image_file():
 # I use this function to create a test image with a given image file type/extension that is used when I try
 # to send a post request to the API client in order to create/add a new scanned receipt in the database
 def create_image(image_file_type):
-    return 'uploads/test.png'
     with tempfile.NamedTemporaryFile(suffix=image_file_type, delete=False) as f:
         image = Image.new('RGB', (200, 200), 'white')
         image.save(f, 'PNG')
@@ -89,7 +87,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             data=self.new_data,
             format='json'
         )
-        self.image = create_image('.png')
+        self.image = create_image('.png').__str__()
         self.receipts_from_responses = []
 
     # I have to use the "tearDown" method to make sure the added/created scanned
@@ -313,7 +311,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.receipts_from_responses.append(self.response.data)
 
         # I am creating a second image to add to the list of receipts
-        self.image = create_image('.jpeg')
+        self.image = create_image('.jpeg').__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -381,7 +379,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg')
+        self.image = create_image('.jpeg').__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -422,6 +420,12 @@ class AddReceiptsAPITest(APITransactionTestCase):
         #                  f'{self.response.data["receipt_image"].split("/")[5]}').replace('\\', '/')
         # )
 
+        # Asserts a Successful 2XX OK status message
+        self.assertEquals(
+            self.response.status_code,
+            status.HTTP_200_OK
+        )
+
     def test_update_specific_receipt_image_with_receipt_id_using_put_request_from_Detail_Receipts_API_View(self):
         # Here, I am testing the API client for the case where a user tries to update a specific receipt they have already added/created using a PUT request
         # I am also making use of the "force_authenticate" method to authenticate the user before making the PUT request since
@@ -444,7 +448,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg')
+        self.image = create_image('.jpeg').__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -467,7 +471,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
 
         # Here, I am creating a new image to update the receipt with
-        self.image = create_image('.jpg')
+        self.image = create_image('.jpg').__str__()
 
         # Now, after the user has added/created the new receipts, when I call the PUT request on a specific
         # receipt, I should expect only that newly added specific receipt to be updated
@@ -541,7 +545,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg')
+        self.image = create_image('.jpeg').__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -623,7 +627,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg')
+        self.image = create_image('.jpeg').__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -705,9 +709,9 @@ class AddReceiptsAPITest(APITransactionTestCase):
 
 
 class PaginationReceiptsAPITest(APITestCase):
-    '''
+    """
     Test Cases for dividing the receipts of a user into pages
-    '''
+    """
 
     def setUp(self):
         # Create a user to test with
@@ -740,13 +744,13 @@ class PaginationReceiptsAPITest(APITestCase):
                 currency="CAD"
             )
 
-        # Get the size of the reciepts create for this user
+        # Get the size of the receipts create for this user
         self.receipt_size = len(Receipts.objects.filter(user=self.user))
 
     def test_pagination_successful(self):
         # Calculates the number of pages. The num of pages wii return different results if the
-        # number of recipts is not perfectly divisible by the page size.
-        if (self.receipt_size % 10 == 0):
+        # number of receipts is not perfectly divisible by the page size.
+        if self.receipt_size % 10 == 0:
             num_of_pages = self.receipt_size // 10
         else:
             num_of_pages = self.receipt_size // 10 + 1
