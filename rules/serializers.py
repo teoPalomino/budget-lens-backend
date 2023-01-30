@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rules.models import Rule
 from datetime import datetime
 
+
 class RuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
