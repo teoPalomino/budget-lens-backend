@@ -9,6 +9,7 @@ from django.core.paginator import Paginator
 
 from item.serializers import ItemSerializer, PutPatchItemSerializer
 from receipts.models import Receipts
+from rules.models import Rule
 
 from .models import Item
 
@@ -21,7 +22,17 @@ class AddItemAPI(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         if Receipts.objects.filter(id=request.data["receipt"]).exists():
+
+            # if there's a rule that matches the item name, assign the rule category to the category of the item
+            rules = Rule.objects.filter(user=self.request.user)
+            if rules.exists():
+                for rule in rules:
+                    if rule.regex == serializer.validated_data['name']:
+                        serializer.validated_data['category_id'] = rule.category
+                        break
+
             item = serializer.save()
             return Response({
                 "user": item.user.id,

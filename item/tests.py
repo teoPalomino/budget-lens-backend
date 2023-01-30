@@ -10,6 +10,7 @@ from merchant.models import Merchant
 from receipts.models import Receipts
 from category.models import Category
 from receipts.tests import get_test_image_file
+from rules.models import Rule
 from users.authentication import BearerToken
 from django.urls import reverse
 from rest_framework.test import APITransactionTestCase, APITestCase
@@ -65,6 +66,13 @@ class ItemsAPITest(APITransactionTestCase):
             parent_category_id=None
         )
 
+        self.category2 = Category.objects.create(
+            user=self.user,
+            category_name="fun",
+            category_toggle_star=False,
+            parent_category_id=None
+        )
+
         Item.objects.create(
             user=self.user,
             receipt=Receipts.objects.get(user=self.user),
@@ -87,6 +95,13 @@ class ItemsAPITest(APITransactionTestCase):
             name='mateo',
             category_id=self.category1,
             price=12.99
+        )
+
+        self.rules1 = Rule.objects.create(
+            user=self.user,
+            regex="fun",
+            category=self.category1,
+            created_at="2020-12-12"
         )
 
     def test_add_new_item(self):
@@ -131,25 +146,52 @@ class ItemsAPITest(APITransactionTestCase):
         self.assertEquals(response.data[0]['category_name'], item.category_id.category_name)
         self.assertEquals(response.data[0]['parent_category_id'], item.category_id.parent_category_id)
 
+    def test_delete_item(self):
+        # This test checks if the item is deleted and if the list of items is decreased
+        item_id = 1
+        delete_item_url = reverse('delete_item', kwargs={'item_id': item_id})
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
-def test_delete_item(self):
-    # This test checks if the item is deleted and if the list of items is decreased
-    item_id = 1
-    delete_item_url = reverse('delete_item', kwargs={'item_id': item_id})
-    self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+        original_item_count = Item.objects.count()
 
-    original_item_count = Item.objects.count()
+        response = self.client.delete(delete_item_url, format='json')
 
-    response = self.client.delete(delete_item_url, format='json')
+        items = Item.objects.all()
 
-    items = Item.objects.all()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in items:
+            self.assertNotEqual(item.id, item_id)
 
-    for item in items:
-        self.assertNotEqual(item.id, item_id)
+        self.assertEqual(Item.objects.count(), original_item_count - 1)
 
-    self.assertEqual(Item.objects.count(), original_item_count - 1)
+    def test_add_item_with_rules(self):
+        # This test checks if a new item and it's name matches the regex of a rule, if it does
+        # then the item's category is changed to the rule's category
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        original_item_count = Item.objects.count()
+
+        response = self.client.post(
+            reverse('add_item'),
+            data={
+                "user": self.user.id,
+                "receipt": self.receipt1.id,
+                "category_id": self.category1.id,
+                "name": "fun",
+                "price": 1.0
+            }, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertTrue(Item.objects.filter(name="fun").exists())
+
+        self.assertEqual(Item.objects.count(), original_item_count + 1)
+
+        # note that the item was added its names rules regex category, whereas it was specified to be added to category1
+        # which was clothes
+        self.assertEqual(Item.objects.get(name="fun").category_id.id, Rule.objects.get(regex="fun").category.id)
 
 
 class PaginationReceiptsAPITest(APITestCase):
