@@ -44,13 +44,26 @@ class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
-            item = self.get_queryset().filter(id=kwargs.get('item_id'))
-            if item.exists():
-                serializer = ItemSerializer(item, many=True)
-                return Response(serializer.data, status=HTTP_200_OK)
-            return Response({
-                "Error": "Item does not exist"
-            }, status=HTTP_400_BAD_REQUEST)
+            try:
+                item = self.get_queryset().get(id=kwargs.get('item_id'))
+
+                response = [{'id': item.id,
+                             'user': item.user.id,
+                             'name': item.name,
+                             'price': item.price,
+                             'receipt': item.receipt.id,
+                             'merchant_name': item.receipt.merchant.name,
+                             'scan_date': item.receipt.scan_date,
+                             'category_id': item.category_id.id,
+                             'category_name': item.category_id.category_name,
+                             'parent_category_id': item.category_id.parent_category_id}]
+
+                return Response(response, status=HTTP_200_OK)
+
+            except Item.DoesNotExist:
+                return Response({
+                    "Error": "Item does not exist"
+                }, status=HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)

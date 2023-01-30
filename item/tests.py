@@ -120,28 +120,36 @@ class ItemsAPITest(APITransactionTestCase):
         response = self.client.get(reverse('item_details', kwargs={'item_id': Item.objects.get(id=1).id}),
                                    format='multipart')
         item = Item.objects.get(id=1)
-        self.assertEquals(response.data[0]['receipt'], item.receipt.id)
-        self.assertEquals(response.data[0]['price'], str(item.price))
+        self.assertEquals(response.data[0]['id'], item.id)
+        self.assertEquals(response.data[0]['user'], item.user.id)
         self.assertEquals(response.data[0]['name'], item.name)
+        self.assertEquals(response.data[0]['price'], item.price)
+        self.assertEquals(response.data[0]['receipt'], item.receipt.id)
+        self.assertEquals(response.data[0]['merchant_name'], item.receipt.merchant.name)
+        self.assertEquals(response.data[0]['scan_date'], item.receipt.scan_date)
+        self.assertEquals(response.data[0]['category_id'], item.category_id.id)
+        self.assertEquals(response.data[0]['category_name'], item.category_id.category_name)
+        self.assertEquals(response.data[0]['parent_category_id'], item.category_id.parent_category_id)
 
-    def test_delete_item(self):
-        # This test checks if the item is deleted and if the list of items is decreased
-        item_id = 1
-        delete_item_url = reverse('delete_item', kwargs={'item_id': item_id})
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
-        original_item_count = Item.objects.count()
+def test_delete_item(self):
+    # This test checks if the item is deleted and if the list of items is decreased
+    item_id = 1
+    delete_item_url = reverse('delete_item', kwargs={'item_id': item_id})
+    self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
-        response = self.client.delete(delete_item_url, format='json')
+    original_item_count = Item.objects.count()
 
-        items = Item.objects.all()
+    response = self.client.delete(delete_item_url, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    items = Item.objects.all()
 
-        for item in items:
-            self.assertNotEqual(item.id, item_id)
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(Item.objects.count(), original_item_count - 1)
+    for item in items:
+        self.assertNotEqual(item.id, item_id)
+
+    self.assertEqual(Item.objects.count(), original_item_count - 1)
 
 
 class PaginationReceiptsAPITest(APITestCase):
@@ -238,7 +246,8 @@ class PaginationReceiptsAPITest(APITestCase):
         self.assertEqual(response.data['description'], 'Invalid Page Number')
 
     def test_pagination_over_page_size_error(self):
-        url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': self.item_size // 10 + 2, 'pageSize': 10})
+        url_paged_items = reverse('list_paged_items',
+                                  kwargs={'pageNumber': self.item_size // 10 + 2, 'pageSize': 10})
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
@@ -503,7 +512,6 @@ class CategoryCostsAPITest(APITransactionTestCase):
         )
 
     def test_get_category_costs(self):
-
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
         response = self.client.get(reverse('get_category_costs'), format='json')

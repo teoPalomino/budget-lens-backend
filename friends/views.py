@@ -158,16 +158,21 @@ class FriendRequestAPI(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
 
         friend_requests_sent = Friends.objects.filter(main_user=request.user.id, confirmed=False, temp_email=None)
+        friend_invites_sent = Friends.objects.filter(main_user=request.user.id, friend_user=None, confirmed=False)
         friend_requests_received = Friends.objects.filter(friend_user=request.user.id, confirmed=False, temp_email=None)
         friends1 = Friends.objects.filter(main_user=request.user.id, confirmed=True, temp_email=None)
         friends2 = Friends.objects.filter(friend_user=request.user.id, confirmed=True, temp_email=None)
 
         friend_requests_sent_list = []
+        friend_invites_sent_list = []
         friend_requests_received_list = []
         friend_list = []
 
         for friend_request in friend_requests_sent:
             friend_requests_sent_list.append(UserSerializer(User.objects.get(id=friend_request.friend_user.id)).data)
+
+        for friend_request in friend_invites_sent:
+            friend_invites_sent_list.append({"email": f"{friend_request.temp_email}"})
 
         for friend_request in friend_requests_received:
             friend_requests_received_list.append(UserSerializer(User.objects.get(id=friend_request.main_user.id)).data)
@@ -179,5 +184,6 @@ class FriendRequestAPI(generics.GenericAPIView):
             friend_list.append(UserSerializer(User.objects.get(id=friend.main_user.id)).data)
 
         return Response({"requests_sent": friend_requests_sent_list,
+                         "invites_sent": friend_invites_sent_list,
                          "requests_received": friend_requests_received_list,
                          "friends": friend_list}, status=status.HTTP_200_OK)
