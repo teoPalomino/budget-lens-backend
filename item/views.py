@@ -25,7 +25,7 @@ class AddItemAPI(generics.CreateAPIView):
 
         if Receipts.objects.filter(id=request.data["receipt"]).exists():
 
-            # if there's a rule that matches the item name, assign the item category to the category of the rule
+            # if there's a rule that matches the item name, assign the rule category to the category of the item
             rules = Rule.objects.filter(user=self.request.user)
             if rules.exists():
                 for rule in rules:
