@@ -120,16 +120,16 @@ class ItemsAPITest(APITransactionTestCase):
         response = self.client.get(reverse('item_details', kwargs={'item_id': Item.objects.get(id=1).id}),
                                    format='multipart')
         item = Item.objects.get(id=1)
-        self.assertEquals(response.data['id'], item.id)
-        self.assertEquals(response.data['user'], item.user.id)
-        self.assertEquals(response.data['name'], item.name)
-        self.assertEquals(response.data['price'], item.price)
-        self.assertEquals(response.data['receipt'], item.receipt.id)
-        self.assertEquals(response.data['merchant_name'], item.receipt.merchant.name)
-        self.assertEquals(response.data['scan_date'], item.receipt.scan_date)
-        self.assertEquals(response.data['category_id'], item.category_id.id)
-        self.assertEquals(response.data['category_name'], item.category_id.category_name)
-        self.assertEquals(response.data['parent_category_id'], item.category_id.parent_category_id)
+        self.assertEquals(response.data[0]['id'], item.id)
+        self.assertEquals(response.data[0]['user'], item.user.id)
+        self.assertEquals(response.data[0]['name'], item.name)
+        self.assertEquals(response.data[0]['price'], item.price)
+        self.assertEquals(response.data[0]['receipt'], item.receipt.id)
+        self.assertEquals(response.data[0]['merchant_name'], item.receipt.merchant.name)
+        self.assertEquals(response.data[0]['scan_date'], item.receipt.scan_date)
+        self.assertEquals(response.data[0]['category_id'], item.category_id.id)
+        self.assertEquals(response.data[0]['category_name'], item.category_id.category_name)
+        self.assertEquals(response.data[0]['parent_category_id'], item.category_id.parent_category_id)
 
 
 def test_delete_item(self):
