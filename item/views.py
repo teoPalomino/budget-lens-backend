@@ -29,14 +29,8 @@ class AddItemAPI(generics.CreateAPIView):
             rules = Rule.objects.filter(user=self.request.user)
             if rules.exists():
                 for rule in rules:
-                    print("hello " + rule.regex + " " + serializer.validated_data['name'])
                     if rule.regex == serializer.validated_data['name']:
-                        print(rule.category)
-                        print(serializer.validated_data['category_id'])
                         serializer.validated_data['category_id'] = rule.category
-                        print("AFDTER")
-                        print(rule.category)
-                        print(serializer.validated_data['category_id'])
                         break
 
             item = serializer.save()
