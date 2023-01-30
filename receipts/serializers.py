@@ -48,7 +48,20 @@ class ManualReceiptsSerializer(serializers.ModelSerializer):
 class PutPatchReceiptsSerializer(serializers.ModelSerializer):
     '''Serializer for PutReceipts, used to update the receipt of a user if need be'''
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    merchant_name = serializers.SerializerMethodField()
+
+    def get_merchant_name(self, obj):
+        if obj.merchant:
+            return obj.merchant.name
+        return None
 
     class Meta:
         model = Receipts
-        fields = ('user', 'scan_date', 'receipt_image')
+        fields = (
+            'user',
+            'scan_date',
+            'receipt_image',
+            'merchant_name',
+            'total',
+            'currency',
+        )
