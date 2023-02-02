@@ -169,6 +169,12 @@ class PaginateFilterItemsView(generics.ListAPIView):
         queryset = self.get_queryset()
         item_list_response = super().get(request, *args, **kwargs)
         item_total_cost = 0
+        items = Item.objects.filter(user=self.request.user)
+        total_value = 0
+
+        if items.exists():
+            for item in items:
+                total_value += item.price
 
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
@@ -196,7 +202,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
-                'total Cost': item_total_cost,
+                'total Cost': total_value,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -219,6 +225,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
         for i in page.object_list:
             current_item_price = list(i.items())
             item_total_cost += float(current_item_price[2][1])
+            if_pass_last_page = item_total_cost
 
         return Response({
             'page_list': page.object_list,
