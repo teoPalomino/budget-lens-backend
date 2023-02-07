@@ -15,10 +15,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.static import static
+from budget_lens_backend import settings
+
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
+    path('api-auth/', include('rest_framework.urls')),  # rest_framework
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
     path('', include('receipts.urls')),
     path('', include('friends.urls')),
-]
+    path('', include('category.urls')),
+    path('', include('item.urls')),
+    path('', include('merchant.urls')),
+    path('', include('rules.urls')),
+    path('', include('important_dates.urls')),
+    path('', include('item_split.urls')),
+    path('file/', include('filemanagement.urls'), name='file'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Optional UI:
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL)  # static files

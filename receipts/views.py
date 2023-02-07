@@ -23,6 +23,7 @@ class PostReceiptsAPIView(generics.CreateAPIView):
 
 
 class PostManualReceiptsAPIView(generics.CreateAPIView):
+    """This view is only for Posting new receipts"""
     permission_classes = [IsAuthenticated]
     serializer_class = ManualReceiptsSerializer
     parser_classes = (MultiPartParser, FormParser)
@@ -32,18 +33,15 @@ class ReceiptsFilter(django_filters.FilterSet):
     merchant_name = django_filters.CharFilter(field_name='merchant__name', lookup_expr='icontains')
     scan_date_start = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='gte')
     scan_date_end = django_filters.DateTimeFilter(field_name='scan_date', lookup_expr='lte')
-    important_date_start = django_filters.DateTimeFilter(field_name='important_date', lookup_expr='gte')
-    important_date_end = django_filters.DateTimeFilter(field_name='important_date', lookup_expr='lte')
 
     class Meta:
         model = Receipts
-        fields = ['id', 'scan_date_start', 'scan_date_end', 'important_date_start', 'important_date_end', 'user_id',
+        fields = ['id', 'scan_date_start', 'scan_date_end', 'user_id',
                   'merchant_name', 'coupon', 'location', 'total', 'tax', 'tip', 'currency']
 
 
 class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     """
-    (This view is only for Posting new receipts) ---- Add this instead to the doc string of this view
     This view returns a list of all the receipts for the user.
 
     It also accepts optional query parameters to filter, order and search the receipts.
@@ -81,22 +79,25 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ReceiptsFilter
     ordering_fields = '__all__'
-    search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip', 'currency',
-                     'important_dates']
+    search_fields = ['scan_date', 'coupon', 'merchant__name', 'location', 'total', 'tax', 'tip', 'currency']
 
     def get(self, request, *args, **kwargs):
         """
-        Get the resonse from the super class which returns the entire list
+        Get the response from the super class which returns the entire list
         and then paginate the results
         """
         #
         reciept_list_response = super().get(request, *args, **kwargs)
 
-        # Try to turn page number to an int value, otherwise set to default value of 1
+        # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
         except Exception:
-            kwargs['pageNumber'] = 1
+            return Response({
+                'page_list': [],
+                'total': 0,
+                'description': "Invalid Page Number"
+            }, status=HTTP_200_OK)
 
         # Try to turn page size to an int value, otherwise set to default value of 10
         try:
@@ -111,19 +112,30 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
 
         paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
 
-        # If page number is greater than page limit, set it to the last page
+        # If page number is greater than page limit, return an empty list
         if kwargs['pageNumber'] > paginator.num_pages:
-            kwargs['pageNumber'] = paginator.num_pages
+            return Response({
+                'page_list': [],
+                'total': 0,
+                'description': "Invalid Page Number"
+            }, status=HTTP_200_OK)
 
-        # If page number is less than 1, set it to the first page
+        # If page number is less than 1, return an empty list
         if kwargs['pageNumber'] <= 0:
-            kwargs['pageNumber'] = 1
+            return Response({
+                'page_list': [],
+                'total': 0,
+                'description': "Invalid Page Number"
+            }, status=HTTP_200_OK)
 
         page = paginator.page(kwargs['pageNumber'])
 
         return Response({
             'page_list': page.object_list,
-            'description': str(page)
+            'total': len(page.object_list),
+            'description': str(page),
+            'current_page_number': page.number,
+            'number_of_pages': page.paginator.num_pages
         }, status=HTTP_200_OK)
 
     def get_queryset(self):
