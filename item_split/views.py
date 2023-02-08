@@ -12,9 +12,10 @@ from .models import ItemSplit
 
 from users.models import User
 
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import api_view, permission_classes
 
 from django.contrib.auth.models import User as DjangoBaseUser
+
 
 class AddItemSplitAPI(generics.ListCreateAPIView):
     """
@@ -117,6 +118,7 @@ class GetSharedAmount(generics.GenericAPIView):
             "is_shared_with_item_user": item_split.is_shared_with_item_user,
         }, status=HTTP_200_OK)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_share_amount_list(request):
@@ -128,7 +130,7 @@ def get_share_amount_list(request):
         split = item.item_user
         shared_user_ids = split.shared_user_ids.split(',')
         shared_user_ids = [int(i) for i in shared_user_ids]
-        shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)#.values_list('first_name', flat=True)
+        shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)
         data = {}
         data['item_id'] = item.id
         data['item_name'] = item.name
@@ -141,7 +143,7 @@ def get_share_amount_list(request):
                         'split_id': split.id,
                         'orignal_user': item.user.first_name,
                         'shared_user': user.first_name
-                    })
+        })
         data_list.append(data)
-        
+   
     return Response({'data': data_list})
