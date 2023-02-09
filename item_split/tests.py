@@ -275,3 +275,12 @@ class ItemSplitAPITestCase(APITestCase):
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+    
+    def get_share_amount_list(self):
+        # Make a Get request
+        _url = reverse('get_shared_amount_list', args=[self.receipt.id])
+        response = self.client.get(_url, format='json')
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        # Assert data\
+        self.assertTrue(len(response.data['data']) >= 1) 

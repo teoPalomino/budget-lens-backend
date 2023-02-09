@@ -121,12 +121,12 @@ class GetSharedAmount(generics.GenericAPIView):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_share_amount_list(request):
+def get_share_amount_list(request, receipt_id):
     """
     item = get_object_or_404(Item, id=item_id)
     """
     data_list = []
-    for item in Item.objects.all():
+    for item in Item.objects.filter(receipt__id=receipt_id):
         split = item.item_user
         shared_user_ids = split.shared_user_ids.split(',')
         shared_user_ids = [int(i) for i in shared_user_ids]
@@ -135,6 +135,8 @@ def get_share_amount_list(request):
         data['item_id'] = item.id
         data['item_name'] = item.name
         data['item_price'] = item.price
+        data['user_id'] = item.user.id
+        data['receipt_id'] = item.receipt.id
         data['splititem'] = []
         for user in shared_users:
             if split.is_shared_with_item_user:
