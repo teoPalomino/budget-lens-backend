@@ -120,18 +120,13 @@ class GetSharedAmount(generics.GenericAPIView):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_share_amount_list(request, receipt_id):
     """
     item = get_object_or_404(Item, id=item_id)
     """
     data_list = []
     for item in Item.objects.filter(receipt__id=receipt_id):
-        split = item.item_user
-        # split = item.itemsplit
-        shared_user_ids = split.shared_user_ids.split(',')
-        shared_user_ids = [int(i) for i in shared_user_ids]
-        shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)
         data = {}
         data['item_id'] = item.id
         data['item_name'] = item.name
@@ -139,13 +134,21 @@ def get_share_amount_list(request, receipt_id):
         data['user_id'] = item.user.id
         data['receipt_id'] = item.receipt.id
         data['splititem'] = []
-        for user in shared_users:
-            if split.is_shared_with_item_user:
-                if user.id != item.user.id:
-                    data['splititem'].append({
-                        'split_id': split.id,
-                        'orignal_user': item.user.first_name,
-                        'shared_user': user.first_name})
+        try:
+            split = item.item_user
+            # split = item.itemsplit
+            shared_user_ids = split.shared_user_ids.split(',')
+            shared_user_ids = [int(i) for i in shared_user_ids]
+            shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)
+            for user in shared_users:
+                if split.is_shared_with_item_user:
+                    if user.id != item.user.id:
+                        data['splititem'].append({
+                            'split_id': split.id,
+                            'orignal_user': item.user.first_name,
+                            'shared_user': user.first_name})
+        except:
+            pass
         data_list.append(data)
     if not data_list:
         _status = HTTP_404_NOT_FOUND
