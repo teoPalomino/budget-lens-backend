@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from item.models import Item
 
@@ -120,7 +120,7 @@ class GetSharedAmount(generics.GenericAPIView):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_share_amount_list(request, receipt_id):
     """
     item = get_object_or_404(Item, id=item_id)
@@ -128,6 +128,7 @@ def get_share_amount_list(request, receipt_id):
     data_list = []
     for item in Item.objects.filter(receipt__id=receipt_id):
         split = item.item_user
+        # split = item.itemsplit
         shared_user_ids = split.shared_user_ids.split(',')
         shared_user_ids = [int(i) for i in shared_user_ids]
         shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)
@@ -146,4 +147,8 @@ def get_share_amount_list(request, receipt_id):
                         'orignal_user': item.user.first_name,
                         'shared_user': user.first_name})
         data_list.append(data)
-    return Response({'data': data_list})
+    if not data_list:
+        _status = HTTP_404_NOT_FOUND
+    else:
+        _status = HTTP_200_OK
+    return Response({'data': data_list}, status=_status)
