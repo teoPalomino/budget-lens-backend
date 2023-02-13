@@ -147,7 +147,7 @@ def get_share_amount_list(request, receipt_id):
                             'split_id': split.id,
                             'orignal_user': item.user.first_name,
                             'shared_user': user.first_name})
-        except:
+        except Exception:
             pass
         data_list.append(data)
     if not data_list:

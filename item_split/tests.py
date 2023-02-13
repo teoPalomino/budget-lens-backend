@@ -281,7 +281,7 @@ class ItemSplitAPITestCase(APITestCase):
         _url = reverse('get_shared_amount_list', args=[receipt_id, ])
         response = self.client.get(_url, format='json')
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
-    
+
     def test_get_share_amount_list_pass(self):
         ItemSplit.objects.create(
             item=self.item,
