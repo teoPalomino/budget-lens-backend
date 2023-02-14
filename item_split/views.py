@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from item.models import Item
 
@@ -11,6 +11,10 @@ from .serializers import ItemSplitSerializer
 from .models import ItemSplit
 
 from users.models import User
+
+from rest_framework.decorators import api_view, permission_classes
+
+from django.contrib.auth.models import User as DjangoBaseUser
 
 
 class AddItemSplitAPI(generics.ListCreateAPIView):
@@ -113,3 +117,41 @@ class GetSharedAmount(generics.GenericAPIView):
             "shared_amount": item_split.shared_amount,
             "is_shared_with_item_user": item_split.is_shared_with_item_user,
         }, status=HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_share_amount_list(request, receipt_id):
+    """
+    item = get_object_or_404(Item, id=item_id)
+    """
+    data_list = []
+    for item in Item.objects.filter(receipt__id=receipt_id):
+        data = {}
+        data['item_id'] = item.id
+        data['item_name'] = item.name
+        data['item_price'] = item.price
+        data['user_id'] = item.user.id
+        data['receipt_id'] = item.receipt.id
+        data['splititem'] = []
+        try:
+            split = item.item_user
+            # split = item.itemsplit
+            shared_user_ids = split.shared_user_ids.split(',')
+            shared_user_ids = [int(i) for i in shared_user_ids]
+            shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)
+            for user in shared_users:
+                if split.is_shared_with_item_user:
+                    if user.id != item.user.id:
+                        data['splititem'].append({
+                            'split_id': split.id,
+                            'orignal_user': item.user.first_name,
+                            'shared_user': user.first_name})
+        except Exception:
+            pass
+        data_list.append(data)
+    if not data_list:
+        _status = HTTP_404_NOT_FOUND
+    else:
+        _status = HTTP_200_OK
+    return Response({'data': data_list}, status=_status)
