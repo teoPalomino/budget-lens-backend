@@ -37,7 +37,7 @@ class RegisterAPI(generics.GenericAPIView):
         # converting all email invites to friend requests upon registration
         friends = Friends.objects.filter(temp_email=user.data['email'])
         for friend in friends:
-            friend.friend_user = user.data['id']
+            friend.friend_user = user_profile.user
             friend.temp_email = None
             friend.save()
         return Response({
