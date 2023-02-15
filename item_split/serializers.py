@@ -9,16 +9,14 @@ class ItemSplitSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = ItemSplit
-        fields = ('item', 'shared_user_ids', 'id')
+        fields = ('item', 'shared_user_ids', 'shared_amount')
 
     def create(self, validated_data):
-        num_to_divide_by = len(validated_data['shared_user_ids'].split(','))
-
         is_shared_with_item_user = False
         if validated_data['item'].user.pk in list(map(int, validated_data['shared_user_ids'].split(','))):
             is_shared_with_item_user = True
 
-        shared_amount = validated_data['item'].price / num_to_divide_by
+        shared_amount = list(map(float, validated_data['shared_amount'].split(',')))
 
         return ItemSplit.objects.create(
             shared_user_ids=validated_data['shared_user_ids'],
