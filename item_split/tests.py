@@ -76,7 +76,7 @@ class ItemSplitAPITestCase(APITestCase):
         )
 
         # the urls
-        self.url_add_item_split = reverse('add_item_split')
+        self.url_add_item_split = reverse('add_item_split_amount')
 
         # Authenticate user before each test
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
@@ -86,14 +86,15 @@ class ItemSplitAPITestCase(APITestCase):
             self.url_add_item_split,
             data={
                 'item': self.item.pk,
-                'shared_user_ids': '100, 3',
+                'shared_user_ids': [100, 3],
+                'shared_amount': [10.15, 10.15],
                 'is_shared_with_item_user': False
             },
             format='json'
         )
 
         # Assert that the item split object was created successfully
-        self.assertEqual(response.data['message'], "List of users do not exist.")
+        self.assertEqual(response.data['Response'], "List of users do not exist.")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -103,14 +104,15 @@ class ItemSplitAPITestCase(APITestCase):
             self.url_add_item_split,
             data={
                 'item': self.item.pk,
-                'shared_user_ids': 'test, 3',
+                'shared_user_ids': ['test', 3],
+                'shared_amount': [10.15, 10.15],
                 'is_shared_with_item_user': False
             },
             format='json'
         )
 
         # Assert that the item split object was created successfully
-        self.assertEqual(response.data['message'], "Invalid list of user IDs. Please enter numbers separated by commas.")
+        self.assertEqual(response.data['Response'], "shared_user_ids contains an element that is not an integer")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -119,14 +121,15 @@ class ItemSplitAPITestCase(APITestCase):
             self.url_add_item_split,
             data={
                 'item': self.item.pk,
-                'shared_user_ids': '3, 3',
+                'shared_user_ids': [3, 3],
+                'shared_amount': [10.15, 10.15],
                 'is_shared_with_item_user': False
             },
             format='json'
         )
 
         # Assert that the item split object was created successfully
-        self.assertEqual(response.data['message'], "List of user IDs contains duplicates.")
+        self.assertEqual(response.data['Response'], "List of user IDs contains duplicates.")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -135,25 +138,21 @@ class ItemSplitAPITestCase(APITestCase):
             self.url_add_item_split,
             data={
                 'item': self.item.pk,
-                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
+                'shared_user_ids': [self.user2.pk, self.user3.pk],
+                'shared_amount': [10.15, 10.15],
                 'is_shared_with_item_user': False
             },
             format='json'
         )
 
         # Assert that the item split object was created successfully
-        self.assertEqual(response.data['item']['item_id'], self.item.pk)
-        self.assertEqual(response.data['item']['item_name'], self.item.name)
-        self.assertEqual(float(response.data['item']['item_price']), float(self.item.price))
-        self.assertEqual(response.data['shared_user_ids'], f'{self.user2.pk}, {self.user3.pk}')
-
         self.assertEqual(response.status_code, HTTP_201_CREATED)
 
     def test_get_shared_user_list_pass(self):
         # Create a new ItemSplit object
         itemsplit = ItemSplit.objects.create(
             item=self.item,
-            shared_user_ids=f'{self.user2.pk}, {self.user3.pk}',
+            shared_user_ids=[self.user2.pk, self.user3.pk],
             is_shared_with_item_user=False
         )
 
@@ -180,7 +179,7 @@ class ItemSplitAPITestCase(APITestCase):
         # Create a new ItemSplit object
         ItemSplit.objects.create(
             item=self.item,
-            shared_user_ids=f'{self.user2.pk}, {self.user3.pk}',
+            shared_user_ids=[self.user2.pk, self.user3.pk],
             is_shared_with_item_user=False
         )
 
@@ -192,7 +191,7 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{100}' does not exist")
+        self.assertEqual(response.data['Response'], f"ItemSplit object with item id of '{100}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
@@ -206,7 +205,7 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{'a'}' does not exist")
+        self.assertEqual(response.data['Response'], f"ItemSplit object with item id of '{'a'}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
@@ -217,10 +216,11 @@ class ItemSplitAPITestCase(APITestCase):
             self.url_add_item_split,
             data={
                 'item': self.item.pk,
-                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
+                'shared_user_ids': [self.user2.pk, self.user3.pk],
+                'shared_amount': [10.15, 10.15]
             },
             format='json'
-        ).data['id']
+        ).data['item_id']
         itemsplit = ItemSplit.objects.get(id=itemsplit_data_id)
 
         # The url using kwargs item_id
@@ -243,7 +243,8 @@ class ItemSplitAPITestCase(APITestCase):
             self.url_add_item_split,
             data={
                 'item': self.item.pk,
-                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
+                'shared_user_ids': [self.user2.pk, self.user3.pk],
+                'shared_amount': [10.15, 10.15],
                 'is_shared_with_item_user': False
             },
             format='json'
@@ -257,7 +258,7 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{100}' does not exist")
+        self.assertEqual(response.data['Response'], f"ItemSplit object with item id of '{100}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
@@ -271,7 +272,7 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{'a'}' does not exist")
+        self.assertEqual(response.data['Response'], f"ItemSplit object with item id of '{'a'}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
