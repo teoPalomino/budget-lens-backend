@@ -9,6 +9,7 @@ from django.core.paginator import Paginator
 
 from item.serializers import ItemSerializer, PutPatchItemSerializer
 from receipts.models import Receipts
+from rules.models import Rule
 
 from .models import Item
 
@@ -21,7 +22,17 @@ class AddItemAPI(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         if Receipts.objects.filter(id=request.data["receipt"]).exists():
+
+            # if there's a rule that matches the item name, assign the rule category to the category of the item
+            rules = Rule.objects.filter(user=self.request.user)
+            if rules.exists():
+                for rule in rules:
+                    if rule.regex == serializer.validated_data['name']:
+                        serializer.validated_data['category_id'] = rule.category
+                        break
+
             item = serializer.save()
             return Response({
                 "user": item.user.id,
@@ -158,6 +169,11 @@ class PaginateFilterItemsView(generics.ListAPIView):
         queryset = self.get_queryset()
         item_list_response = super().get(request, *args, **kwargs)
         item_total_cost = 0
+        items = Item.objects.filter(user=self.request.user)
+
+        if items.exists():
+            for item in items:
+                item_total_cost += item.price
 
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
@@ -204,10 +220,6 @@ class PaginateFilterItemsView(generics.ListAPIView):
         for i, item in zip(queryset, page.object_list):
             item['scan_date'] = i.receipt.scan_date
             item['merchant_name'] = i.receipt.merchant.name
-
-        for i in page.object_list:
-            current_item_price = list(i.items())
-            item_total_cost += float(current_item_price[2][1])
 
         return Response({
             'page_list': page.object_list,

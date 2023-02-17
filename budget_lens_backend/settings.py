@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
             '206.81.3.66',
             '192.168.2.15',
             'budgetlens.tech',
-            'api.budgetlens.tech'
+            'api.budgetlens.tech',
     ]
 ALLOWED_HOSTS.append(os.getenv('ADDRESS'))
 STATIC_ROOT = os.environ.get("RECEIPT_IMAGES_ROOT")
