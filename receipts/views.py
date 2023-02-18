@@ -88,8 +88,6 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         for item in reciept_list_response.data:
             item['merchant'] = Merchant.objects.get(pk=item['merchant']).name
             new_reciept_list_response.append(item)
-
-
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
