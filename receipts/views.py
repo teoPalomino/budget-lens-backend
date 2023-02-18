@@ -4,6 +4,7 @@ from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from merchant.models import Merchant
 from .models import Receipts
 from .serializers import ManualReceiptsSerializer, ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -83,6 +84,11 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         """
         #
         reciept_list_response = super().get(request, *args, **kwargs)
+        new_reciept_list_response = []
+        for item in reciept_list_response.data:
+            item['merchant'] = Merchant.objects.get(pk=item['merchant']).name
+            new_reciept_list_response.append(item)
+
 
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
