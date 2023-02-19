@@ -216,7 +216,7 @@ class ReceiptSplitAPITestCase(APITestCase):
             self.url_add_receipt_split,
             data={
                 'receipt': self.receipt.pk,
-                'shared_amount': [10,10],
+                'shared_amount': [10, 10],
                 'shared_user_ids': [self.user2.pk, self.user3.pk],
             },
             format='json'

@@ -9,6 +9,7 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
     Basic serializer that takes in a receipt object and string representation
     of the list of user ids splitting the receipt
     """
+
     class Meta:
         model = ReceiptSplit
         fields = ('receipt', 'shared_user_ids', 'shared_amount')

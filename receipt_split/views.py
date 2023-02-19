@@ -22,7 +22,7 @@ class AddReceiptSplitAmountAPI(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = ReceiptSplit.objects.all()
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # noqa: C901
         # Check if receipt, shared_user_id and shared_amount are provided
         if 'receipt' not in request.data:
             return Response({"Response": "Item is not provided."}, status=HTTP_400_BAD_REQUEST)
@@ -106,7 +106,7 @@ class AddReceiptSplitPercentageAPI(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = ReceiptSplit.objects.all()
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # noqa: C901
         # Check if receipt, shared_user_id and shared_amount are provided
         if 'receipt' not in request.data:
             return Response({"Response": "Item is not provided."}, status=HTTP_400_BAD_REQUEST)
