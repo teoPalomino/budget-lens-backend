@@ -5,7 +5,8 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_RE
 
 from item.models import Item
 
-from .serializers import ItemSplitAmountSerializer, ItemSplitPercentageSerializer
+
+from .serializers import ItemSplitSerializer
 
 from .models import ItemSplit
 
@@ -16,158 +17,44 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User as DjangoBaseUser
 
 
-class AddItemSplitAmountAPI(generics.ListCreateAPIView):
+class AddItemSplitAPI(generics.ListCreateAPIView):
     """
     Adds item to a receipt for a user
     The list of shared user IDs are a string that represents the list of user IDs (List of integers).
     Therefore the list must be separated by commas.
     """
-    serializer_class = ItemSplitAmountSerializer
+    serializer_class = ItemSplitSerializer
     permission_classes = [IsAuthenticated]
     queryset = ItemSplit.objects.all()
 
     def post(self, request, *args, **kwargs):
-        # Check if item, shared_user_id and shared_amount are provided
-        if 'item' not in request.data:
-            return Response({"Response": "Item is not provided."}, status=HTTP_400_BAD_REQUEST)
-        if 'shared_user_ids' not in request.data:
-            return Response({"Response": "shared_user_ids is not provided."}, status=HTTP_400_BAD_REQUEST)
-        if 'shared_amount' not in request.data:
-            return Response({"Response": "shared_amount is not provided."}, status=HTTP_400_BAD_REQUEST)
-
-        # Check if the item exists
-        if not Item.objects.filter(id=request.data['item']).exists():
-            return Response({"Response": "Item does not exist."}, status=HTTP_400_BAD_REQUEST)
-
-        # Check if the list shared_user_id and shared_amount are lists
-        if type(request.data['shared_user_ids']) != list:
-            return Response({"Response": "shared_user_ids is not a list. Ensure that the data is a list of integers"},
-                            status=HTTP_400_BAD_REQUEST)
-
-        if type(request.data['shared_amount']) != list:
-            return Response(
-                {"Response": "shared_amount is not a list. Ensure that the data is a list of floats or integers"},
-                status=HTTP_400_BAD_REQUEST)
-
-        # Check if the list shared_user_id and shared_amount is a list of integers
-        for user_id in request.data['shared_user_ids']:
-            if type(user_id) != int:
-                return Response({"Response": "shared_user_ids contains an element that is not an integer"},
-                                status=HTTP_400_BAD_REQUEST)
-
-        for amount in request.data['shared_amount']:
-            if type(amount) != float and type(amount) != int:
-                return Response({"Response": "shared_amount contains an element that is not an integer or float"},
-                                status=HTTP_400_BAD_REQUEST)
-
-        # Check if the number of user ids and amounts are the same
-        if len(request.data['shared_user_ids']) != len(request.data['shared_amount']):
-            return Response({"Response": "Number of user IDs and amounts do not match."},
-                            status=HTTP_400_BAD_REQUEST)
+        # Check if the string of users can be converted into a list of integers
+        # That way if they are valid than they may be valid user ids as well
+        try:
+            # Try to convert the string into the list of integers. If not then its not a valid string list
+            user_ids_list = list(map(int, request.data['shared_user_ids'].split(',')))
+        except Exception:
+            return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."}, status=HTTP_400_BAD_REQUEST)
 
         # Try to check for uniqueness of the list of user ids since a user can't have a same item shared more than
         # once as it creates multiple instances of the same item
-        user_ids_list_as_set = set(request.data['shared_user_ids'])
-        if len(user_ids_list_as_set) != len(request.data['shared_user_ids']):
-            return Response({"Response": "List of user IDs contains duplicates."},
+        user_ids_list_as_set = set(user_ids_list)
+        if len(user_ids_list_as_set) != len(user_ids_list):
+            return Response({"message": "List of user IDs contains duplicates."},
                             status=HTTP_400_BAD_REQUEST)
 
         # Check if the user ids are valid (they exist)
-        for user_id in request.data['shared_user_ids']:
+        for user_id in user_ids_list:
             if User.objects.filter(id=user_id).exists() is not True:
-                return Response({"Response": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
+                return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
 
-        # Convert the list of user ids and amounts to a string
-        request.data['shared_user_ids'] = ','.join(map(str, request.data['shared_user_ids']))
-        request.data['shared_amount'] = ','.join(map(str, request.data['shared_amount']))
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        item_split = serializer.save()
-        response_data = {
-            "item_id": item_split.item.id,
-            "shared_user_ids": item_split.shared_user_ids,
-            "is_shared_with_item_user": item_split.is_shared_with_item_user,
-            "shared_amount": item_split.shared_amount,
-        }
-        return Response(response_data, status=HTTP_201_CREATED)
-
-
-class AddItemSplitPercentAPI(generics.ListCreateAPIView):
-    """
-    Adds item to a receipt for a user
-    The list of shared user IDs are a string that represents the list of user IDs (List of integers).
-    Therefore the list must be separated by commas.
-    """
-    serializer_class = ItemSplitPercentageSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = ItemSplit.objects.all()
-
-    def post(self, request, *args, **kwargs):
-        # Check if item, shared_user_id and shared_amount are provided
-        if 'item' not in request.data:
-            return Response({"Response": "Item is not provided."}, status=HTTP_400_BAD_REQUEST)
-        if 'shared_user_ids' not in request.data:
-            return Response({"Response": "shared_user_ids is not provided."}, status=HTTP_400_BAD_REQUEST)
-        if 'shared_amount' not in request.data:
-            return Response({"Response": "shared_amount is not provided."}, status=HTTP_400_BAD_REQUEST)
-
-        # Check if the item exists
-        if not Item.objects.filter(id=request.data['item']).exists():
-            return Response({"Response": "Item does not exist."}, status=HTTP_400_BAD_REQUEST)
-
-        # Check if the list shared_user_id and shared_amount are lists
-        if type(request.data['shared_user_ids']) != list:
-            return Response({"Response": "shared_user_ids is not a list. Ensure that the data is a list of integers"},
-                            status=HTTP_400_BAD_REQUEST)
-
-        if type(request.data['shared_amount']) != list:
-            return Response(
-                {"Response": "shared_amount is not a list. Ensure that the data is a list of floats or integers"},
-                status=HTTP_400_BAD_REQUEST)
-
-        # Check if the list shared_user_id and shared_amount is a lists are lists of integers
-        for user_id in request.data['shared_user_ids']:
-            if type(user_id) != int:
-                return Response({"Response": "shared_user_ids contains an element that is not an integer"},
-                                status=HTTP_400_BAD_REQUEST)
-
-        for amount in request.data['shared_amount']:
-            if type(amount) != float and type(amount) != int:
-                return Response({"Response": "shared_amount contains an element that is not an integer or float"},
-                                status=HTTP_400_BAD_REQUEST)
-
-        # Check if the number of user ids and amounts are the same
-        if len(request.data['shared_user_ids']) != len(request.data['shared_amount']):
-            return Response({"Response": "Number of user IDs and amounts do not match."},
-                            status=HTTP_400_BAD_REQUEST)
-
-        # Try to check for uniqueness of the list of user ids since a user can't have a same item shared more than
-        # once as it creates multiple instances of the same item
-        user_ids_list_as_set = set(request.data['shared_user_ids'])
-        if len(user_ids_list_as_set) != len(request.data['shared_user_ids']):
-            return Response({"Response": "List of user IDs contains duplicates."},
-                            status=HTTP_400_BAD_REQUEST)
-
-        # Check if the user ids are valid (they exist)
-        for user_id in request.data['shared_user_ids']:
-            if User.objects.filter(id=user_id).exists() is not True:
-                return Response({"Response": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
-
-        # Convert the list of user ids and amounts to a string
-        request.data['shared_user_ids'] = ','.join(map(str, request.data['shared_user_ids']))
-        request.data['shared_amount'] = ','.join(map(str, request.data['shared_amount']))
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        item_split = serializer.save()
-        response_data = {
-            "item_id": item_split.item.id,
-            "shared_user_ids": item_split.shared_user_ids,
-            "is_shared_with_item_user": item_split.is_shared_with_item_user,
-            "shared_amount": item_split.shared_amount,
+        # If the users exists add the new Item Split object
+        response_data = super().post(request, *args, **kwargs).data
+        item_response = Item.objects.get(id=response_data['item'])
+        response_data['item'] = {
+            "item_id": item_response.pk,
+            "item_name": item_response.name,
+            "item_price": item_response.price
         }
         return Response(response_data, status=HTTP_201_CREATED)
 
@@ -179,7 +66,7 @@ class GetSharedUsersList(generics.GenericAPIView):
         `api/itemsplit/sharedUsers/item_id=<item_id>`
     """
 
-    serializer_class = ItemSplitAmountSerializer
+    serializer_class = ItemSplitSerializer
     permission_classes = [IsAuthenticated]
     queryset = ItemSplit.objects.all()
 
@@ -191,7 +78,7 @@ class GetSharedUsersList(generics.GenericAPIView):
 
         except Exception:
             return Response({
-                'Response': f"ItemSplit object with item id of '{kwargs['item_id']}' does not exist"
+                'message': f"ItemSplit object with item id of '{kwargs['item_id']}' does not exist"
             }, status=HTTP_400_BAD_REQUEST)
 
         # Create the list of user ids from the string list
@@ -211,7 +98,7 @@ class GetSharedAmount(generics.GenericAPIView):
     Put in place as a parameter a shared item id like so:
         `api/itemsplit/sharedAmount/itemsplit_id=<itemsplit_id>`
     """
-    serializer_class = ItemSplitAmountSerializer
+    serializer_class = ItemSplitSerializer
     permission_classes = [IsAuthenticated]
     queryset = ItemSplit.objects.all()
 
@@ -222,7 +109,7 @@ class GetSharedAmount(generics.GenericAPIView):
             item_split = self.get_queryset().filter(item=item.id).get()
         except Exception:
             return Response({
-                'Response': f"ItemSplit object with item id of '{kwargs['item_id']}' does not exist"
+                'message': f"ItemSplit object with item id of '{kwargs['item_id']}' does not exist"
             }, status=HTTP_400_BAD_REQUEST)
 
         return Response({
