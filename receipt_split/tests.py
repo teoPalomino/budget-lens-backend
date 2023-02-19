@@ -81,14 +81,15 @@ class ReceiptSplitAPITestCase(APITestCase):
             self.url_add_receipt_split,
             data={
                 'receipt': self.receipt.pk,
-                'shared_user_ids': '100, 3',
+                'shared_user_ids': [100, 3],
+                'shared_amount': [1, 1],
                 'is_shared_with_receipt_owner': False
             },
             format='json'
         )
 
         # Assert that the receipt split object was created successfully
-        self.assertEqual(response.data['message'], "List of users do not exist.")
+        self.assertEqual(response.data['Response'], "List of users do not exist.")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -98,14 +99,15 @@ class ReceiptSplitAPITestCase(APITestCase):
             self.url_add_receipt_split,
             data={
                 'receipt': self.receipt.pk,
-                'shared_user_ids': 'test, 3',
+                'shared_user_ids': ["test", 3],
+                'shared_amount': [1, 1],
                 'is_shared_with_receipt_owner': False
             },
             format='json'
         )
 
         # Assert that the receipt split object was created successfully
-        self.assertEqual(response.data['message'], "Invalid list of user IDs. Please enter numbers separated by commas.")
+        self.assertEqual(response.data['Response'], "shared_user_ids contains an element that is not an integer")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -114,14 +116,15 @@ class ReceiptSplitAPITestCase(APITestCase):
             self.url_add_receipt_split,
             data={
                 'receipt': self.receipt.pk,
-                'shared_user_ids': '3, 3',
+                'shared_user_ids': [3, 3],
+                'shared_amount': [1, 1],
                 'is_shared_with_receipt_user': False
             },
             format='json'
         )
 
         # Assert that the receipt split object was created successfully
-        self.assertEqual(response.data['message'], "List of user IDs contains duplicates.")
+        self.assertEqual(response.data['Response'], "List of user IDs contains duplicates.")
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
@@ -130,18 +133,18 @@ class ReceiptSplitAPITestCase(APITestCase):
             self.url_add_receipt_split,
             data={
                 'receipt': self.receipt.pk,
-                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
-                'shared_amount': 10,
+                'shared_user_ids': [self.user2.pk, self.user3.pk],
+                'shared_amount': [10, 10],
                 'is_shared_with_receipt_owner': False
             },
             format='json'
         )
 
         # Assert that the receipt split object was created successfully
-        self.assertEqual(response.data['receipt']['receipt_id'], self.receipt.pk)
-        self.assertEqual(response.data['receipt']['receipt_scan_date'], self.receipt.scan_date)
-        self.assertEqual(response.data['receipt']['receipt_total'], self.receipt.total)
-        self.assertEqual(response.data['shared_user_ids'], f'{self.user2.pk}, {self.user3.pk}')
+        self.assertEqual(response.data['receipt_id'], self.receipt.pk)
+        self.assertEqual(response.data['shared_user_ids'], f'{self.user2.pk},{self.user3.pk}')
+        self.assertEqual(response.data['is_shared_with_receipt_owner'], False)
+        self.assertEqual(response.data['shared_amount'], "10,10")
 
         self.assertEqual(response.status_code, HTTP_201_CREATED)
 
@@ -188,7 +191,7 @@ class ReceiptSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ReceiptSplit object with a receipt id of '{100}' does not exist")
+        self.assertEqual(response.data['Response'], f"ReceiptSplit object with a receipt id of '{100}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
@@ -202,23 +205,23 @@ class ReceiptSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ReceiptSplit object with a receipt id of '{'a'}' does not exist")
+        self.assertEqual(response.data['Response'], f"ReceiptSplit object with a receipt id of '{'a'}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
     def test_get_shared_amount_pass(self):
         # Create a new ReceiptSplit object using the post request
-        receiptsplit_data_id = self.client.post(
+        self.client.post(
             self.url_add_receipt_split,
             data={
                 'receipt': self.receipt.pk,
-                'shared_amount': 10,
-                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
+                'shared_amount': [10,10],
+                'shared_user_ids': [self.user2.pk, self.user3.pk],
             },
             format='json'
-        ).data['id']
-        receiptsplit = ReceiptSplit.objects.get(id=receiptsplit_data_id)
+        )
+        receiptsplit = ReceiptSplit.objects.get(receipt=self.receipt.pk)
 
         # The url using kwargs receipt_id
         self.url_shared_amount = reverse('get_shared_amount', kwargs={'receipt_id': self.receipt.pk})
@@ -255,7 +258,7 @@ class ReceiptSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ReceiptSplit object with a receipt id of '{100}' does not exist")
+        self.assertEqual(response.data['Response'], f"ReceiptSplit object with a receipt id of '{100}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
@@ -269,7 +272,7 @@ class ReceiptSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['message'], f"ReceiptSplit object with a receipt id of '{'a'}' does not exist")
+        self.assertEqual(response.data['Response'], f"ReceiptSplit object with a receipt id of '{'a'}' does not exist")
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)

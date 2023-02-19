@@ -49,7 +49,7 @@ class AddItemSplitAmountAPI(generics.ListCreateAPIView):
                 {"Response": "shared_amount is not a list. Ensure that the data is a list of floats or integers"},
                 status=HTTP_400_BAD_REQUEST)
 
-        # Check if the list shared_user_id and shared_amount is a lists are lists of integers
+        # Check if the list shared_user_id and shared_amount is a list of integers
         for user_id in request.data['shared_user_ids']:
             if type(user_id) != int:
                 return Response({"Response": "shared_user_ids contains an element that is not an integer"},
