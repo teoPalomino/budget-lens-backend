@@ -26,11 +26,7 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
         shared_amount_total = sum(shared_amount)
         print(owners_receipt.total, shared_amount_total)
 
-        # Subtract the total amount of the shared amount from the total amount of the receipt
-        if owners_receipt.total - shared_amount_total >= 0:
-            owners_receipt.total = owners_receipt.total - shared_amount_total
-            owners_receipt.save()
-        else:
+        if owners_receipt.total - shared_amount_total < 0:
             raise serializers.ValidationError(
                 "Error: The total amount of the shared amount is greater than the total amount of the receipt")
 
@@ -50,6 +46,10 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
                     coupon=owners_receipt.coupon,
                     currency=owners_receipt.currency
                 )
+
+                # Subtract the total amount of the shared amount from the total amount of the receipt
+                owners_receipt.total = owners_receipt.total - shared_amount[i]
+                owners_receipt.save()
 
             i += 1
 
@@ -89,11 +89,7 @@ class ReceiptSplitPercentageSerializer(serializers.ModelSerializer):
 
         shared_amount_total = sum(shared_amount)
 
-        # Subtract the total amount of the shared amount from the total amount of the receipt
-        if owners_receipt.total - shared_amount_total >= 0:
-            owners_receipt.total = owners_receipt.total - shared_amount_total
-            owners_receipt.save()
-        else:
+        if owners_receipt.total - shared_amount_total < 0:
             raise serializers.ValidationError(
                 "Error: The total amount of the shared amount is greater than the total amount of the receipt")
 
@@ -113,6 +109,9 @@ class ReceiptSplitPercentageSerializer(serializers.ModelSerializer):
                     coupon=owners_receipt.coupon,
                     currency=owners_receipt.currency
                 )
+                # Subtract the shared amount from the receipt owner's receipt
+                owners_receipt.total = owners_receipt.total - shared_amount[i]
+                owners_receipt.save()
 
             i += 1
 
