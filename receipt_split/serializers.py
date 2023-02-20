@@ -33,23 +33,22 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
         # Create a new receipt for each user id in the list of user ids, excluding the receipt owner
         i = 0
         for ids in list(map(int, validated_data['shared_user_ids'].split(','))):
-            if ids is not owners_receipt.user.pk:
-                Receipts.objects.create(
-                    user=User.objects.get(pk=ids),
-                    scan_date=owners_receipt.scan_date,
-                    receipt_image=owners_receipt.receipt_image,
-                    merchant=owners_receipt.merchant,
-                    location=owners_receipt.location,
-                    total=shared_amount[i],
-                    tax=owners_receipt.tax,
-                    tip=owners_receipt.tip,
-                    coupon=owners_receipt.coupon,
-                    currency=owners_receipt.currency
-                )
+            Receipts.objects.create(
+                user=User.objects.get(pk=ids),
+                scan_date=owners_receipt.scan_date,
+                receipt_image=owners_receipt.receipt_image,
+                merchant=owners_receipt.merchant,
+                location=owners_receipt.location,
+                total=shared_amount[i],
+                tax=owners_receipt.tax,
+                tip=owners_receipt.tip,
+                coupon=owners_receipt.coupon,
+                currency=owners_receipt.currency
+            )
 
-                # Subtract the total amount of the shared amount from the total amount of the receipt
-                owners_receipt.total = owners_receipt.total - shared_amount[i]
-                owners_receipt.save()
+            # Subtract the total amount of the shared amount from the total amount of the receipt
+            owners_receipt.total = owners_receipt.total - shared_amount[i]
+            owners_receipt.save()
 
             i += 1
 
@@ -96,22 +95,21 @@ class ReceiptSplitPercentageSerializer(serializers.ModelSerializer):
         # Create a new receipt for each user id in the list of user ids, excluding the receipt owner
         i = 0
         for ids in list(map(int, validated_data['shared_user_ids'].split(','))):
-            if ids is not owners_receipt.user.pk:
-                Receipts.objects.create(
-                    user=User.objects.get(pk=ids),
-                    scan_date=owners_receipt.scan_date,
-                    receipt_image=owners_receipt.receipt_image,
-                    merchant=owners_receipt.merchant,
-                    location=owners_receipt.location,
-                    total=shared_amount[i],
-                    tax=owners_receipt.tax,
-                    tip=owners_receipt.tip,
-                    coupon=owners_receipt.coupon,
-                    currency=owners_receipt.currency
-                )
-                # Subtract the shared amount from the receipt owner's receipt
-                owners_receipt.total = owners_receipt.total - shared_amount[i]
-                owners_receipt.save()
+            Receipts.objects.create(
+                user=User.objects.get(pk=ids),
+                scan_date=owners_receipt.scan_date,
+                receipt_image=owners_receipt.receipt_image,
+                merchant=owners_receipt.merchant,
+                location=owners_receipt.location,
+                total=shared_amount[i],
+                tax=owners_receipt.tax,
+                tip=owners_receipt.tip,
+                coupon=owners_receipt.coupon,
+                currency=owners_receipt.currency
+            )
+            # Subtract the shared amount from the receipt owner's receipt
+            owners_receipt.total = owners_receipt.total - shared_amount[i]
+            owners_receipt.save()
 
             i += 1
 
