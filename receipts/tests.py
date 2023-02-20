@@ -19,6 +19,8 @@ from receipts.models import Receipts
 from users.models import UserProfile
 from merchant.models import Merchant
 
+from PIL import Image
+
 
 # This function is used when I want to directly create/add a new scanned receipt in the database
 def get_test_image_file():
@@ -28,11 +30,11 @@ def get_test_image_file():
 
 # I use this function to create a test image with a given image file type/extension that is used when I try
 # to send a post request to the API client in order to create/add a new scanned receipt in the database
-def create_image(image_file_type):
-    with tempfile.NamedTemporaryFile(suffix=image_file_type, delete=False) as f:
-        image = Image.new('RGB', (200, 200), 'white')
-        image.save(f, 'PNG')
-    return open(f.name, mode='rb')
+def create_image():
+    # with tempfile.NamedTemporaryFile(suffix=image_file_type, delete=False) as f:
+    #     image = Image.new('RGB', (200, 200), 'white')
+    #     image.save(f, 'PNG')
+    return Image.open("receipts/test_image/receipt_copy.png")
 
 
 class AddReceiptsAPITest(APITransactionTestCase):
@@ -87,7 +89,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             data=self.new_data,
             format='json'
         )
-        self.image = create_image('.png').__str__()
+        self.image = create_image().__str__()
         self.receipts_from_responses = []
 
     # I have to use the "tearDown" method to make sure the added/created scanned
@@ -311,7 +313,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.receipts_from_responses.append(self.response.data)
 
         # I am creating a second image to add to the list of receipts
-        self.image = create_image('.jpeg').__str__()
+        self.image = create_image().__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -379,7 +381,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg').__str__()
+        self.image = create_image().__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -448,7 +450,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg').__str__()
+        self.image = create_image().__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -545,7 +547,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg').__str__()
+        self.image = create_image().__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -610,7 +612,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         # I am also making use of the "force_authenticate" method to authenticate the user before making the DELETE request since
         # I don't need to "properly" authenticate the user before doing so as this test is not relevant to that behaviour/functionality
         self.client.force_authenticate(user=self.user)
-
+        print(self.image)
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
@@ -627,7 +629,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.receipts_from_responses.append(self.response.data)
 
-        self.image = create_image('.jpeg').__str__()
+        self.image = create_image().__str__()
         self.response = self.client.post(
             reverse('create_manual_receipts'),
             data={
