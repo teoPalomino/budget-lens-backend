@@ -22,7 +22,9 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
             is_shared_with_receipt_owner = True
 
         owners_receipt = Receipts.objects.get(id=validated_data['receipt'].pk)
-        shared_amount_total = sum(list(map(float, validated_data['shared_amount'].split(','))))
+        shared_amount = list(map(float, validated_data['shared_amount'].split(',')))
+        shared_amount_total = sum(shared_amount)
+        print(owners_receipt.total, shared_amount_total)
 
         # Subtract the total amount of the shared amount from the total amount of the receipt
         if owners_receipt.total - shared_amount_total >= 0:
@@ -32,10 +34,8 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Error: The total amount of the shared amount is greater than the total amount of the receipt")
 
-        owners_receipt.total = owners_receipt.total - shared_amount_total
-        owners_receipt.save()
-
         # Create a new receipt for each user id in the list of user ids, excluding the receipt owner
+        i = 0
         for ids in list(map(int, validated_data['shared_user_ids'].split(','))):
             if ids is not owners_receipt.user.pk:
                 Receipts.objects.create(
@@ -44,12 +44,14 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
                     receipt_image=owners_receipt.receipt_image,
                     merchant=owners_receipt.merchant,
                     location=owners_receipt.location,
-                    total=owners_receipt.total,
+                    total=shared_amount[i],
                     tax=owners_receipt.tax,
                     tip=owners_receipt.tip,
                     coupon=owners_receipt.coupon,
                     currency=owners_receipt.currency
                 )
+
+            i += 1
 
         return ReceiptSplit.objects.create(
             shared_user_ids=validated_data['shared_user_ids'],
@@ -96,6 +98,7 @@ class ReceiptSplitPercentageSerializer(serializers.ModelSerializer):
                 "Error: The total amount of the shared amount is greater than the total amount of the receipt")
 
         # Create a new receipt for each user id in the list of user ids, excluding the receipt owner
+        i = 0
         for ids in list(map(int, validated_data['shared_user_ids'].split(','))):
             if ids is not owners_receipt.user.pk:
                 Receipts.objects.create(
@@ -104,12 +107,14 @@ class ReceiptSplitPercentageSerializer(serializers.ModelSerializer):
                     receipt_image=owners_receipt.receipt_image,
                     merchant=owners_receipt.merchant,
                     location=owners_receipt.location,
-                    total=owners_receipt.total,
+                    total=shared_amount[i],
                     tax=owners_receipt.tax,
                     tip=owners_receipt.tip,
                     coupon=owners_receipt.coupon,
                     currency=owners_receipt.currency
                 )
+
+            i += 1
 
         shared_amount = ','.join(map(str, shared_amount))
 
