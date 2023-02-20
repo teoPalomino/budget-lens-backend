@@ -24,7 +24,6 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
         owners_receipt = Receipts.objects.get(id=validated_data['receipt'].pk)
         shared_amount = list(map(float, validated_data['shared_amount'].split(',')))
         shared_amount_total = sum(shared_amount)
-        print(owners_receipt.total, shared_amount_total)
 
         if owners_receipt.total - shared_amount_total < 0:
             raise serializers.ValidationError(
