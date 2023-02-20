@@ -30,7 +30,7 @@ class ReceiptSplitSerializer(serializers.ModelSerializer):
             owners_receipt.save()
         else:
             raise serializers.ValidationError(
-                'The total amount of the shared amount is greater than the total amount of the receipt')
+                "Error: The total amount of the shared amount is greater than the total amount of the receipt")
 
         owners_receipt.total = owners_receipt.total - shared_amount_total
         owners_receipt.save()
@@ -93,7 +93,7 @@ class ReceiptSplitPercentageSerializer(serializers.ModelSerializer):
             owners_receipt.save()
         else:
             raise serializers.ValidationError(
-                'The total amount of the shared amount is greater than the total amount of the receipt')
+                "Error: The total amount of the shared amount is greater than the total amount of the receipt")
 
         # Create a new receipt for each user id in the list of user ids, excluding the receipt owner
         for ids in list(map(int, validated_data['shared_user_ids'].split(','))):

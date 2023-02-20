@@ -63,7 +63,7 @@ class ReceiptSplitAPITestCase(APITestCase):
             receipt_image=get_test_image_file(),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
-            total=1,
+            total=100,
             tax=1,
             tip=1,
             coupon=1,
