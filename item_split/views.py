@@ -28,35 +28,38 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
     queryset = ItemSplit.objects.all()
 
     def post(self, request, *args, **kwargs):
-        # Check if the string of users can be converted into a list of integers
-        # That way if they are valid than they may be valid user ids as well
-        try:
-            # Try to convert the string into the list of integers. If not then its not a valid string list
-            user_ids_list = list(map(int, request.data['shared_user_ids'].split(',')))
-        except Exception:
-            return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."}, status=HTTP_400_BAD_REQUEST)
+        item_splits = request.data
+        responses = []
 
-        # Try to check for uniqueness of the list of user ids since a user can't have a same item shared more than
-        # once as it creates multiple instances of the same item
-        user_ids_list_as_set = set(user_ids_list)
-        if len(user_ids_list_as_set) != len(user_ids_list):
-            return Response({"message": "List of user IDs contains duplicates."},
-                            status=HTTP_400_BAD_REQUEST)
+        for item_split_data in item_splits:
+            try:
+                user_ids_list = list(map(int, item_split_data['shared_user_ids'].split(',')))
+            except Exception:
+                return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."},
+                                status=HTTP_400_BAD_REQUEST)
 
-        # Check if the user ids are valid (they exist)
-        for user_id in user_ids_list:
-            if User.objects.filter(id=user_id).exists() is not True:
-                return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
+            user_ids_list_as_set = set(user_ids_list)
+            if len(user_ids_list_as_set) != len(user_ids_list):
+                return Response({"message": "List of user IDs contains duplicates."},
+                                status=HTTP_400_BAD_REQUEST)
 
-        # If the users exists add the new Item Split object
-        response_data = super().post(request, *args, **kwargs).data
-        item_response = Item.objects.get(id=response_data['item'])
-        response_data['item'] = {
-            "item_id": item_response.pk,
-            "item_name": item_response.name,
-            "item_price": item_response.price
-        }
-        return Response(response_data, status=HTTP_201_CREATED)
+            for user_id in user_ids_list:
+                if User.objects.filter(id=user_id).exists() is not True:
+                    return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
+
+            serializer = self.serializer_class(data=item_split_data)
+            serializer.is_valid(raise_exception=True)
+            item_split = serializer.save()
+            response_data = serializer.data
+            item_response = Item.objects.get(id=response_data['item'])
+            response_data['item'] = {
+                "item_id": item_response.pk,
+                "item_name": item_response.name,
+                "item_price": item_response.price
+            }
+            responses.append(response_data)
+
+        return Response(responses, status=HTTP_201_CREATED)
 
 
 class GetSharedUsersList(generics.GenericAPIView):

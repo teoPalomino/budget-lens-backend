@@ -134,6 +134,37 @@ class GetItemsAPI(generics.ListAPIView):
             }, HTTP_200_OK)
 
 
+class ReceiptItemsAPI(generics.ListAPIView):
+    """
+    Gets list of items of a receipt and the total cost of all items
+    """
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        items = Item.objects.filter(user=self.request.user, receipt=kwargs.get('receipt_id'))
+        item_costs_dict = {}
+        item_total_cost = 0
+
+        if items.exists():
+            for item in items:
+                item_costs_dict[item.id] = {'item': [item.user.id, item.name, item.price],
+                                            'receipt_details': [item.receipt.id, item.receipt.merchant.name,
+                                                                item.receipt.scan_date],
+                                            'category_details': [item.category_id.category_name,
+                                                                 item.category_id.parent_category_id] if item.category_id is not None else "Empty"}
+                item_total_cost += item.price
+            return Response({
+                "totalPrice": item_total_cost,
+                "items": item_costs_dict,
+            }, HTTP_200_OK)
+        else:
+            return Response({
+                "totalPrice": 0,
+                "items": item_costs_dict,
+            }, HTTP_200_OK)
+
+
 class ItemFilter(django_filters.FilterSet):
     start_date = django_filters.DateFilter(field_name="receipt__scan_date", lookup_expr='gte')
     end_date = django_filters.DateFilter(field_name="receipt__scan_date", lookup_expr='lte')
