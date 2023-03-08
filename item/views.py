@@ -266,7 +266,7 @@ class GetCategoryCostsView(generics.ListAPIView):
         return Item.objects.filter(user=self.request.user)
 
 
-class GetCategoryCostByDateAndStarredCategoryView(GetCategoryCostsView):
+class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsView):
     """
     This View is essentially the same class as GetCategoryCost but it compares the date
     and if the category is starred.
@@ -277,8 +277,7 @@ class GetCategoryCostByDateAndStarredCategoryView(GetCategoryCostsView):
 
     def get(self, request, *args, **kwargs):
         items = self.get_queryset()
-        category_costs_dict = {}
-        category_costs_list = []
+        category_costs_frequency_dict = {}
 
         items[0].receipt
         if items.exists():
@@ -292,17 +291,19 @@ class GetCategoryCostByDateAndStarredCategoryView(GetCategoryCostsView):
                 #  then add the category/change the price of the category.
                 if (item.receipt.scan_date.date() >= date_range and item.category_id.category_toggle_star):
 
-                    if item.category_id.get_category_name() in category_costs_dict:
-                        category_costs_dict[item.category_id.get_category_name()] += item.price
+                    if item.category_id.get_category_name() in category_costs_frequency_dict:
+                        category_costs_frequency_dict[item.category_id.get_category_name()] = {
+                            'price': category_costs_frequency_dict[item.category_id.get_category_name()]['price'] + item.price,
+                            'category_frequency': category_costs_frequency_dict[item.category_id.get_category_name()]['category_frequency'] + 1
+                        }
+
                     else:
-                        category_costs_dict[item.category_id.get_category_name()] = item.price
+                        category_costs_frequency_dict[item.category_id.get_category_name()] = {
+                            'price': item.price,
+                            'category_frequency': 1
+                        }
         else:
             return Response({"Response": "The user either has no items created or something went wrong"},
                             HTTP_400_BAD_REQUEST)
 
-        for key, value in category_costs_dict.items():
-            category_costs_list.append({
-                "category_name": key,
-                "category_cost": value
-            })
-        return Response({"Costs": category_costs_list}, status=HTTP_200_OK)
+        return Response(category_costs_frequency_dict, status=HTTP_200_OK)
