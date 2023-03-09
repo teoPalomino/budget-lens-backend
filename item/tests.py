@@ -564,3 +564,122 @@ class CategoryCostsAPITest(APITransactionTestCase):
         self.assertEqual(float(response.data['Costs'][0]['category_cost']), self.shirt.price)
         self.assertEqual(float(response.data['Costs'][1]['category_cost']),
                          self.coffee.price + self.tea.price)
+
+
+class ItemCostsFrequencyAPITest(APITransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='therock123@gmail.com',
+            email='therock123@gmail.com',
+            first_name='The',
+            last_name='Rock',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-1234"
+        )
+        self.data = {
+            'username': 'therock123@gmail.com',
+            'password': 'wrestlingrules123'
+        }
+
+        self.token = BearerToken.objects.create(user=self.user)
+
+        self.receipt_starbucks = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+        # Update the date to be an old receipt
+        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date - datetime.timedelta(days=2)
+
+        self.receipt_starbucks_newest = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.get(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+        self.receipt_walmart = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Walmart'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+        self.shirt1 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_walmart,
+            name='shirt',
+            price=10.15
+        )
+
+        self.coffee1 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_starbucks,
+            name='coffee',
+            price=10.15
+        )
+
+    def test_get_item_costs_frequency(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(reverse('get_item_costs_frequency_date', kwargs={'days': 1}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # First, assert the case where the frequency of purchase of an item is just 1
+        self.assertEqual(float(response.data[self.shirt1.name]['cumulated_total_price']), self.shirt1.price)
+        self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 1)
+
+        # Let's assume there were two items with this name under the same receipt, then we expect the frequency of
+        # purchase to be incremented by 1 since there are two instances of this item that were bought
+        self.shirt2 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_walmart,
+            name='shirt',
+            price=10.15
+        )
+
+        response = self.client.get(reverse('get_item_costs_frequency_date', kwargs={'days': 1}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        self.assertEqual(float(response.data[self.shirt1.name]['cumulated_total_price']), self.shirt1.price + self.shirt2.price)
+        self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 2)
+
+        # Now, let's assume the case where an item was bought more than once from different receipts: the frequency of
+        # purchase should still reflect the number of times that item was bought previously, regardless of the receipt
+        self.coffee2 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_starbucks_newest,
+            name='coffee',
+            price=10.15
+        )
+
+        response = self.client.get(reverse('get_item_costs_frequency_date', kwargs={'days': 1}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        self.assertEqual(float(response.data[self.coffee1.name]['cumulated_total_price']), self.coffee1.price + self.coffee2.price)
+        self.assertEqual(response.data[self.coffee1.name]['item_frequency'], 2)
