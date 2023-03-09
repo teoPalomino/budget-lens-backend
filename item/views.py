@@ -279,7 +279,6 @@ class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsVi
         items = self.get_queryset()
         category_costs_frequency_dict = {}
 
-        items[0].receipt
         if items.exists():
             for item in items:
                 # Find the reciept in which this item belongs to
