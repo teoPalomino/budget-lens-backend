@@ -613,7 +613,6 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-        print(self.receipt_starbucks_newest)
 
         self.receipt_walmart = Receipts.objects.create(
             user=self.user,
@@ -664,8 +663,6 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
             category_id=self.category2,
             price=10.15
         )
-        print(self.tea.receipt.scan_date)
-        print(self.coffee.receipt.scan_date)
 
     def test_get_category_costs_frequency(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
@@ -677,7 +674,6 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
         # Assert the drinks prices and frequency of purchasing drinks
         self.assertEqual(float(response.data['drinks']['price']), self.coffee.price + self.tea.price)
         self.assertEqual(response.data['drinks']['category_frequency'], 2)
-        print(response.data)
 
         # since drinks is a starred category, we should only have the drinks price and frequency
         #  and not the clothes price and frequency. So we assert that the clothes category in None in the response data
