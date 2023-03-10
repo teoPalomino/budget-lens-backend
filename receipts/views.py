@@ -157,13 +157,16 @@ class DetailReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ParseReceiptsAPIView(APIView):
+    """
+    any email to budgetlens.tech will be sent to this api
+
+    """
     parser_classes = (FormParser, MultiPartParser)
 
     def post(self, request, *args, **kwargs):
 
         # check if it is a valid forwarding email
-
-        email = request.data['to']
+        email = request.POST.get('To').strip()
         try:
             userProfile = UserProfile.objects.get(forwardingEmail=email)
         except:
@@ -172,35 +175,54 @@ class ParseReceiptsAPIView(APIView):
 
         # create file and store image of html data from email
 
+        """ email converted to image"""
+
         filename = str(email + str(datetime.datetime.now()) + '.jpg')
-        imgkit.from_string(str(request.data['html']), filename)
+        imgkit.from_string(str(request.POST.get('Html')), filename)
 
         # assign forwarded receipt to the correct user
+        """
+        to test locally send email in format of the default payload in
+        https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook 
+        
+    
+        once the image is collected, send it to the receipt api
+        instead of using url, use the model
+        so, send image to receipt model
+        """
 
+        data = {}
+        data['receipt_image'] = open(filename, 'rb')
+        data['user'] = userProfile.user.id
 
-        token = str(BearerToken.objects.get(user=userProfile.user))
+        receipt_serializer = ReceiptsSerializer(data=request.data)
+        receipt_serializer.is_valid(raise_exception=True)
 
+        receipt_serializer.save()
 
+        return Response(receipt_serializer.data, status=status.HTTP_201_CREATED)
 
-        url = "https://api.budgetlens.tech/api/receipts/"
-
-        payload = {}
-        files = [
-            ('receipt_image', (filename,
-                               open(filename, 'rb'),
-                               'image/jpeg'))
-        ]
-        headers = {
-            'Authorization': 'Bearer '+token
-        }
-
-        try:
-            response = requests.request("POST", url, headers=headers, data=payload, files=files)
-        except Exception as e:
-            f = open("error.txt", "a")
-            f.write(str(e))
-            f.close()
-
-        # TODO pass the picture through the ocr
-
-        return Response(str(BearerToken.objects.get(user=userProfile.user)))
+        # token = str(BearerToken.objects.get(user=userProfile.user))
+        #
+        # url = "https://api.budgetlens.tech/api/receipts/"
+        #
+        # payload = {}
+        # files = [
+        #     ('receipt_image', (filename,
+        #                        open(filename, 'rb'),
+        #                        'image/jpeg'))
+        # ]
+        # headers = {
+        #     'Authorization': 'Bearer '+token
+        # }
+        #
+        # try:
+        #     response = requests.request("POST", url, headers=headers, data=payload, files=files)
+        # except Exception as e:
+        #     f = open("error.txt", "a")
+        #     f.write(str(e))
+        #     f.close()
+        #
+        # # TODO pass the picture through the ocr
+        #
+        # return Response(str(BearerToken.objects.get(user=userProfile.user)))
