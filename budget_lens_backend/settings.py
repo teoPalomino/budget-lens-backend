@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'item.apps.ItemConfig',
     'important_dates.apps.ImportantDatesConfig',
     'item_split.apps.ItemSplitConfig',
+    'receipt_split.apps.ReceiptSplitConfig',
     'filemanagement',
     'rules.apps.RulesConfig',
 
