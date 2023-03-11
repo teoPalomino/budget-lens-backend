@@ -599,7 +599,6 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-        
         # Update the date to be an old receipt
         self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date - datetime.timedelta(days=2)
 
@@ -626,7 +625,6 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-        
         self.shirt1 = Item.objects.create(
             user=self.user,
             receipt=self.receipt_walmart,
@@ -663,7 +661,6 @@ class ItemFrequencyAPITest(APITransactionTestCase):
         response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.shirt1.id, 'days': 1}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
-        
         self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 2)
 
         # Now, let's assume the case where an item was bought more than once from different receipts: the frequency of
@@ -715,7 +712,6 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-        
         # Update the date to be an old receipt
         self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date - datetime.timedelta(days=2)
 
@@ -742,7 +738,6 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-        
         self.category1 = Category.objects.create(
             user=self.user,
             category_name="clothes",
