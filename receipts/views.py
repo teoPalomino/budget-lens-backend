@@ -15,7 +15,7 @@ from .serializers import ManualReceiptsSerializer, ReceiptsSerializer, PutPatchR
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
-
+from PIL import Image
 
 class PostReceiptsAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -185,7 +185,8 @@ class ParseReceiptsAPIView(APIView):
         and change the "TO" field to the forwarding email of the user you want to test with
         """
 
-        data = {'receipt_image': open(filename, 'rb'), 'user': userProfile.user.id}
+        data = {'receipt_image': Image.open(filename), 'user': userProfile.user.id}
+
         receipt_serializer = ReceiptsSerializer(context={'request': request}, data=data)
         receipt_serializer.is_valid(raise_exception=True)
 
