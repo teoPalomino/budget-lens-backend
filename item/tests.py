@@ -566,7 +566,7 @@ class CategoryCostsAPITest(APITransactionTestCase):
                          self.coffee.price + self.tea.price)
 
 
-class ItemCostsFrequencyAPITest(APITransactionTestCase):
+class ItemFrequencyAPITest(APITransactionTestCase):
     reset_sequences = True
 
     def setUp(self):
@@ -641,15 +641,14 @@ class ItemCostsFrequencyAPITest(APITransactionTestCase):
             price=10.15
         )
 
-    def test_get_item_costs_frequency(self):
+    def test_get_item_frequency(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
-        response = self.client.get(reverse('get_item_costs_frequency_date', kwargs={'days': 1}), format='json')
+        response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.shirt1.id, 'days': 1}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         # First, assert the case where the frequency of purchase of an item is just 1
-        self.assertEqual(float(response.data[self.shirt1.name]['cumulated_total_price']), self.shirt1.price)
         self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 1)
 
         # Let's assume there were two items with this name under the same receipt, then we expect the frequency of
@@ -661,11 +660,9 @@ class ItemCostsFrequencyAPITest(APITransactionTestCase):
             price=10.15
         )
 
-        response = self.client.get(reverse('get_item_costs_frequency_date', kwargs={'days': 1}), format='json')
+        response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.shirt1.id, 'days': 1}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
-
-        self.assertEqual(float(response.data[self.shirt1.name]['cumulated_total_price']), self.shirt1.price + self.shirt2.price)
         self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 2)
 
         # Now, let's assume the case where an item was bought more than once from different receipts: the frequency of
@@ -677,9 +674,8 @@ class ItemCostsFrequencyAPITest(APITransactionTestCase):
             price=10.15
         )
 
-        response = self.client.get(reverse('get_item_costs_frequency_date', kwargs={'days': 1}), format='json')
+        response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.coffee1.id, 'days': 1}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
 
-        self.assertEqual(float(response.data[self.coffee1.name]['cumulated_total_price']), self.coffee1.price + self.coffee2.price)
         self.assertEqual(response.data[self.coffee1.name]['item_frequency'], 2)

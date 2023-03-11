@@ -266,43 +266,47 @@ class GetCategoryCostsView(generics.ListAPIView):
         return Item.objects.filter(user=self.request.user)
 
 
-class GetItemCostAndFrequencyByDateView(generics.ListAPIView):
+class GetItemFrequencyByDateView(ItemDetailAPIView):
     """
-    This view is used to get the cost and frequency of items by date. It returns a dictionary
-    with the key being the item name and the value being a dictionary with the key being the total cumulated price
-    of the item and the value being the frequency of the item throughout all receipts of that given user.
+    This view is used to get the frequency of a specific item by date using its name. It returns a dictionary
+    with the key being the item name and the value being the frequency of the item throughout all receipts of that given user.
 
-    The route used by this view is `items/costs/date/days=<int:days>/` where `days` is the range from
+    The route used by this view is `items/<int:item_id>/date/days=<int:days>/` where `days` is the range from
     when the scan_date can be from today's date till today's date minus `days` in the api route.
     """
     def get(self, request, *args, **kwargs):
-        # Get the list of items
-        items = Item.objects.filter(user=self.request.user)
-        item_costs_frequency_dict = {}
+        if kwargs.get('item_id'):
+            try:
+                item = self.get_queryset().get(id=kwargs.get('item_id'))
 
-        if items.exists():
-            for item in items:
-                # Find the receipt in which this item belongs to. This receipt contains
-                # the date details of all the items and hence the receipt itself
-                date_range = datetime.date.today() - datetime.timedelta(days=kwargs['days'])
+                # Additional query to get all the items that have the same name as the item in question
+                items = Item.objects.filter(name=item.name, user=self.request.user)
+                item_frequency_dict = {}
 
-                # If the date of the receipt is within the date range,
-                # then add the item/change the total cumulated price of the item to reflect
-                # its frequency, where the item price is simply the total cumulated price divided
-                # by the frequency of the item found in all receipts of the given user
-                if item.receipt.scan_date.date() >= date_range:
-                    if item.name in item_costs_frequency_dict:
-                        item_costs_frequency_dict[item.name] = {
-                            'cumulated_total_price': item_costs_frequency_dict[item.name]['cumulated_total_price'] + item.price,
-                            'item_frequency': item_costs_frequency_dict[item.name]['item_frequency'] + 1
-                        }
-                    else:
-                        item_costs_frequency_dict[item.name] = {
-                            'cumulated_total_price': item.price,
-                            'item_frequency': 1
-                        }
-        else:
-            return Response({"Response": "The user either has no items and/or receipts created or something went wrong"},
-                            HTTP_400_BAD_REQUEST)
+                if items.exists():
+                    for item in items:
+                        # Find the receipt in which this item belongs to. This receipt contains
+                        # the date details of all the items and hence the receipt itself
+                        date_range = datetime.date.today() - datetime.timedelta(days=kwargs['days'])
 
-        return Response(item_costs_frequency_dict, status=HTTP_200_OK)
+                        # If the date of the receipt is within the date range,
+                        # then add the item/change its existing frequency found in
+                        # all receipts of the given user
+                        if item.receipt.scan_date.date() >= date_range:
+                            if item.name in item_frequency_dict:
+                                item_frequency_dict[item.name] = {
+                                    'item_frequency': item_frequency_dict[item.name]['item_frequency'] + 1
+                                }
+                            else:
+                                item_frequency_dict[item.name] = {
+                                    'item_frequency': 1
+                                }
+
+                    return Response(item_frequency_dict, status=HTTP_200_OK)
+
+            except Item.DoesNotExist:
+                return Response({"Error": "Item with this id does not exist"},
+                                status=HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        return Item.objects.filter(user=self.request.user)
