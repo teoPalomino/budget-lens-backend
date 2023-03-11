@@ -1,3 +1,4 @@
+import datetime
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
@@ -263,3 +264,45 @@ class GetCategoryCostsView(generics.ListAPIView):
 
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)
+
+
+class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsView):
+    """
+    This View is essentially the same class as GetCategoryCost but it compares the date
+    and if the category is starred.
+
+    *   route is `items/category/costs/date/days=<int:days>/` where `days` is the range from
+        when the scan_date can be from today date and todays date minus `days` in the api route.
+    """
+
+    def get(self, request, *args, **kwargs):
+        items = self.get_queryset()
+        category_costs_frequency_dict = {}
+
+        if items.exists():
+            for item in items:
+                # Find the reciept in which this item belongs to
+                #  The receipt contains the date details of all the items and hence the receipt itself
+                #  item.receipt.scan_date
+                date_range = datetime.date.today() - datetime.timedelta(days=kwargs['days'])
+
+                # If the date of the receipt is within the date range and the category is stared,
+                #  then add the category/change the price of the category.
+                if (item.receipt.scan_date.date() >= date_range and item.category_id.category_toggle_star):
+
+                    if item.category_id.get_category_name() in category_costs_frequency_dict:
+                        category_costs_frequency_dict[item.category_id.get_category_name()] = {
+                            'price': category_costs_frequency_dict[item.category_id.get_category_name()]['price'] + item.price,
+                            'category_frequency': category_costs_frequency_dict[item.category_id.get_category_name()]['category_frequency'] + 1
+                        }
+
+                    else:
+                        category_costs_frequency_dict[item.category_id.get_category_name()] = {
+                            'price': item.price,
+                            'category_frequency': 1
+                        }
+        else:
+            return Response({"Response": "The user either has no items created or something went wrong"},
+                            HTTP_400_BAD_REQUEST)
+
+        return Response(category_costs_frequency_dict, status=HTTP_200_OK)
