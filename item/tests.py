@@ -599,7 +599,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-
+        
         # Update the date to be an old receipt
         self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date - datetime.timedelta(days=2)
 
@@ -626,7 +626,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-
+        
         self.shirt1 = Item.objects.create(
             user=self.user,
             receipt=self.receipt_walmart,
@@ -663,6 +663,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
         response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.shirt1.id, 'days': 1}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
+        
         self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 2)
 
         # Now, let's assume the case where an item was bought more than once from different receipts: the frequency of
@@ -679,3 +680,118 @@ class ItemFrequencyAPITest(APITransactionTestCase):
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         self.assertEqual(response.data[self.coffee1.name]['item_frequency'], 2)
+
+
+class CategoryCostsFrequencyAPITest(APITransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='therock123@gmail.com',
+            email='therock123@gmail.com',
+            first_name='The',
+            last_name='Rock',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-1234"
+        )
+        self.data = {
+            'username': 'therock123@gmail.com',
+            'password': 'wrestlingrules123'
+        }
+
+        self.token = BearerToken.objects.create(user=self.user)
+
+        self.receipt_starbucks = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+        
+        # Update the date to be an old receipt
+        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date - datetime.timedelta(days=2)
+
+        self.receipt_starbucks_newest = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.get(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+        self.receipt_walmart = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Walmart'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+        
+        self.category1 = Category.objects.create(
+            user=self.user,
+            category_name="clothes",
+            category_toggle_star=False,
+            parent_category_id=None
+        )
+
+        self.shirt = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_walmart,
+            name='shirt',
+            category_id=self.category1,
+            price=10.15
+        )
+
+        self.category2 = Category.objects.create(
+            user=self.user,
+            category_name="drinks",
+            category_toggle_star=True,
+            parent_category_id=None
+        )
+
+        self.coffee = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_starbucks_newest,
+            name='coffee',
+            category_id=self.category2,
+            price=10.15
+        )
+
+        self.tea = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_starbucks,
+            name='tea',
+            category_id=self.category2,
+            price=10.15
+        )
+
+    def test_get_category_costs_frequency(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(reverse('get_category_costs_frequency_date', kwargs={'days': 1}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Assert the drinks prices and frequency of purchasing drinks
+        self.assertEqual(float(response.data['drinks']['price']), self.coffee.price + self.tea.price)
+        self.assertEqual(response.data['drinks']['category_frequency'], 2)
+
+        # since drinks is a starred category, we should only have the drinks price and frequency
+        #  and not the clothes price and frequency. So we assert that the clothes category in None in the response data
+        self.assertIsNone(response.data.get('clothes'))
