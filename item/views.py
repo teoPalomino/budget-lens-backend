@@ -1,10 +1,10 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics
+from rest_framework import filters, generics, status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from django.core.paginator import Paginator
 
 from item.serializers import ItemSerializer, PutPatchItemSerializer
@@ -134,33 +134,27 @@ class GetItemsAPI(generics.ListAPIView):
 
 class ReceiptItemsAPI(generics.ListAPIView):
     """
-    Gets list of items of a receipt and the total cost of all items
+    Gets list of items of a receipt and the total cost of all items, used for split by items.
     """
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        items = Item.objects.filter(user=self.request.user, receipt=kwargs.get('receipt_id'))
-        item_costs_dict = {}
-        item_total_cost = 0
-
+        items = Item.objects.filter(receipt=kwargs.get('receipt_id')).values('id', 'name', 'price')
+        item_list = []
         if items.exists():
             for item in items:
-                item_costs_dict[item.id] = {'item': [item.user.id, item.name, item.price],
-                                            'receipt_details': [item.receipt.id, item.receipt.merchant.name,
-                                                                item.receipt.scan_date],
-                                            'category_details': [item.category_id.category_name,
-                                                                 item.category_id.parent_category_id] if item.category_id is not None else "Empty"}
-                item_total_cost += item.price
+                item_list.append(item)
+
             return Response({
-                "totalPrice": item_total_cost,
-                "items": item_costs_dict,
+                "items": item_list
             }, HTTP_200_OK)
         else:
             return Response({
-                "totalPrice": 0,
-                "items": item_costs_dict,
+                "items": item_list,
             }, HTTP_200_OK)
+
+
 
 
 class ItemFilter(django_filters.FilterSet):
