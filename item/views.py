@@ -1,3 +1,4 @@
+import datetime
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, status
@@ -288,3 +289,95 @@ class GetCategoryCostsView(generics.ListAPIView):
 
     def get_queryset(self):
         return Item.objects.filter(user=self.request.user)
+
+
+class GetItemFrequencyByMonthView(ItemDetailAPIView):
+    """
+    This view is used to get the frequency of a specific item by an interval of one previous month in history using its name.
+    It returns a dictionary with the key being the item name and the value being the frequency of the item throughout all
+    receipts of that given user.
+
+    The route used by this view is `items/<int:item_id>/date/` where `item_id` is the id of the item in question.
+    """
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('item_id'):
+            try:
+                item = self.get_queryset().get(id=kwargs.get('item_id'))
+
+                # Additional query to get all the items that have the same name as the item in question
+                items = Item.objects.filter(name=item.name, user=self.request.user)
+                item_frequency_dict = {}
+
+                if items.exists():
+                    for item in items:
+                        # Find the receipt in which this item belongs to. This receipt contains
+                        # the date details of all the items and hence the receipt itself
+                        date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
+
+                        # If the date of the receipt is within the date range,
+                        # then add the item/change its existing frequency found in
+                        # all receipts of the given user
+                        if date_range <= item.receipt.scan_date.date() <= datetime.date.today():
+                            if item.name in item_frequency_dict:
+                                item_frequency_dict[item.name] = {
+                                    'item_frequency': item_frequency_dict[item.name]['item_frequency'] + 1
+                                }
+                            else:
+                                item_frequency_dict[item.name] = {
+                                    'item_frequency': 1
+                                }
+
+                    if not item_frequency_dict:
+                        return Response({"This item was not bought in the last month"},
+                                        status=HTTP_200_OK)
+                    else:
+                        return Response(item_frequency_dict, status=HTTP_200_OK)
+
+            except Item.DoesNotExist:
+                return Response({"Error": "Item with this id does not exist"},
+                                status=HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        return Item.objects.filter(user=self.request.user)
+
+
+class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsView):
+    """
+    This View is essentially the same class as GetCategoryCost, but it compares the date
+    and if the category is starred.
+
+    *   route is `items/category/costs/date/days=<int:days>/` where `days` is the range from
+        when the scan_date can be from today's date till today's date minus `days` in the api route.
+    """
+
+    def get(self, request, *args, **kwargs):
+        items = self.get_queryset()
+        category_costs_frequency_dict = {}
+
+        if items.exists():
+            for item in items:
+                # Find the receipt in which this item belongs to
+                #  The receipt contains the date details of all the items and hence the receipt itself
+                #  item.receipt.scan_date
+                date_range = datetime.date.today() - datetime.timedelta(days=kwargs['days'])
+
+                # If the date of the receipt is within the date range and the category is stared,
+                #  then add the category/change the price of the category.
+                if item.receipt.scan_date.date() >= date_range and item.category_id.category_toggle_star:
+
+                    if item.category_id.get_category_name() in category_costs_frequency_dict:
+                        category_costs_frequency_dict[item.category_id.get_category_name()] = {
+                            'price': category_costs_frequency_dict[item.category_id.get_category_name()]['price'] + item.price,
+                            'category_frequency': category_costs_frequency_dict[item.category_id.get_category_name()]['category_frequency'] + 1
+                        }
+
+                    else:
+                        category_costs_frequency_dict[item.category_id.get_category_name()] = {
+                            'price': item.price,
+                            'category_frequency': 1
+                        }
+        else:
+            return Response({"Response": "The user either has no items created or something went wrong"},
+                            HTTP_400_BAD_REQUEST)
+
+        return Response(category_costs_frequency_dict, status=HTTP_200_OK)
