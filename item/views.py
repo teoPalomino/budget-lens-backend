@@ -266,13 +266,13 @@ class GetCategoryCostsView(generics.ListAPIView):
         return Item.objects.filter(user=self.request.user)
 
 
-class GetItemFrequencyByDateView(ItemDetailAPIView):
+class GetItemFrequencyByMonthView(ItemDetailAPIView):
     """
-    This view is used to get the frequency of a specific item by date using its name. It returns a dictionary
-    with the key being the item name and the value being the frequency of the item throughout all receipts of that given user.
+    This view is used to get the frequency of a specific item by an interval of one previous month in history using its name.
+    It returns a dictionary with the key being the item name and the value being the frequency of the item throughout all
+    receipts of that given user.
 
-    The route used by this view is `items/<int:item_id>/date/days=<int:days>/` where `days` is the range from
-    when the scan_date can be from today's date till today's date minus `days` in the api route.
+    The route used by this view is `items/<int:item_id>/date/` where `item_id` is the id of the item in question.
     """
     def get(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
@@ -287,12 +287,12 @@ class GetItemFrequencyByDateView(ItemDetailAPIView):
                     for item in items:
                         # Find the receipt in which this item belongs to. This receipt contains
                         # the date details of all the items and hence the receipt itself
-                        date_range = datetime.date.today() - datetime.timedelta(days=kwargs['days'])
+                        date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
 
                         # If the date of the receipt is within the date range,
                         # then add the item/change its existing frequency found in
                         # all receipts of the given user
-                        if item.receipt.scan_date.date() >= date_range:
+                        if date_range <= item.receipt.scan_date.date() <= datetime.date.today():
                             if item.name in item_frequency_dict:
                                 item_frequency_dict[item.name] = {
                                     'item_frequency': item_frequency_dict[item.name]['item_frequency'] + 1
@@ -302,7 +302,11 @@ class GetItemFrequencyByDateView(ItemDetailAPIView):
                                     'item_frequency': 1
                                 }
 
-                    return Response(item_frequency_dict, status=HTTP_200_OK)
+                    if not item_frequency_dict:
+                        return Response({"This item was not bought in the last month"},
+                                        status=HTTP_200_OK)
+                    else:
+                        return Response(item_frequency_dict, status=HTTP_200_OK)
 
             except Item.DoesNotExist:
                 return Response({"Error": "Item with this id does not exist"},
@@ -314,11 +318,11 @@ class GetItemFrequencyByDateView(ItemDetailAPIView):
 
 class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsView):
     """
-    This View is essentially the same class as GetCategoryCost but it compares the date
+    This View is essentially the same class as GetCategoryCost, but it compares the date
     and if the category is starred.
 
     *   route is `items/category/costs/date/days=<int:days>/` where `days` is the range from
-        when the scan_date can be from today date and todays date minus `days` in the api route.
+        when the scan_date can be from today's date till today's date minus `days` in the api route.
     """
 
     def get(self, request, *args, **kwargs):
@@ -327,14 +331,14 @@ class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsVi
 
         if items.exists():
             for item in items:
-                # Find the reciept in which this item belongs to
+                # Find the receipt in which this item belongs to
                 #  The receipt contains the date details of all the items and hence the receipt itself
                 #  item.receipt.scan_date
                 date_range = datetime.date.today() - datetime.timedelta(days=kwargs['days'])
 
                 # If the date of the receipt is within the date range and the category is stared,
                 #  then add the category/change the price of the category.
-                if (item.receipt.scan_date.date() >= date_range and item.category_id.category_toggle_star):
+                if item.receipt.scan_date.date() >= date_range and item.category_id.category_toggle_star:
 
                     if item.category_id.get_category_name() in category_costs_frequency_dict:
                         category_costs_frequency_dict[item.category_id.get_category_name()] = {

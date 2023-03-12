@@ -2,7 +2,7 @@ import datetime
 from random import randint
 from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from item.models import Item
 
@@ -600,7 +600,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             currency="CAD"
         )
         # Update the date to be an old receipt
-        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date - datetime.timedelta(days=2)
+        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=datetime.date.today().month - 1)
 
         self.receipt_starbucks_newest = Receipts.objects.create(
             user=self.user,
@@ -642,7 +642,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
     def test_get_item_frequency(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
-        response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.shirt1.id, 'days': 1}), format='json')
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.shirt1.id}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
 
@@ -658,7 +658,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             price=10.15
         )
 
-        response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.shirt1.id, 'days': 1}), format='json')
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.shirt1.id}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 2)
@@ -672,11 +672,32 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             price=10.15
         )
 
-        response = self.client.get(reverse('get_item_frequency_date', kwargs={'item_id': self.coffee1.id, 'days': 1}), format='json')
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.coffee1.id}), format='json')
 
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         self.assertEqual(response.data[self.coffee1.name]['item_frequency'], 2)
+
+        # Now, let's assume the case where an item was bought more than a month ago: the response of the request should
+        # return a message saying that the item was not bought in the last month
+        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=datetime.date.today().month - 2)
+        self.receipt_starbucks.save()
+        self.receipt_starbucks_newest.scan_date = self.receipt_starbucks_newest.scan_date.replace(month=datetime.date.today().month - 2)
+        self.receipt_starbucks_newest.save()
+
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.coffee1.id}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        self.assertEqual(list(response.data)[0], "This item was not bought in the last month")
+
+        # Now, let's assume the case where the id of an item does not exist: the response of the request should return an
+        # error message saying that the item with that specific id does not exist
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': 100}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        self.assertEqual(response.data['Error'], "Item with this id does not exist")
 
 
 class CategoryCostsFrequencyAPITest(APITransactionTestCase):
