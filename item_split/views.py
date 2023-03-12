@@ -28,30 +28,44 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
     queryset = ItemSplit.objects.all()
 
     def post(self, request, *args, **kwargs):
-        item_splits = request.data
+        item_splits_data = request.data.get('item_list')
+        print(request.data)
         responses = []
 
-        for item_split_data in item_splits:
+        for item_data in item_splits_data:
             try:
-                user_ids_list = list(map(int, item_split_data['shared_user_ids'].split(',')))
+                print(37)
+                user_ids_list = list(map(int, item_data['shared_user_ids'].split(',')))
             except Exception:
+                print(40)
                 return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."},
                                 status=HTTP_400_BAD_REQUEST)
 
             user_ids_list_as_set = set(user_ids_list)
+            print(45)
             if len(user_ids_list_as_set) != len(user_ids_list):
+                print(47)
                 return Response({"message": "List of user IDs contains duplicates."},
                                 status=HTTP_400_BAD_REQUEST)
 
             for user_id in user_ids_list:
+                print(52)
                 if User.objects.filter(id=user_id).exists() is not True:
+                    print(54)
                     return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
-
-            serializer = self.serializer_class(data=item_split_data)
+            print(56)
+            serializer = self.serializer_class(data=item_data)
+            print(58)
             serializer.is_valid(raise_exception=True)
+            if serializer.errors:
+                print(serializer.errors)
+            print(60)
             item_split = serializer.save()
+            print(62)
             response_data = serializer.data
-            item_response = Item.objects.get(id=response_data['item'])
+            print(64)
+            item_response = Item.objects.get(id=response_data['item_id'])
+            print(66)
             response_data['item'] = {
                 "item_id": item_response.pk,
                 "item_name": item_response.name,
