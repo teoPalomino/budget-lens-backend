@@ -49,7 +49,7 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
                     return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
             serializer = self.serializer_class(data=item_data)
             serializer.is_valid(raise_exception=True)
-            item_split = serializer.save()
+            serializer.save()
             response_data = serializer.data
             item_response = Item.objects.get(id=response_data['item_id'])
             response_data['item'] = {

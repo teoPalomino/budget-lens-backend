@@ -2,11 +2,11 @@ import datetime
 import django_filters
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, status
+from rest_framework import filters, generics
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from django.core.paginator import Paginator
 
 from item.serializers import ItemSerializer, PutPatchItemSerializer
@@ -155,8 +155,6 @@ class ReceiptItemsAPI(generics.ListAPIView):
             return Response({
                 "items": item_list,
             }, HTTP_200_OK)
-
-
 
 
 class ItemFilter(django_filters.FilterSet):

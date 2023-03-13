@@ -1,10 +1,7 @@
 from django.contrib.auth.models import User
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
-
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from item.models import Item
 from users.models import UserProfile
-from .models import ItemSplit
-
 from merchant.models import Merchant
 from receipts.models import Receipts
 from receipts.tests import get_test_image_file
@@ -123,9 +120,3 @@ class ItemSplitAPITestCase(APITestCase):
 
         # Authenticate user before each test
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-
-
-
-
-
-
