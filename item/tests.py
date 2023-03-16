@@ -2,7 +2,7 @@ import datetime
 from random import randint
 from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from item.models import Item
 
@@ -566,6 +566,140 @@ class CategoryCostsAPITest(APITransactionTestCase):
                          self.coffee.price + self.tea.price)
 
 
+class ItemFrequencyAPITest(APITransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='therock123@gmail.com',
+            email='therock123@gmail.com',
+            first_name='The',
+            last_name='Rock',
+            password='wrestlingrules123'
+        )
+        self.user_profile = UserProfile.objects.create(
+            user=self.user,
+            telephone_number="+1-613-555-1234"
+        )
+        self.data = {
+            'username': 'therock123@gmail.com',
+            'password': 'wrestlingrules123'
+        }
+
+        self.token = BearerToken.objects.create(user=self.user)
+
+        self.receipt_starbucks = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+        # Update the date to be an old receipt
+        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=datetime.date.today().month - 1)
+
+        self.receipt_starbucks_newest = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.get(name='starbucks'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+
+        self.receipt_walmart = Receipts.objects.create(
+            user=self.user,
+            receipt_image=get_test_image_file(),
+            merchant=Merchant.objects.create(name='Walmart'),
+            location='123 Testing Street T1E 5T5',
+            total=1,
+            tax=1,
+            tip=1,
+            coupon=1,
+            currency="CAD"
+        )
+        self.shirt1 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_walmart,
+            name='shirt',
+            price=10.15
+        )
+
+        self.coffee1 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_starbucks,
+            name='coffee',
+            price=10.15
+        )
+
+    def test_get_item_frequency(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.shirt1.id}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # First, assert the case where the frequency of purchase of an item is just 1
+        self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 1)
+
+        # Let's assume there were two items with this name under the same receipt, then we expect the frequency of
+        # purchase to be incremented by 1 since there are two instances of this item that were bought
+        self.shirt2 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_walmart,
+            name='shirt',
+            price=10.15
+        )
+
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.shirt1.id}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.data[self.shirt1.name]['item_frequency'], 2)
+
+        # Now, let's assume the case where an item was bought more than once from different receipts: the frequency of
+        # purchase should still reflect the number of times that item was bought previously, regardless of the receipt
+        self.coffee2 = Item.objects.create(
+            user=self.user,
+            receipt=self.receipt_starbucks_newest,
+            name='coffee',
+            price=10.15
+        )
+
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.coffee1.id}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        self.assertEqual(response.data[self.coffee1.name]['item_frequency'], 2)
+
+        # Now, let's assume the case where an item was bought more than a month ago: the response of the request should
+        # return a message saying that the item was not bought in the last month
+        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=datetime.date.today().month - 2)
+        self.receipt_starbucks.save()
+        self.receipt_starbucks_newest.scan_date = self.receipt_starbucks_newest.scan_date.replace(month=datetime.date.today().month - 2)
+        self.receipt_starbucks_newest.save()
+
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': self.coffee1.id}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        self.assertEqual(list(response.data)[0], "This item was not bought in the last month")
+
+        # Now, let's assume the case where the id of an item does not exist: the response of the request should return an
+        # error message saying that the item with that specific id does not exist
+        response = self.client.get(reverse('get_item_frequency_month', kwargs={'item_id': 100}), format='json')
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        self.assertEqual(response.data['Error'], "Item with this id does not exist")
+
+
 class CategoryCostsFrequencyAPITest(APITransactionTestCase):
     reset_sequences = True
 
@@ -599,7 +733,7 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-        # Update the date to be a old receipt
+        # Update the date to be an old receipt
         self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date - datetime.timedelta(days=2)
 
         self.receipt_starbucks_newest = Receipts.objects.create(
@@ -625,7 +759,6 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
-
         self.category1 = Category.objects.create(
             user=self.user,
             category_name="clothes",

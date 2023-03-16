@@ -9,5 +9,6 @@ urlpatterns = [
     path('items/pageNumber=<pageNumber>&pageSize=<pageSize>/', views.PaginateFilterItemsView.as_view(),
          name='list_paged_items'),
     path('items/category/costs/', views.GetCategoryCostsView.as_view(), name='get_category_costs'),
+    path('items/<int:item_id>/date/', views.GetItemFrequencyByMonthView.as_view(), name='get_item_frequency_month'),
     path('items/category/costs/date/days=<int:days>/', views.GetCategoryCostAndFrequencyByDateAndStarredCategoryView.as_view(), name='get_category_costs_frequency_date')
 ]
