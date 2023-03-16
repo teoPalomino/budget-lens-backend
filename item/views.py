@@ -154,12 +154,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-
-    '''
-    TODO: fix search, for some reason not working
-    '''
-
-    # search_fields = ['name', 'price','user']
+    search_fields = ['name', 'price', 'user__first_name', 'user__last_name']
 
     # noqa: C901
     def get(self, request, *args, **kwargs):
@@ -169,12 +164,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
         """
         queryset = self.get_queryset()
         item_list_response = super().get(request, *args, **kwargs)
-        item_total_cost = 0
-        items = Item.objects.filter(user=self.request.user)
-
-        if items.exists():
-            for item in items:
-                item_total_cost += item.price
+        item_total_price = 0
 
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
@@ -183,7 +173,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
-                'total Cost': item_total_cost,
+                'total_price': item_total_price,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -202,7 +192,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
-                'total Cost': item_total_cost,
+                'total_price': item_total_price,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -211,7 +201,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
-                'total Cost': item_total_cost,
+                'total_price': item_total_price,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -221,11 +211,13 @@ class PaginateFilterItemsView(generics.ListAPIView):
         for i, item in zip(queryset, page.object_list):
             item['scan_date'] = i.receipt.scan_date
             item['merchant_name'] = i.receipt.merchant.name
+            item_total_price += float(item['price'])
 
+        item_total_price = round(item_total_price, 2)
         return Response({
             'page_list': page.object_list,
             'total': len(page.object_list),
-            'total Cost': item_total_cost,
+            'total_price': item_total_price,
             'description': str(page),
             'current_page_number': page.number,
             'number_of_pages': page.paginator.num_pages
@@ -274,6 +266,7 @@ class GetItemFrequencyByMonthView(ItemDetailAPIView):
 
     The route used by this view is `items/<int:item_id>/date/` where `item_id` is the id of the item in question.
     """
+
     def get(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
             try:
@@ -342,8 +335,10 @@ class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsVi
 
                     if item.category_id.get_category_name() in category_costs_frequency_dict:
                         category_costs_frequency_dict[item.category_id.get_category_name()] = {
-                            'price': category_costs_frequency_dict[item.category_id.get_category_name()]['price'] + item.price,
-                            'category_frequency': category_costs_frequency_dict[item.category_id.get_category_name()]['category_frequency'] + 1
+                            'price': category_costs_frequency_dict[item.category_id.get_category_name()][
+                                         'price'] + item.price,
+                            'category_frequency': category_costs_frequency_dict[item.category_id.get_category_name()][
+                                                      'category_frequency'] + 1
                         }
 
                     else:
