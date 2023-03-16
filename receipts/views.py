@@ -1,4 +1,5 @@
 import datetime
+
 import imgkit
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,7 +16,8 @@ from .serializers import ManualReceiptsSerializer, ReceiptsSerializer, PutPatchR
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
-from PIL import Image
+from django.core.files.images import ImageFile
+
 
 class PostReceiptsAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -164,32 +166,32 @@ class ParseReceiptsAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         # check if it is a valid forwarding email
-        email = request.POST.get('To').strip()
         try:
+            email = request.POST.get('To').strip()
             userProfile = UserProfile.objects.get(forwardingEmail=email)
         except:
             return Response({"response": "This email does not correspond to any Budget Lens account"},
                             status=status.HTTP_400_BAD_REQUEST)
-
-        # create file and store image of html data from email
-
         """ email converted to image"""
 
         filename = str(email + str(datetime.datetime.now()) + '.jpg')
-        imgkit.from_string(str(request.POST.get('Html')), filename)
+        imgkit.from_string(str(request.POST.get('Html')), filename,
+                           options={"enable-local-file-access": ""})
 
-        # assign forwarded receipt to the correct user
         """
         to test locally send email in format of the default payload in
         https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook 
         and change the "TO" field to the forwarding email of the user you want to test with
         """
 
-        data = {'receipt_image': Image.open(filename), 'user': userProfile.user.id}
+        receipt_image = ImageFile(open(filename, 'rb'), name=filename)
+
+        data = {'receipt_image': receipt_image, 'user': userProfile.user}
 
         receipt_serializer = ReceiptsSerializer(context={'request': request}, data=data)
-        receipt_serializer.is_valid(raise_exception=True)
 
-        receipt_serializer.save()
-
-        return Response(receipt_serializer.data, status=status.HTTP_201_CREATED)
+        if receipt_serializer.is_valid(raise_exception=True):
+            receipt_serializer.save()
+            return Response(receipt_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(receipt_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
