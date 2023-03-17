@@ -143,7 +143,7 @@ class ItemFilter(django_filters.FilterSet):
 
     class Meta:
         model = Item
-        fields = ['id', 'receipt', 'category_id', 'name', 'price', 'min_price', 'max_price',
+        fields = ['id', 'receipt', 'category_id', 'category_id_id__category_name', 'name', 'price', 'min_price', 'max_price',
                   'start_date', 'end_date', 'user', 'merchant_name', 'merchant_id']
 
 
@@ -154,7 +154,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-    search_fields = ['name', 'price', 'user__first_name', 'user__last_name']
+    search_fields = ['name', 'price', 'user__first_name', 'user__last_name', 'category_id_id__category_name']
 
     # noqa: C901
     def get(self, request, *args, **kwargs):
@@ -184,7 +184,11 @@ class PaginateFilterItemsView(generics.ListAPIView):
             kwargs['pageSize'] = 10
 
         # If Page size is less than zero, -> had to remove due to complexity issue.
-        kwargs['pageSize'] = 10
+        # If Page size is less than zero
+        if kwargs['pageSize'] <= 0:
+            # Make default page size = 10
+            kwargs['pageSize'] = 10
+
         paginator = Paginator(item_list_response.data, kwargs['pageSize'])
 
         # If page number is greater than page limit, return an empty list
@@ -212,6 +216,10 @@ class PaginateFilterItemsView(generics.ListAPIView):
             item['scan_date'] = i.receipt.scan_date
             item['merchant_name'] = i.receipt.merchant.name
             item_total_price += float(item['price'])
+            if i.category_id is not None:
+                item['category_name'] = i.category_id.category_name
+            else:
+                item['category_name'] = ""
 
         item_total_price = round(item_total_price, 2)
         return Response({
