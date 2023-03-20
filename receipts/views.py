@@ -17,6 +17,7 @@ from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
 from django.core.files.images import ImageFile
 
+
 class PostReceiptsAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ReceiptsSerializer
@@ -164,7 +165,7 @@ class ParseReceiptsAPIView(APIView):
         try:
             email = request.POST.get('To').strip()
             userProfile = UserProfile.objects.get(forwardingEmail=email)
-        except:
+        except Exception:
             return Response({"response": "This email does not correspond to any Budget Lens account"},
                             status=status.HTTP_400_BAD_REQUEST)
         """ email converted to image"""
