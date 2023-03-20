@@ -9,7 +9,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from merchant.models import Merchant
 from users.models import UserProfile
 from .models import Receipts
 from .serializers import ManualReceiptsSerializer, ReceiptsSerializer, PutPatchReceiptsSerializer
@@ -17,7 +16,6 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
 from django.core.files.images import ImageFile
-
 
 class PostReceiptsAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -77,7 +75,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     This will return all the receipts with the scan_date between the scan_date_start and scan_date_end (inclusive).
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = ReceiptsSerializer
+    serializer_class = ManualReceiptsSerializer
     parser_classes = (MultiPartParser, FormParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ReceiptsFilter
@@ -90,11 +88,8 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         and then paginate the results
         """
         #
-        reciept_list_response = super().get(request, *args, **kwargs)
-        new_reciept_list_response = []
-        for item in reciept_list_response.data:
-            item['merchant'] = Merchant.objects.get(pk=item['merchant']).name
-            new_reciept_list_response.append(item)
+        receipt_list_response = super().get(request, *args, **kwargs)
+
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
@@ -116,7 +111,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
             # Make default page size = 10
             kwargs['pageSize'] = 10
 
-        paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
+        paginator = Paginator(receipt_list_response.data, kwargs['pageSize'])
 
         # If page number is greater than page limit, return an empty list
         if kwargs['pageNumber'] > paginator.num_pages:
@@ -183,7 +178,6 @@ class ParseReceiptsAPIView(APIView):
         https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook 
         and change the "TO" field to the forwarding email of the user you want to test with
         """
-
         receipt_image = ImageFile(open(filename, 'rb'), name=filename)
 
         data = {'receipt_image': receipt_image, 'user': userProfile.user}
