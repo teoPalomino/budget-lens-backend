@@ -176,7 +176,7 @@ class ParseReceiptsAPIView(APIView):
 
         """
         to test locally send email in format of the default payload in
-        https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook 
+        https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook
         and change the "TO" field to the forwarding email of the user you want to test with
         """
         receipt_image = ImageFile(open(filename, 'rb'), name=filename)
