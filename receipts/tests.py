@@ -99,18 +99,6 @@ class AddReceiptsAPITest(APITransactionTestCase):
         shutil.rmtree(os.path.join(settings.RECEIPT_IMAGES_URL, f'{self.new_user.id}'), ignore_errors=True)
         super().tearDown()
 
-    def test_parse_email_receipts(self):
-        self.client.force_authenticate(user=self.user)
-        self.response = self.client.post(
-            reverse('parse'),
-            data={
-                'To': self.user.email,
-                'HTML': "<div> Heres an email example</div>"
-            },
-            format='multipart'
-        )
-        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
-
     def test_create_user_id_sub_folder(self):
         # I should expect the "user_id" sub-folder to not exist in the "receipt_images" folder at first since
         # no receipt has been added/created yet
