@@ -1,5 +1,6 @@
 import datetime
 import django_filters
+from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -60,7 +61,7 @@ class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 item = self.get_queryset().get(id=kwargs.get('item_id'))
 
                 response = [{'id': item.id,
-                             'user': item.user.id,
+                             'user': User.objects.get(id=item.user.id).first_name,
                              'name': item.name,
                              'price': item.price,
                              'receipt': item.receipt.id,
