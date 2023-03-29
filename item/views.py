@@ -289,7 +289,10 @@ class GetItemFrequencyByMonthView(ItemDetailAPIView):
                     for item in items:
                         # Find the receipt in which this item belongs to. This receipt contains
                         # the date details of all the items and hence the receipt itself
-                        date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
+                        if datetime.date.today().month == 3 and datetime.date.today().day == 29:
+                            date_range = datetime.date.today().replace(month=datetime.date.today().month - 1, day=28)
+                        else:
+                            date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
 
                         # If the date of the receipt is within the date range,
                         # then add the item/change its existing frequency found in
