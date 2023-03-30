@@ -289,7 +289,7 @@ class GetItemFrequencyByMonthView(ItemDetailAPIView):
                     for item in items:
                         # Find the receipt in which this item belongs to. This receipt contains
                         # the date details of all the items and hence the receipt itself
-                        if datetime.date.today().month == 3 and datetime.date.today().day == 29:
+                        if (datetime.date.today().month == 3 and datetime.date.today().day == 29) or (datetime.date.today().month == 3 and datetime.date.today().day == 30) or (datetime.date.today().month == 3 and datetime.date.today().day == 31):
                             date_range = datetime.date.today().replace(month=datetime.date.today().month - 1, day=28)
                         else:
                             date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
