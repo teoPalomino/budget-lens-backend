@@ -1,7 +1,9 @@
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # for the purpose of this app, you can call sendEmail function with the three parameters, to, subject and content and an email will be sent.
 def sendEmail(to, subject, content):
@@ -14,7 +16,7 @@ def sendEmail(to, subject, content):
 
         try:
             # TODO: make this a little more secure, currently, is using is my own sendgrid code, but later on we figure something out
-            sg = SendGridAPIClient('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')
+            sg = SendGridAPIClient(os.getenv('SEND_GRID_TOKEN'))
             response = sg.send(message)
             print(response.status_code)
             print(response.body)
