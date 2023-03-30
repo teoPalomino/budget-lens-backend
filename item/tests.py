@@ -600,7 +600,9 @@ class ItemFrequencyAPITest(APITransactionTestCase):
         )
 
         # Update the date to be an old receipt
-        if (datetime.date.today().month == 3 and datetime.date.today().day == 29) or (datetime.date.today().month == 3 and datetime.date.today().day == 30) or (datetime.date.today().month == 3 and datetime.date.today().day == 31):
+        if (datetime.date.today().month == 3 and datetime.date.today().day == 29)\
+                or (datetime.date.today().month == 3 and datetime.date.today().day == 30)\
+                or (datetime.date.today().month == 3 and datetime.date.today().day == 31):
             self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=2, day=28)
         else:
             self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=datetime.date.today().month - 1)
