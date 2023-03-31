@@ -136,7 +136,7 @@ class ItemsAPITest(APITransactionTestCase):
                                    format='multipart')
         item = Item.objects.get(id=1)
         self.assertEquals(response.data[0]['id'], item.id)
-        self.assertEquals(response.data[0]['user'], item.user.id)
+        self.assertEquals(response.data[0]['user'], User.objects.get(id=item.user.id).first_name)
         self.assertEquals(response.data[0]['name'], item.name)
         self.assertEquals(response.data[0]['price'], item.price)
         self.assertEquals(response.data[0]['receipt'], item.receipt.id)
@@ -245,13 +245,13 @@ class PaginationReceiptsAPITest(APITestCase):
                 price=59.99
             )
 
-        # Get the size of the reciepts create for this user
+        # Get the size of the receipts create for this user
         self.item_size = len(Item.objects.filter(user=self.user))
 
     def test_pagination_successful(self):
         # Calculates the number of pages. The num of pages wii return different results if the
-        # number of recipts is not perfectly divisible by the page size.
-        if (self.item_size % 10 == 0):
+        # number of receipts is not perfectly divisible by the page size.
+        if self.item_size % 10 == 0:
             num_of_pages = self.item_size // 10
         else:
             num_of_pages = self.item_size // 10 + 1
@@ -312,7 +312,7 @@ class PaginationReceiptsAPITest(APITestCase):
         )
 
         self.assertTrue(len(response.data['page_list']) <= 10)
-        if (self.item_size % 10 == 0):
+        if self.item_size % 10 == 0:
             self.assertEqual(response.data['description'], f'<Page {1} of {self.item_size // 10}>')
         else:
             self.assertEqual(response.data['description'], f'<Page {1} of {self.item_size // 10 + 1}>')
@@ -420,15 +420,14 @@ class TestItemsFilteringOrderingSearching(APITestCase):
     TODO: un-pass when search is fixed'''
 
     def test_search(self):
-        pass
-        # items_url = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=coffee'
-        # self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-        # response = self.client.get(items_url, format='json')
-        #
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        #
-        # # ensure only 2 items are returned
-        # self.assertEqual(len(response.data['page_list']), 2)
+        items_url = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?search=coffee'
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+        response = self.client.get(items_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # ensure only 2 items are returned
+        self.assertEqual(len(response.data['page_list']), 2)
 
     def test_ordering(self):
         items_url = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 10}) + '?ordering=-price'
@@ -599,8 +598,14 @@ class ItemFrequencyAPITest(APITransactionTestCase):
             coupon=1,
             currency="CAD"
         )
+
         # Update the date to be an old receipt
-        self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=datetime.date.today().month - 1)
+        if (datetime.date.today().month == 3 and datetime.date.today().day == 29)\
+                or (datetime.date.today().month == 3 and datetime.date.today().day == 30)\
+                or (datetime.date.today().month == 3 and datetime.date.today().day == 31):
+            self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=2, day=28)
+        else:
+            self.receipt_starbucks.scan_date = self.receipt_starbucks.scan_date.replace(month=datetime.date.today().month - 1)
 
         self.receipt_starbucks_newest = Receipts.objects.create(
             user=self.user,

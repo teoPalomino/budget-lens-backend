@@ -1,5 +1,6 @@
 import datetime
 import django_filters
+from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -60,7 +61,7 @@ class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 item = self.get_queryset().get(id=kwargs.get('item_id'))
 
                 response = [{'id': item.id,
-                             'user': item.user.id,
+                             'user': User.objects.get(id=item.user.id).first_name,
                              'name': item.name,
                              'price': item.price,
                              'receipt': item.receipt.id,
@@ -288,7 +289,12 @@ class GetItemFrequencyByMonthView(ItemDetailAPIView):
                     for item in items:
                         # Find the receipt in which this item belongs to. This receipt contains
                         # the date details of all the items and hence the receipt itself
-                        date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
+                        if (datetime.date.today().month == 3 and datetime.date.today().day == 29)\
+                                or (datetime.date.today().month == 3 and datetime.date.today().day == 30)\
+                                or (datetime.date.today().month == 3 and datetime.date.today().day == 31):
+                            date_range = datetime.date.today().replace(month=datetime.date.today().month - 1, day=28)
+                        else:
+                            date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
 
                         # If the date of the receipt is within the date range,
                         # then add the item/change its existing frequency found in
