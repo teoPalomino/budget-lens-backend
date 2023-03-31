@@ -68,4 +68,3 @@ class Receipts(models.Model):
                 instance.receipt_text = analyze_receipts(instance.receipt_image.path, instance)
                 categorize_line_items(instance)
                 instance.save()
-                

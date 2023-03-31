@@ -4,7 +4,6 @@ from random import randint
 import shutil
 import tempfile
 import time
-from unittest import skip
 
 from PIL import Image
 from django.conf import settings
@@ -487,4 +486,3 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
 
         # only one receipt contained the currency USD
         self.assertEqual(len(response.data['page_list']), 1)
-        
