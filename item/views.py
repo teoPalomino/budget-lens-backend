@@ -1,5 +1,6 @@
 import datetime
 import django_filters
+from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -60,7 +61,7 @@ class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 item = self.get_queryset().get(id=kwargs.get('item_id'))
 
                 response = [{'id': item.id,
-                             'user': item.user.id,
+                             'user': User.objects.get(id=item.user.id).first_name,
                              'name': item.name,
                              'price': item.price,
                              'receipt': item.receipt.id,
@@ -143,7 +144,7 @@ class ItemFilter(django_filters.FilterSet):
 
     class Meta:
         model = Item
-        fields = ['id', 'receipt', 'category_id', 'name', 'price', 'min_price', 'max_price',
+        fields = ['id', 'receipt', 'category_id', 'category_id_id__category_name', 'name', 'price', 'min_price', 'max_price',
                   'start_date', 'end_date', 'user', 'merchant_name', 'merchant_id']
 
 
@@ -154,12 +155,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     ordering_fields = '__all__'
-
-    '''
-    TODO: fix search, for some reason not working
-    '''
-
-    # search_fields = ['name', 'price','user']
+    search_fields = ['name', 'price', 'user__first_name', 'user__last_name', 'category_id_id__category_name']
 
     # noqa: C901
     def get(self, request, *args, **kwargs):
@@ -169,12 +165,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
         """
         queryset = self.get_queryset()
         item_list_response = super().get(request, *args, **kwargs)
-        item_total_cost = 0
-        items = Item.objects.filter(user=self.request.user)
-
-        if items.exists():
-            for item in items:
-                item_total_cost += item.price
+        item_total_price = 0
 
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
@@ -183,7 +174,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
-                'total Cost': item_total_cost,
+                'total_price': item_total_price,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -194,7 +185,11 @@ class PaginateFilterItemsView(generics.ListAPIView):
             kwargs['pageSize'] = 10
 
         # If Page size is less than zero, -> had to remove due to complexity issue.
-        kwargs['pageSize'] = 10
+        # If Page size is less than zero
+        if kwargs['pageSize'] <= 0:
+            # Make default page size = 10
+            kwargs['pageSize'] = 10
+
         paginator = Paginator(item_list_response.data, kwargs['pageSize'])
 
         # If page number is greater than page limit, return an empty list
@@ -202,7 +197,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
-                'total Cost': item_total_cost,
+                'total_price': item_total_price,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -211,7 +206,7 @@ class PaginateFilterItemsView(generics.ListAPIView):
             return Response({
                 'page_list': [],
                 'total': 0,
-                'total Cost': item_total_cost,
+                'total_price': item_total_price,
                 'description': "Invalid Page Number"
             }, status=HTTP_200_OK)
 
@@ -221,11 +216,17 @@ class PaginateFilterItemsView(generics.ListAPIView):
         for i, item in zip(queryset, page.object_list):
             item['scan_date'] = i.receipt.scan_date
             item['merchant_name'] = i.receipt.merchant.name
+            item_total_price += float(item['price'])
+            if i.category_id is not None:
+                item['category_name'] = i.category_id.category_name
+            else:
+                item['category_name'] = ""
 
+        item_total_price = round(item_total_price, 2)
         return Response({
             'page_list': page.object_list,
             'total': len(page.object_list),
-            'total Cost': item_total_cost,
+            'total_price': item_total_price,
             'description': str(page),
             'current_page_number': page.number,
             'number_of_pages': page.paginator.num_pages
@@ -274,6 +275,7 @@ class GetItemFrequencyByMonthView(ItemDetailAPIView):
 
     The route used by this view is `items/<int:item_id>/date/` where `item_id` is the id of the item in question.
     """
+
     def get(self, request, *args, **kwargs):
         if kwargs.get('item_id'):
             try:
@@ -287,7 +289,12 @@ class GetItemFrequencyByMonthView(ItemDetailAPIView):
                     for item in items:
                         # Find the receipt in which this item belongs to. This receipt contains
                         # the date details of all the items and hence the receipt itself
-                        date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
+                        if (datetime.date.today().month == 3 and datetime.date.today().day == 29)\
+                                or (datetime.date.today().month == 3 and datetime.date.today().day == 30)\
+                                or (datetime.date.today().month == 3 and datetime.date.today().day == 31):
+                            date_range = datetime.date.today().replace(month=datetime.date.today().month - 1, day=28)
+                        else:
+                            date_range = datetime.date.today().replace(month=datetime.date.today().month - 1)
 
                         # If the date of the receipt is within the date range,
                         # then add the item/change its existing frequency found in
@@ -342,8 +349,10 @@ class GetCategoryCostAndFrequencyByDateAndStarredCategoryView(GetCategoryCostsVi
 
                     if item.category_id.get_category_name() in category_costs_frequency_dict:
                         category_costs_frequency_dict[item.category_id.get_category_name()] = {
-                            'price': category_costs_frequency_dict[item.category_id.get_category_name()]['price'] + item.price,
-                            'category_frequency': category_costs_frequency_dict[item.category_id.get_category_name()]['category_frequency'] + 1
+                            'price': category_costs_frequency_dict[item.category_id.get_category_name()][
+                                         'price'] + item.price,
+                            'category_frequency': category_costs_frequency_dict[item.category_id.get_category_name()][
+                                                      'category_frequency'] + 1
                         }
 
                     else:

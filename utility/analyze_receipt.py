@@ -98,14 +98,19 @@ def analyze_receipts(file,passed_receipt):
                 )
             tax = receipt.fields.get("TotalTax")
             if tax:
+                passed_receipt.tax = tax.value
+
                 receipt_text +=("Total tax: {} has confidence: {}".format(tax.value, tax.confidence))
             tip = receipt.fields.get("Tip")
             if tip:
+                passed_receipt.tip = tip.value
                 receipt_text +=("Tip: {} has confidence: {}".format(tip.value, tip.confidence))
             total = receipt.fields.get("Total")
             if total:
+                passed_receipt.total = total.value
                 receipt_text +=("Total: {} has confidence: {}".format(total.value, total.confidence))
             receipt_text += ("--------------------------------------")
+            passed_receipt.save()
         return receipt_text
 
 if __name__ == "__main__":
