@@ -1,4 +1,4 @@
-import random
+import secrets
 from django.core.validators import validate_email
 from django.db import IntegrityError
 from phonenumber_field.phonenumber import PhoneNumber
@@ -34,7 +34,7 @@ class RegisterAPI(generics.GenericAPIView):
 
         email = user.data['email']
         splitEmail = email.split('@')[0]
-        randomInt = random.randint(1000, 9999)
+        randomInt = secrets.randbelow(9000) + 1000
         user_profile.forwardingEmail = str(splitEmail + str(randomInt) + "@budgetlens.tech")
         user_profile.save()
 
