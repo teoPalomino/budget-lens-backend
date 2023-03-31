@@ -96,7 +96,7 @@ class ItemSplitAPITestCase(APITestCase):
             },
             format='json'
         )
-        print(response)
+
         # Assert that the item split object was created successfully
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         self.assertEqual(response.data[0]['item_id'], self.item2.pk)
