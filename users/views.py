@@ -1,4 +1,5 @@
 import random
+import secrets
 from django.core.validators import validate_email
 from django.db import IntegrityError
 from phonenumber_field.phonenumber import PhoneNumber
@@ -24,12 +25,19 @@ class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         user_profile = serializer.save()
-
         token = BearerToken.objects.create(user=user_profile.user)
         user = UserSerializer(user_profile.user, context=self.get_serializer_context())
+
+        # creating the forwardingEmail of a user
+
+        email = user.data['email']
+        splitEmail = email.split('@')[0]
+        randomInt = secrets.randbelow(9000) + 1000
+        user_profile.forwardingEmail = str(splitEmail + str(randomInt) + "@budgetlens.tech")
+        user_profile.save()
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
         # To use sendEmail function, you have to import it from the utility folder, for refrence, look at the imports at the top
@@ -44,6 +52,7 @@ class RegisterAPI(generics.GenericAPIView):
             # saves user and its data
             "user": user.data,
             "telephone_number": str(user_profile.telephone_number),
+            "forwardingEmail": str(user_profile.forwardingEmail),
             # creates token for that particular user
             # "token": AuthToken.objects.create(user_profile.user)[1],
             "token": token.key,
@@ -107,7 +116,8 @@ class UserProfileAPI(generics.UpdateAPIView):
                 "first_name": user_profile.user.first_name,
                 "last_name": user_profile.user.last_name,
                 "email": user_profile.user.email,
-                "telephone_number": str(user_profile.telephone_number)
+                "telephone_number": str(user_profile.telephone_number),
+                "forwardingEmail": user_profile.forwarding_email
             }
             return Response(data, status=HTTP_200_OK)
         except Exception:

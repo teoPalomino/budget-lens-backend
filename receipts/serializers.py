@@ -6,15 +6,16 @@ from receipts.models import Receipts
 
 class ReceiptsSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    receipt_image = serializers.ImageField(use_url=True)
 
     class Meta:
         model = Receipts
-        fields = '__all__'
+        fields = ('user', 'receipt_image')
 
     def create(self, validated_data):
         receipt = Receipts.objects.create(
             user=validated_data['user'],
-            receipt_image=validated_data['receipt_image'],
+            receipt_image=validated_data['receipt_image']
         )
         return receipt
 

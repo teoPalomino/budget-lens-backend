@@ -1,15 +1,21 @@
+import datetime
+
+import imgkit
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, filters
+
+from rest_framework import generics, filters, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from merchant.models import Merchant
+from users.models import UserProfile
 from .models import Receipts
 from .serializers import ManualReceiptsSerializer, ReceiptsSerializer, PutPatchReceiptsSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.paginator import Paginator
 from rest_framework.status import HTTP_200_OK
+from django.core.files.images import ImageFile
 
 
 class PostReceiptsAPIView(generics.CreateAPIView):
@@ -70,7 +76,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
     This will return all the receipts with the scan_date between the scan_date_start and scan_date_end (inclusive).
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = ReceiptsSerializer
+    serializer_class = ManualReceiptsSerializer
     parser_classes = (MultiPartParser, FormParser)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ReceiptsFilter
@@ -83,11 +89,8 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         and then paginate the results
         """
         #
-        reciept_list_response = super().get(request, *args, **kwargs)
-        new_reciept_list_response = []
-        for item in reciept_list_response.data:
-            item['merchant'] = Merchant.objects.get(pk=item['merchant']).name
-            new_reciept_list_response.append(item)
+        receipt_list_response = super().get(request, *args, **kwargs)
+
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
@@ -109,7 +112,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
             # Make default page size = 10
             kwargs['pageSize'] = 10
 
-        paginator = Paginator(reciept_list_response.data, kwargs['pageSize'])
+        paginator = Paginator(receipt_list_response.data, kwargs['pageSize'])
 
         # If page number is greater than page limit, return an empty list
         if kwargs['pageNumber'] > paginator.num_pages:
@@ -149,3 +152,41 @@ class DetailReceiptsAPIView(generics.RetrieveUpdateDestroyAPIView):
     # Ensure user can only delete their own receipts
     def get_queryset(self):
         return Receipts.objects.filter(user=self.request.user)
+
+
+class ParseReceiptsAPIView(APIView):
+    """
+    any email to budgetlens.tech will be sent to this api
+    """
+    parser_classes = (FormParser, MultiPartParser)
+
+    def post(self, request, *args, **kwargs):
+        # check if it is a valid forwarding email
+        try:
+            email = request.POST.get('To').strip()
+            userProfile = UserProfile.objects.get(forwardingEmail=email)
+        except Exception:
+            return Response({"response": "This email does not correspond to any Budget Lens account"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        """ email converted to image"""
+
+        filename = str(email + str(datetime.datetime.now()) + '.jpg')
+        imgkit.from_string(str(request.POST.get('Html')), filename,
+                           options={"enable-local-file-access": ""})
+
+        """
+        to test locally send email in format of the default payload in
+        https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook
+        and change the "TO" field to the forwarding email of the user you want to test with
+        """
+        receipt_image = ImageFile(open(filename, 'rb'), name=filename)
+
+        data = {'receipt_image': receipt_image, 'user': userProfile.user}
+
+        receipt_serializer = ReceiptsSerializer(context={'request': request}, data=data)
+
+        if receipt_serializer.is_valid(raise_exception=True):
+            receipt_serializer.save()
+            return Response(receipt_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(receipt_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -31,7 +31,6 @@ class Receipts(models.Model):
     user = models.ForeignKey(User, related_name='receipts', on_delete=models.CASCADE)
     scan_date = models.DateTimeField(default=timezone.now, null=True, blank=True)
     receipt_image = models.ImageField(upload_to=upload_to)
-    # receipt_image = models.TextField(null=True, blank=True)
     merchant = models.ForeignKey(Merchant, related_name='merchant', on_delete=models.DO_NOTHING, null=True, blank=True)
     location = models.CharField(max_length=200, null=True, blank=True)
     total = models.FloatField(null=True, blank=True)
@@ -42,12 +41,12 @@ class Receipts(models.Model):
     receipt_text = models.TextField(default=None, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-
         super(Receipts, self).save(*args, **kwargs)
         # if self.receipt_image and self.receipt_text is None:
         #     analyze_receipts(self.receipt_image.path)
 
-    # When a receipt image is deleted from the database, the receipt image file is also deleted from the file system/server
+    # When a receipt image is deleted from the database, the receipt image file is also deleted from the file
+    # system/server
     def delete(self, using=None, keep_parents=False):
         # self.receipt_image.delete()
         self.receipt_image = ''

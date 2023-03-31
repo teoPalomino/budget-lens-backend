@@ -36,14 +36,6 @@ def create_image(image_file_type):
 
 
 class AddReceiptsAPITest(APITransactionTestCase):
-    # this makes sure that the database ids reset to 1 for every test (when dealing with fetching receipts
-    # ids from the database) which is especially important for the tests:
-    # test_add_receipt_images_using_post_request_from_Receipts_API_View
-    # test_get_list_of_receipt_images_using_get_request_from_Receipts_API_View
-    # test_get_specific_receipt_image_with_receipt_id_using_get_request_from_Detail_Receipts_API_View
-    # test_update_specific_receipt_image_with_receipt_id_using_put_request_from_Detail_Receipts_API_View
-    # test_update_specific_receipt_image_with_receipt_id_using_patch_request_from_Detail_Receipts_API_View
-    # test_delete_specific_receipt_image_with_receipt_id_using_delete_request_from_Detail_Receipts_API_View
     reset_sequences = True
 
     def setUp(self):
@@ -56,7 +48,8 @@ class AddReceiptsAPITest(APITransactionTestCase):
         )
         self.user_profile = UserProfile.objects.create(
             user=self.user,
-            telephone_number="+1-613-555-0187"
+            telephone_number="+1-613-555-0187",
+            forwardingEmail='momoamineahmadi@gmail.com'
         )
         self.data = {
             'username': 'johncena123@gmail.com',

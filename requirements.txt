@@ -23,6 +23,7 @@ djangorestframework==3.13.1
 flake8==5.0.4
 h11==0.13.0
 idna==3.4
+imgkit==1.2.2
 isodate==0.6.1
 isort==5.10.1
 lazy-object-proxy==1.7.1
