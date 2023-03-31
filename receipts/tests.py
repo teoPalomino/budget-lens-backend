@@ -487,3 +487,4 @@ class TestReceiptsFilteringOrderingSearching(APITestCase):
 
         # only one receipt contained the currency USD
         self.assertEqual(len(response.data['page_list']), 1)
+        
