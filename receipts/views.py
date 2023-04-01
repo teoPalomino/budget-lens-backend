@@ -203,7 +203,7 @@ class ReceiptsAvailableFilters(APIView):
         currency = list(
             Receipts.objects.distinct().all().values_list('currency', flat=True)
         )
-        locations = list(
+        coupon = list(
             Receipts.objects.distinct().all().values_list('coupon', flat=True)
         )
         context = {
