@@ -144,7 +144,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             self.new_user.id
         )
 
-    def test_add_null_receipt_images_using_post_request_from_Receipts_API_View(self):
+    def test_add_null_receipt_images_using_post_request_from_Post_Manual_Receipts_API_View(self):
         # Here, I am testing the API client for the case where a user tries to add a null receipt (or no receipt at all basically)
         # using a POST request. I am also making use of the "force_authenticate" method to authenticate the user
         # before making the POST request since I don't need to "properly" authenticate the user before doing so as this test
@@ -155,7 +155,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             format='multipart'
         )
 
-    def test_add_receipt_images_using_post_request_from_Receipts_API_View(self):
+    def test_add_receipt_images_using_post_request_from_Post_Manual_Receipts_API_View(self):
         # Here, I am testing the API client for the case where a user tries to add a new receipt using a POST request
         # which is the normal way/behaviour in the future for a user to be able to add/create new receipts.
         # I am also making use of the "force_authenticate" method to authenticate the user before making the POST request since
@@ -202,7 +202,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             status.HTTP_201_CREATED
         )
 
-    def test_get_list_of_receipt_images_using_get_request_from_Receipts_API_View(self):
+    def test_get_list_of_receipt_images_using_get_request_from_Default_Receipt_Pagination_API_List_View(self):
         # Here, I am testing the API client for the case where a user tries to get a list of all the receipts they have added/created using a GET request
         # which is the normal way/behaviour in the future for a user to be able to get a list of all the receipts they have added/created.
         # I am also making use of the "force_authenticate" method to authenticate the user before making the GET request since
@@ -580,7 +580,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
             status.HTTP_200_OK
         )
 
-    def test_delete_specific_receipt_image_with_receipt_id_using_delete_request_from_Detail_Receipts_API_View(self):
+    def test_delete_specific_receipt_image_with_receipt_id_using_delete_request_from_Post_Manual_Receipts_API_View(self):
         # Here, I am testing the API client for the case where a user tries to delete a specific receipt they have already added/created using a DELETE request
         # which is the normal way/behaviour in the future for a user to be able to delete a specific receipt they have added/created.
         # I am also making use of the "force_authenticate" method to authenticate the user before making the DELETE request since
