@@ -229,6 +229,7 @@ class ItemSplitAPITestCase(APITestCase):
             },
             format='json'
         ).data[0]['id']
+
         itemsplit = ItemSplit.objects.get(id=itemsplit_data_id)
 
         # The url using kwargs item_id
@@ -281,7 +282,6 @@ class ItemSplitAPITestCase(APITestCase):
 
         self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{'a'}' does not exist")
 
-        # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
     def test_get_shared_amount_list_invalid_id(self):
