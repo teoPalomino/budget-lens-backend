@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_404_NOT_FOUND
 from item.models import Item
+from item_split.models import ItemSplit
 from users.models import UserProfile
 from merchant.models import Merchant
 from receipts.models import Receipts
@@ -120,3 +121,185 @@ class ItemSplitAPITestCase(APITestCase):
 
         # Authenticate user before each test
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
+
+    def test_add_item_split_invalid_string(self):
+        # Case1:  Where shared_user_ids string has letters
+        response = self.client.post(
+            self.url_add_item_split,
+            data={'item_list': [{
+                'item_id': self.item.pk,
+                'shared_user_ids': 'test, 3',
+                'is_shared_with_item_user': False}]
+            },
+            format='json'
+        )
+
+        # Assert that the item split object was created successfully
+        self.assertEqual(response.data['message'],
+                         "Invalid list of user IDs. Please enter numbers separated by commas.")
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        # Case2:  Where shared_user_ids string has duplicate numbers
+        response = self.client.post(
+            self.url_add_item_split,
+            data={'item_list': [{
+                'item_id': self.item.pk,
+                'shared_user_ids': '3, 3',
+                'is_shared_with_item_user': False}]
+            },
+            format='json'
+        )
+
+        # Assert that the item split object was created successfully
+        self.assertEqual(response.data['message'], "List of user IDs contains duplicates.")
+
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+    def test_get_shared_user_list_pass(self):
+        # Create a new ItemSplit object
+        itemsplit = ItemSplit.objects.create(
+            item=self.item,
+            shared_user_ids=f'{self.user2.pk}, {self.user3.pk}',
+            is_shared_with_item_user=False
+        )
+
+        # The url using kwargs item_id
+        self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': self.item.pk})
+
+        response = self.client.get(
+            self.url_shared_users_list,
+            format='json'
+        )
+
+        self.assertEqual(response.data['original_user'], self.item.user.first_name)
+
+        # Loop and assert that all the shared users are correct
+        user_id_list = list(map(int, itemsplit.shared_user_ids.split(',')))
+        for count, user_id in enumerate(user_id_list):
+            user = User.objects.get(id=user_id)
+            self.assertEqual(response.data['shared_users'][count], user.first_name)
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+    def test_get_shared_user_list_invalid_id(self):
+        # Create a new ItemSplit object
+        ItemSplit.objects.create(
+            item=self.item,
+            shared_user_ids=f'{self.user2.pk}, {self.user3.pk}',
+            is_shared_with_item_user=False
+        )
+
+        # The url using kwargs item_id with invalid id number e.g. 100
+        self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': 100})
+
+        response = self.client.get(
+            self.url_shared_users_list,
+            format='json'
+        )
+
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{100}' does not exist")
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        # Do the same request but with invalid parameters
+        # The url using kwargs item_id with invalid id number e.g. a
+        self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': 'a'})
+
+        response = self.client.get(
+            self.url_shared_users_list,
+            format='json'
+        )
+
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{'a'}' does not exist")
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+    def test_get_shared_amount_pass(self):
+        # Create a new ItemSplit object using the post request
+        itemsplit_data_id = self.client.post(
+            self.url_add_item_split,
+            data={'item_list': [{
+                'item_id': self.item.pk,
+                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
+                'is_shared_with_item_user': False}]
+            },
+            format='json'
+        ).data[0]['id']
+        itemsplit = ItemSplit.objects.get(id=itemsplit_data_id)
+
+        # The url using kwargs item_id
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': self.item.pk})
+
+        response = self.client.get(
+            self.url_shared_amount,
+            format='json'
+        )
+
+        self.assertEqual(response.data['shared_amount'], itemsplit.shared_amount)
+        self.assertEqual(response.data['is_shared_with_item_user'], itemsplit.is_shared_with_item_user)
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+    def test_get_shared_amount_invalid_id(self):
+        # Create a new ItemSplit object using the post request
+        self.client.post(
+            self.url_add_item_split,
+            data={'item_list': [{
+                'item': self.item.pk,
+                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
+                'is_shared_with_item_user': False}]
+            },
+            format='json'
+        )
+
+        # The url using kwargs item_id with invalid id number e.g. 100
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': 100})
+
+        response = self.client.get(
+            self.url_shared_amount,
+            format='json'
+        )
+
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{100}' does not exist")
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        # Do the same request but with invalid parameters
+        # The url using kwargs item_id with invalid id number e.g. a
+        self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': 'a'})
+
+        response = self.client.get(
+            self.url_shared_amount,
+            format='json'
+        )
+
+        self.assertEqual(response.data['message'], f"ItemSplit object with item id of '{'a'}' does not exist")
+
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+    def test_get_shared_amount_list_invalid_id(self):
+        receipt_id = 99999
+        _url = reverse('get_shared_amount_list', args=[receipt_id, ])
+        response = self.client.get(_url, format='json')
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_get_shared_amount_list_pass(self):
+        ItemSplit.objects.create(
+            item=self.item,
+            shared_user_ids=f'{self.user2.pk}, {self.user3.pk}',
+            is_shared_with_item_user=False
+        )
+        # Make a Get request
+        _url = reverse('get_shared_amount_list', args=[self.receipt.id])
+        response = self.client.get(_url, format='json')
+        # Assert status code
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        # Assert data\
+        self.assertTrue(len(response.data['data']) >= 1)

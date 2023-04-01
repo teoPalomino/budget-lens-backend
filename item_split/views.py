@@ -21,7 +21,7 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
     """
     Adds item to a receipt for a user
     The list of shared user IDs are a string that represents the list of user IDs (List of integers).
-    Therefore the list must be separated by commas.
+    Therefore, the list must be separated by commas.
     """
     serializer_class = ItemSplitSerializer
     permission_classes = [IsAuthenticated]
@@ -29,7 +29,6 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         item_splits_data = request.data.get('item_list')
-        print(request.data)
         responses = []
 
         for item_data in item_splits_data:
@@ -130,16 +129,10 @@ def get_share_amount_list(request, receipt_id):
     """
     data_list = []
     for item in Item.objects.filter(receipt__id=receipt_id):
-        data = {}
-        data['item_id'] = item.id
-        data['item_name'] = item.name
-        data['item_price'] = item.price
-        data['user_id'] = item.user.id
-        data['receipt_id'] = item.receipt.id
-        data['splititem'] = []
+        data = {'item_id': item.id, 'item_name': item.name, 'item_price': item.price, 'user_id': item.user.id,
+                'receipt_id': item.receipt.id, 'splititem': []}
         try:
             split = item.item_user
-            # split = item.itemsplit
             shared_user_ids = split.shared_user_ids.split(',')
             shared_user_ids = [int(i) for i in shared_user_ids]
             shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)
@@ -148,7 +141,7 @@ def get_share_amount_list(request, receipt_id):
                     if user.id != item.user.id:
                         data['splititem'].append({
                             'split_id': split.id,
-                            'orignal_user': item.user.first_name,
+                            'original_user': item.user.first_name,
                             'shared_user': user.first_name})
         except Exception:
             pass
