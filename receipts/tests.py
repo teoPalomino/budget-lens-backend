@@ -1,13 +1,10 @@
 import datetime
 import os
 from random import randint
-import tempfile
 import time
 
-from PIL import Image
 from django.contrib.auth.models import User
 from users.authentication import BearerToken
-from django.core.files.images import ImageFile
 from django.urls import reverse
 from django.utils.timezone import make_aware
 from rest_framework import status

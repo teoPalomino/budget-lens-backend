@@ -143,5 +143,6 @@ dmypy.json
 # Remove receipt images folder for local development
 receipt_images/*
 media/uploads/*
+media/receipt_images/*
 
 .env_*
