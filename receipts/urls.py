@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    path('api/receipts/filters/', views.ReceiptsAvailableFilters.as_view(), name='receipts-filters'),
     path('api/receipts/', views.PostReceiptsAPIView.as_view(), name='create_receipts'),
     path('api/receipts/pageNumber=<pageNumber>&pageSize=<pageSize>/', views.DefaultReceiptPaginationAPIListView.as_view(), name='list_paged_receipts'),
     path('api/receipts/<int:receipt_id>/', views.DetailReceiptsAPIView.as_view(), name='detail_receipts'),
