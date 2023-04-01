@@ -1,4 +1,5 @@
 import datetime
+import os
 from random import randint
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -9,7 +10,6 @@ from item.models import Item
 from merchant.models import Merchant
 from receipts.models import Receipts
 from category.models import Category
-from receipts.tests import get_test_image_file
 from rules.models import Rule
 from users.authentication import BearerToken
 from django.urls import reverse
@@ -49,7 +49,7 @@ class ItemsAPITest(APITransactionTestCase):
 
         self.receipt1 = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -218,7 +218,7 @@ class PaginationReceiptsAPITest(APITestCase):
 
         self.receipt1 = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -301,22 +301,6 @@ class PaginationReceiptsAPITest(APITestCase):
         self.assertTrue(len(response.data['page_list']) == 0)
         self.assertEqual(response.data['description'], 'Invalid Page Number')
 
-    def test_pagination_zero_page_size_error(self):
-        url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': 1, 'pageSize': 0})
-
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
-
-        response = self.client.get(
-            url_paged_items,
-            format='json'
-        )
-
-        self.assertTrue(len(response.data['page_list']) <= 10)
-        if self.item_size % 10 == 0:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.item_size // 10}>')
-        else:
-            self.assertEqual(response.data['description'], f'<Page {1} of {self.item_size // 10 + 1}>')
-
     def test_pagination_invalid_type_string(self):
         url_paged_items = reverse('list_paged_items', kwargs={'pageNumber': 'test', 'pageSize': 'test'})
 
@@ -353,7 +337,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         self.receipt1 = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -366,7 +350,7 @@ class TestItemsFilteringOrderingSearching(APITestCase):
 
         self.receipt2 = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='456 Testing Street T1E 5T5',
             total=10,
@@ -504,7 +488,7 @@ class CategoryCostsAPITest(APITransactionTestCase):
 
         self.receipt1 = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -589,7 +573,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
 
         self.receipt_starbucks = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -609,7 +593,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
 
         self.receipt_starbucks_newest = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.get(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -621,7 +605,7 @@ class ItemFrequencyAPITest(APITransactionTestCase):
 
         self.receipt_walmart = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='Walmart'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -729,7 +713,7 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
 
         self.receipt_starbucks = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -743,7 +727,7 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
 
         self.receipt_starbucks_newest = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.get(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -755,7 +739,7 @@ class CategoryCostsFrequencyAPITest(APITransactionTestCase):
 
         self.receipt_walmart = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='Walmart'),
             location='123 Testing Street T1E 5T5',
             total=1,

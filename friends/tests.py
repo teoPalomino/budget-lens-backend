@@ -8,12 +8,6 @@ from .models import Friends
 
 
 class FriendsAPITest(APITestCase):
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
     def helper_create_user_instance(self):
         """
         Helper method for creating a new user in db
@@ -191,7 +185,7 @@ class FriendsAPITest(APITestCase):
         """
         Test Case for user.InviteFriendsAPI
         """
-        invitefriend_url = reverse('friend_requests')
+        invite_friend_url = reverse('friend_requests')
 
         # Create 2 users in the database for testing
         self.helper_create_user_instance()
@@ -213,7 +207,7 @@ class FriendsAPITest(APITestCase):
         }
 
         response = self.client.post(
-            invitefriend_url,
+            invite_friend_url,
             data=data,
             format='json'
         )
@@ -231,7 +225,7 @@ class FriendsAPITest(APITestCase):
         """
         Test Case for user.InviteFriendsAPI
         """
-        invitefriend_url = reverse('friend_requests')
+        invite_friend_url = reverse('friend_requests')
 
         # Create 2 users in the database for testing
         self.helper_create_user_instance()
@@ -253,7 +247,7 @@ class FriendsAPITest(APITestCase):
         }
 
         response = self.client.post(
-            invitefriend_url,
+            invite_friend_url,
             data=data,
             format='json'
         )
@@ -269,7 +263,7 @@ class FriendsAPITest(APITestCase):
 
         # Sending a duplicate request
         response = self.client.post(
-            invitefriend_url,
+            invite_friend_url,
             data=data,
             format='json'
         )
@@ -704,7 +698,7 @@ class FriendsAPITest(APITestCase):
         self.assertEquals(len(friend_requests2), 0)
         self.assertFalse(friend_requests2)
 
-        # showing the friend table with main user user is deleted
+        # showing the friend table with main user is deleted
         friend_requests3 = Friends.objects.filter(main_user=self.user.id, confirmed=True)
         self.assertEquals(len(friend_requests3), 0)
         self.assertFalse(friend_requests3)

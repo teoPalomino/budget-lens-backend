@@ -1,5 +1,4 @@
 from veryfi import Client
-import json
 from item.models import Item
 from category.models import Category
 import os
@@ -8,6 +7,8 @@ client_id = 'vrfSF8foCT17EJT3UgcSLY3YUbztTJOCnbA6wXM'
 client_secret = 'S07fCdCCPIUa2wrCapt3COCaWIFsItrevAnVzTnglaxXI8EO7F1FvEcVy0riH8zZ3U2YkkVy21hKo6wgIu0zuNKWH0jSemV0bhXTiztNGUMrwnRuoPGK3WTdKkswyJEf'
 username = 'amir4'
 api_key = 'fcff4aa0b6f33e7826e467319d76985b'
+
+
 def categorize_line_items(receipt):
     if os.getenv('APP_ENV') != 'test':
         # This submits document for processing (takes 3-5 seconds to get response)
@@ -24,4 +25,3 @@ def categorize_line_items(receipt):
                 else:
                     i.category_id = other
                 i.save()
-

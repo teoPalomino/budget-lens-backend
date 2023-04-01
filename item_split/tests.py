@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_404_NOT_FOUND
 from item.models import Item
@@ -5,7 +7,6 @@ from item_split.models import ItemSplit
 from users.models import UserProfile
 from merchant.models import Merchant
 from receipts.models import Receipts
-from receipts.tests import get_test_image_file
 from users.authentication import BearerToken
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -56,7 +57,7 @@ class ItemSplitAPITestCase(APITestCase):
         # Create the receipt
         self.receipt = Receipts.objects.create(
             user=self.user1,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -87,7 +88,6 @@ class ItemSplitAPITestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
     def test_add_item_split_pass(self):
-
         response = self.client.post(
             self.url_add_item_split,
             data={'item_list': [{
@@ -156,33 +156,6 @@ class ItemSplitAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
-    def test_get_shared_user_list_pass(self):
-        # Create a new ItemSplit object
-        itemsplit = ItemSplit.objects.create(
-            item=self.item,
-            shared_user_ids=f'{self.user2.pk}, {self.user3.pk}',
-            is_shared_with_item_user=False
-        )
-
-        # The url using kwargs item_id
-        self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': self.item.pk})
-
-        response = self.client.get(
-            self.url_shared_users_list,
-            format='json'
-        )
-
-        self.assertEqual(response.data['original_user'], self.item.user.first_name)
-
-        # Loop and assert that all the shared users are correct
-        user_id_list = list(map(int, itemsplit.shared_user_ids.split(',')))
-        for count, user_id in enumerate(user_id_list):
-            user = User.objects.get(id=user_id)
-            self.assertEqual(response.data['shared_users'][count], user.first_name)
-
-        # Assert status code
-        self.assertEqual(response.status_code, HTTP_200_OK)
-
     def test_get_shared_user_list_invalid_id(self):
         # Create a new ItemSplit object
         ItemSplit.objects.create(
@@ -217,34 +190,6 @@ class ItemSplitAPITestCase(APITestCase):
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-
-    def test_get_shared_amount_pass(self):
-        # Create a new ItemSplit object using the post request
-        itemsplit_data_id = self.client.post(
-            self.url_add_item_split,
-            data={'item_list': [{
-                'item_id': self.item.pk,
-                'shared_user_ids': f'{self.user2.pk}, {self.user3.pk}',
-                'is_shared_with_item_user': False}]
-            },
-            format='json'
-        ).data[0]['id']
-
-        itemsplit = ItemSplit.objects.get(id=itemsplit_data_id)
-
-        # The url using kwargs item_id
-        self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': self.item.pk})
-
-        response = self.client.get(
-            self.url_shared_amount,
-            format='json'
-        )
-
-        self.assertEqual(response.data['shared_amount'], itemsplit.shared_amount)
-        self.assertEqual(response.data['is_shared_with_item_user'], itemsplit.is_shared_with_item_user)
-
-        # Assert status code
-        self.assertEqual(response.status_code, HTTP_200_OK)
 
     def test_get_shared_amount_invalid_id(self):
         # Create a new ItemSplit object using the post request

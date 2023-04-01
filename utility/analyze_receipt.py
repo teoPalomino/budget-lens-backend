@@ -1,8 +1,9 @@
 import os
-from django.db import models
 from merchant.models import Merchant
 from item.models import Item
-def analyze_receipts(file,passed_receipt):
+
+
+def analyze_receipts(file, passed_receipt):
     if os.getenv('APP_ENV') != 'test':
         path_to_sample_documents = file
         from azure.core.credentials import AzureKeyCredential
@@ -23,54 +24,53 @@ def analyze_receipts(file,passed_receipt):
         receipt_text = ""
         for idx, receipt in enumerate(receipts.documents):
             receipt_text += "--------Analysis of receipt #{}--------".format(idx + 1)
-            receipt_text +=  "Receipt type: {}".format(receipt.doc_type or "N/A")
+            receipt_text += "Receipt type: {}".format(receipt.doc_type or "N/A")
             merchant_name = receipt.fields.get("MerchantName")
             if merchant_name:
                 receipt_merchant, created = Merchant.objects.get_or_create(name=merchant_name.value)
                 passed_receipt.merchant = receipt_merchant
                 passed_receipt.save()
-                receipt_text +=  (
+                receipt_text += (
                     "Merchant Name: {} has confidence: {}".format(
                         merchant_name.value, merchant_name.confidence
                     )
                 )
             transaction_date = receipt.fields.get("TransactionDate")
             if transaction_date:
-                receipt_text +=(
+                receipt_text += (
                     "Transaction Date: {} has confidence: {}".format(
                         transaction_date.value, transaction_date.confidence
                     )
                 )
             if receipt.fields.get("Items"):
-                receipt_text +=("Receipt items:")
+                receipt_text += "Receipt items:"
                 for idx, item in enumerate(receipt.fields.get("Items").value):
-                    receipt_text +=("...Item #{}".format(idx + 1))
+                    receipt_text += ("...Item #{}".format(idx + 1))
                     item_description = item.value.get("Description")
                     if item_description:
-                        receipt_text +=(
+                        receipt_text += (
                             "......Item Description: {} has confidence: {}".format(
                                 item_description.value, item_description.confidence
                             )
                         )
                     item_quantity = item.value.get("Quantity")
                     if item_quantity:
-                        receipt_text +=(
+                        receipt_text += (
                             "......Item Quantity: {} has confidence: {}".format(
                                 item_quantity.value, item_quantity.confidence
                             )
                         )
                     item_price = item.value.get("Price")
                     if item_price:
-                        receipt_text +=(
+                        receipt_text += (
                             "......Individual Item Price: {} has confidence: {}".format(
                                 item_price.value, item_price.confidence
                             )
                         )
 
-
                     item_total_price = item.value.get("TotalPrice")
                     if item_total_price:
-                        receipt_text +=(
+                        receipt_text += (
                             "......Total Item Price: {} has confidence: {}".format(
                                 item_total_price.value, item_total_price.confidence
                             )
@@ -91,7 +91,7 @@ def analyze_receipts(file,passed_receipt):
                             )
             subtotal = receipt.fields.get("Subtotal")
             if subtotal:
-                receipt_text +=(
+                receipt_text += (
                     "Subtotal: {} has confidence: {}".format(
                         subtotal.value, subtotal.confidence
                     )
@@ -100,18 +100,19 @@ def analyze_receipts(file,passed_receipt):
             if tax:
                 passed_receipt.tax = tax.value
 
-                receipt_text +=("Total tax: {} has confidence: {}".format(tax.value, tax.confidence))
+                receipt_text += ("Total tax: {} has confidence: {}".format(tax.value, tax.confidence))
             tip = receipt.fields.get("Tip")
             if tip:
                 passed_receipt.tip = tip.value
-                receipt_text +=("Tip: {} has confidence: {}".format(tip.value, tip.confidence))
+                receipt_text += ("Tip: {} has confidence: {}".format(tip.value, tip.confidence))
             total = receipt.fields.get("Total")
             if total:
                 passed_receipt.total = total.value
-                receipt_text +=("Total: {} has confidence: {}".format(total.value, total.confidence))
-            receipt_text += ("--------------------------------------")
+                receipt_text += ("Total: {} has confidence: {}".format(total.value, total.confidence))
+            receipt_text += "--------------------------------------"
             passed_receipt.save()
         return receipt_text
+
 
 if __name__ == "__main__":
     analyze_receipts()

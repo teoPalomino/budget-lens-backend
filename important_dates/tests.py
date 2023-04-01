@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User
 from rest_framework.status import HTTP_200_OK
 
@@ -7,7 +9,6 @@ from rest_framework.test import APITransactionTestCase
 from category.models import Category
 from merchant.models import Merchant
 from receipts.models import Receipts
-from receipts.tests import get_test_image_file
 from users.authentication import BearerToken
 
 from item.models import Item
@@ -45,7 +46,7 @@ class ImportantDatesTests(APITransactionTestCase):
 
         self.receipt1 = Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
