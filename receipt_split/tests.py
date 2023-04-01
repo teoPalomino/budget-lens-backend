@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from django.contrib.auth.models import User
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
@@ -8,7 +9,6 @@ from .models import ReceiptSplit
 
 from merchant.models import Merchant
 from receipts.models import Receipts
-from receipts.tests import get_test_image_file
 from users.authentication import BearerToken
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -60,7 +60,7 @@ class ReceiptSplitAPITestCase(APITestCase):
         self.receipt = Receipts.objects.create(
             user=self.user1,
             scan_date=datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=100,

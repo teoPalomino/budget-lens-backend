@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
@@ -7,7 +9,6 @@ from .models import ItemSplit
 
 from merchant.models import Merchant
 from receipts.models import Receipts
-from receipts.tests import get_test_image_file
 from users.authentication import BearerToken
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -58,7 +59,7 @@ class ItemSplitAPITestCase(APITestCase):
         # Create the receipt
         self.receipt = Receipts.objects.create(
             user=self.user1,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -151,7 +152,7 @@ class ItemSplitAPITestCase(APITestCase):
 
     def test_get_shared_user_list_pass(self):
         # Create a new ItemSplit object
-        itemsplit = ItemSplit.objects.create(
+        item_split = ItemSplit.objects.create(
             item=self.item,
             shared_user_ids=f'{self.user2.pk}, {self.user3.pk}',
             is_shared_with_item_user=False
@@ -167,8 +168,8 @@ class ItemSplitAPITestCase(APITestCase):
 
         self.assertEqual(response.data['original_user'], self.item.user.first_name)
 
-        # Loop and assert that all of the shared users are correct
-        user_id_list = list(map(int, itemsplit.shared_user_ids.split(',')))
+        # Loop and assert that all the shared users are correct
+        user_id_list = list(map(int, item_split.shared_user_ids.split(',')))
         for count, user_id in enumerate(user_id_list):
             user = User.objects.get(id=user_id)
             self.assertEqual(response.data['shared_users'][count], user.first_name)
@@ -184,7 +185,7 @@ class ItemSplitAPITestCase(APITestCase):
             is_shared_with_item_user=False
         )
 
-        # The url using kwargs item_id with invalid id number eg. 100
+        # The url using kwargs item_id with invalid id number e.g. 100
         self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': 100})
 
         response = self.client.get(
@@ -198,7 +199,7 @@ class ItemSplitAPITestCase(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         # Do the same request but with invalid parameters
-        # The url using kwargs item_id with invalid id number eg. a
+        # The url using kwargs item_id with invalid id number e.g. a
         self.url_shared_users_list = reverse('get_user_list', kwargs={'item_id': 'a'})
 
         response = self.client.get(
@@ -213,7 +214,7 @@ class ItemSplitAPITestCase(APITestCase):
 
     def test_get_shared_amount_pass(self):
         # Create a new ItemSplit object using the post request
-        itemsplit_data_id = self.client.post(
+        item_split_data_id = self.client.post(
             self.url_add_item_split,
             data={
                 'item': self.item.pk,
@@ -221,7 +222,7 @@ class ItemSplitAPITestCase(APITestCase):
             },
             format='json'
         ).data['id']
-        itemsplit = ItemSplit.objects.get(id=itemsplit_data_id)
+        item_split = ItemSplit.objects.get(id=item_split_data_id)
 
         # The url using kwargs item_id
         self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': self.item.pk})
@@ -231,8 +232,8 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        self.assertEqual(response.data['shared_amount'], itemsplit.shared_amount)
-        self.assertEqual(response.data['is_shared_with_item_user'], itemsplit.is_shared_with_item_user)
+        self.assertEqual(response.data['shared_amount'], item_split.shared_amount)
+        self.assertEqual(response.data['is_shared_with_item_user'], item_split.is_shared_with_item_user)
 
         # Assert status code
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -249,7 +250,7 @@ class ItemSplitAPITestCase(APITestCase):
             format='json'
         )
 
-        # The url using kwargs item_id with invalid id number eg. 100
+        # The url using kwargs item_id with invalid id number e.g. 100
         self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': 100})
 
         response = self.client.get(
@@ -263,7 +264,7 @@ class ItemSplitAPITestCase(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
         # Do the same request but with invalid parameters
-        # The url using kwargs item_id with invalid id number eg. a
+        # The url using kwargs item_id with invalid id number e.g. a
         self.url_shared_amount = reverse('get_shared_amount', kwargs={'item_id': 'a'})
 
         response = self.client.get(

@@ -24,7 +24,7 @@ class AddCategoryView(generics.GenericAPIView):
     """
     API for adding a new category (either a new parent category or adding a new sub category):
     End users are not allowed to create a new parent category, but they can create a new sub category.
-    However, this route containes both functionalities so that when a new user is registered, we can call
+    However, this route contains both functionalities so that when a new user is registered, we can call
     this route to create the parent categories. The frontend should limit the user to only create subcategories
     and not create parent categories.
     """
@@ -59,7 +59,7 @@ class DeleteCategoryView(generics.DestroyAPIView):
         # Check if the category exists
         try:
             category = self.get_queryset().get(category_name=kwargs['categoryName'])
-        except Exception:
+        except Category.DoesNotExist:
             return Response({
                 "Description": "This sub category does not exist"
             }, status=HTTP_400_BAD_REQUEST)
@@ -76,19 +76,19 @@ class DeleteCategoryView(generics.DestroyAPIView):
                 "Description": "Cannot delete SubCategory, items exists in this subcategory"
             }, status=HTTP_400_BAD_REQUEST)
 
-        # If all condtions passed, then delete the item
+        # If all conditions pass, then delete the item
         Category.objects.filter(user=self.request.user, category_name=kwargs['categoryName']).delete()
         return Response({
-            "Description": 'SubCategory succesfully deleted'
+            "Description": 'SubCategory successfully deleted'
         }, status=HTTP_200_OK)
 
 
 class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
     """
     List all categories and subcategories.
-    To filter basted on stared on unstared categories type the url in the following
+    To filter basted on starred on unstarred categories type the url in the following
         /api/category/?category_toggle_star=true  --> list of only stared categories and subcategories
-        /api/category/?category_toggle_star=false --> list of only unstared categories and subcategories
+        /api/category/?category_toggle_star=false --> list of only unstarred categories and subcategories
     """
     serializer_class = BasicCategorySerializer
     permission_classes = (IsAuthenticated,)
@@ -101,13 +101,13 @@ class ListCategoriesAndSubCategoriesView(generics.ListAPIView):
         # Get the list of Categories
         original_request = super().get(request, *args, **kwargs)
 
-        # Create a subcategory list from the resonse
+        # Create a subcategory list from the response
         sub_list_category = []
         for i in original_request.data:
             if i['parent_category_id'] is not None:
                 sub_list_category.append(i)
 
-        # Create a parent category list from the resonse
+        # Create a parent category list from the response
         parent_list_category = []
         for i in original_request.data:
             if i['parent_category_id'] is None:
@@ -155,7 +155,7 @@ class ToggleStarCategoryView(generics.UpdateAPIView):
         self.get_queryset().filter(category_name=kwargs['categoryName']).update(
             category_toggle_star=not star_value)
         return Response({
-            "Description": "Updated Succesfully"
+            "Description": "Updated Successfully"
         }, status=HTTP_200_OK)
 
     def get_queryset(self):

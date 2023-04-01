@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
@@ -8,7 +10,6 @@ from category.models import Category
 from item.models import Item
 from merchant.models import Merchant
 from receipts.models import Receipts
-from receipts.tests import get_test_image_file
 from users.authentication import BearerToken
 from users.models import UserProfile
 
@@ -16,7 +17,7 @@ from users.models import UserProfile
 class CategoryAPITestCase(APITestCase):
     def setUp(self):
         """
-        SetUp the values in database for testing Category API
+        Set up the values in database for testing Category API
         """
         self.user = User.objects.create_user(
             username='johncena123@gmail.com',
@@ -34,7 +35,7 @@ class CategoryAPITestCase(APITestCase):
 
         Receipts.objects.create(
             user=self.user,
-            receipt_image=get_test_image_file(),
+            receipt_image=os.path.join('receipt_image_for_tests.png'),
             merchant=Merchant.objects.create(name='starbucks'),
             location='123 Testing Street T1E 5T5',
             total=1,
@@ -165,7 +166,7 @@ class CategoryAPITestCase(APITestCase):
 
     def test_delete_sub_category_successful(self):
         """
-        Test Case for deleting a sub category. The Fruits category should not exists anymore in the Category table"
+        Test Case for deleting a sub category. The Fruits category should not exist anymore in the Category table.
         """
         # Delete the item for this test case so that there is no item stored under the Fruits subcategory
         Item.objects.get(name='Fruit Item test').delete()
@@ -180,7 +181,7 @@ class CategoryAPITestCase(APITestCase):
         )
 
         # Assert that the correct message is returned
-        self.assertEqual(response.data['Description'], 'SubCategory succesfully deleted')
+        self.assertEqual(response.data['Description'], 'SubCategory successfully deleted')
 
         # Assert that the Fruits subcategory does not exist
         self.assertFalse(Category.objects.filter(category_name='Fruits').exists())
@@ -210,7 +211,7 @@ class CategoryAPITestCase(APITestCase):
         Test Case for deleting a category that doesn't exist.
         """
 
-        url_delete_sub_category = reverse('delete_and_toggle_category', kwargs={'categoryName': 'Giberish'})
+        url_delete_sub_category = reverse('delete_and_toggle_category', kwargs={'categoryName': 'Gibberish'})
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
@@ -239,16 +240,16 @@ class CategoryAPITestCase(APITestCase):
         self.assertTrue(Category.objects.get(category_name='Food').category_toggle_star)
 
         # Assert the message
-        self.assertEqual(response.data['Description'], 'Updated Succesfully')
+        self.assertEqual(response.data['Description'], 'Updated Successfully')
 
         # Assert the status code
         self.assertEqual(response.status_code, HTTP_200_OK)
 
     def test_toggle_category_star_invalid_category_name(self):
         """
-        Test Case for toggling a category star when inputing and invalid category name
+        Test Case for toggling a category star when inputting and invalid category name
         """
-        url_toggle_category_star = reverse('delete_and_toggle_category', kwargs={'categoryName': 'Giborish'})
+        url_toggle_category_star = reverse('delete_and_toggle_category', kwargs={'categoryName': 'Gibberish'})
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token.key)
 
@@ -258,7 +259,7 @@ class CategoryAPITestCase(APITestCase):
         )
 
         # Assert that this category does not exist in Category model
-        self.assertFalse(Category.objects.filter(category_name='Giborish').exists())
+        self.assertFalse(Category.objects.filter(category_name='Gibberish').exists())
 
         # Assert the message
         self.assertEqual(response.data['Description'], 'Category does not exist')

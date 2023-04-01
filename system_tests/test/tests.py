@@ -31,11 +31,11 @@ class SystemTests(LiveServerTestCase):
 
         # Record the actual requirements by running the subprocess command pip freeze
         sub_process = subprocess.Popen(["pip", "freeze"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        actual_reqirements_packages, error = sub_process.communicate()
+        actual_requirements_packages, error = sub_process.communicate()
 
-        # Remove unesecarry characters and decode the strings to work with the same string types
+        # Remove unnecessary characters and decode the strings to work with the same string types
         expected_requirements_packages = expected_requirements_packages.replace("\r", "").replace("\n", "")
-        actual_reqirements_packages = actual_reqirements_packages.decode().replace("\r", "").replace("\n", "")
+        actual_requirements_packages = actual_requirements_packages.decode().replace("\r", "").replace("\n", "")
 
-        self.assertEqual(expected_requirements_packages, actual_reqirements_packages)
+        self.assertEqual(expected_requirements_packages, actual_requirements_packages)
         self.assertEqual(error, b'')

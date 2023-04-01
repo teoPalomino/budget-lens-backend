@@ -10,7 +10,6 @@ from django.db.models.signals import pre_save, post_save
 
 from merchant.models import Merchant
 
-# from utility.analyze_receipt import analyze_receipts
 from utility.create_update_receipt import create_update_receipt
 
 
