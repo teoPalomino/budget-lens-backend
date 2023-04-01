@@ -134,6 +134,29 @@ class GetItemsAPI(generics.ListAPIView):
             }, HTTP_200_OK)
 
 
+class ReceiptItemsAPI(generics.ListAPIView):
+    """
+    Gets list of items of a receipt and the total cost of all items, used for split by items.
+    """
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        items = Item.objects.filter(receipt=kwargs.get('receipt_id')).values('id', 'name', 'price')
+        item_list = []
+        if items.exists():
+            for item in items:
+                item_list.append(item)
+
+            return Response({
+                "items": item_list
+            }, HTTP_200_OK)
+        else:
+            return Response({
+                "items": item_list,
+            }, HTTP_200_OK)
+
+
 class ItemFilter(django_filters.FilterSet):
     start_date = django_filters.DateFilter(field_name="receipt__scan_date", lookup_expr='gte')
     end_date = django_filters.DateFilter(field_name="receipt__scan_date", lookup_expr='lte')
