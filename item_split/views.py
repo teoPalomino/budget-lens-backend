@@ -21,42 +21,44 @@ class AddItemSplitAPI(generics.ListCreateAPIView):
     """
     Adds item to a receipt for a user
     The list of shared user IDs are a string that represents the list of user IDs (List of integers).
-    Therefore the list must be separated by commas.
+    Therefore, the list must be separated by commas.
     """
     serializer_class = ItemSplitSerializer
     permission_classes = [IsAuthenticated]
     queryset = ItemSplit.objects.all()
 
     def post(self, request, *args, **kwargs):
-        # Check if the string of users can be converted into a list of integers
-        # That way if they are valid than they may be valid user ids as well
-        try:
-            # Try to convert the string into the list of integers. If not then its not a valid string list
-            user_ids_list = list(map(int, request.data['shared_user_ids'].split(',')))
-        except Exception:
-            return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."}, status=HTTP_400_BAD_REQUEST)
+        item_splits_data = request.data.get('item_list')
+        responses = []
 
-        # Try to check for uniqueness of the list of user ids since a user can't have a same item shared more than
-        # once as it creates multiple instances of the same item
-        user_ids_list_as_set = set(user_ids_list)
-        if len(user_ids_list_as_set) != len(user_ids_list):
-            return Response({"message": "List of user IDs contains duplicates."},
-                            status=HTTP_400_BAD_REQUEST)
+        for item_data in item_splits_data:
+            try:
+                user_ids_list = list(map(int, item_data['shared_user_ids'].split(',')))
+            except Exception:
+                return Response({"message": "Invalid list of user IDs. Please enter numbers separated by commas."},
+                                status=HTTP_400_BAD_REQUEST)
 
-        # Check if the user ids are valid (they exist)
-        for user_id in user_ids_list:
-            if User.objects.filter(id=user_id).exists() is not True:
-                return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
+            user_ids_list_as_set = set(user_ids_list)
+            if len(user_ids_list_as_set) != len(user_ids_list):
+                return Response({"message": "List of user IDs contains duplicates."},
+                                status=HTTP_400_BAD_REQUEST)
 
-        # If the users exists add the new Item Split object
-        response_data = super().post(request, *args, **kwargs).data
-        item_response = Item.objects.get(id=response_data['item'])
-        response_data['item'] = {
-            "item_id": item_response.pk,
-            "item_name": item_response.name,
-            "item_price": item_response.price
-        }
-        return Response(response_data, status=HTTP_201_CREATED)
+            for user_id in user_ids_list:
+                if User.objects.filter(id=user_id).exists() is not True:
+                    return Response({"message": "List of users do not exist."}, status=HTTP_400_BAD_REQUEST)
+            serializer = self.serializer_class(data=item_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response_data = serializer.data
+            item_response = Item.objects.get(id=response_data['item_id'])
+            response_data['item'] = {
+                "item_id": item_response.pk,
+                "item_name": item_response.name,
+                "item_price": item_response.price
+            }
+            responses.append(response_data)
+
+        return Response(responses, status=HTTP_201_CREATED)
 
 
 class GetSharedUsersList(generics.GenericAPIView):
@@ -127,16 +129,10 @@ def get_share_amount_list(request, receipt_id):
     """
     data_list = []
     for item in Item.objects.filter(receipt__id=receipt_id):
-        data = {}
-        data['item_id'] = item.id
-        data['item_name'] = item.name
-        data['item_price'] = item.price
-        data['user_id'] = item.user.id
-        data['receipt_id'] = item.receipt.id
-        data['splititem'] = []
+        data = {'item_id': item.id, 'item_name': item.name, 'item_price': item.price, 'user_id': item.user.id,
+                'receipt_id': item.receipt.id, 'splititem': []}
         try:
             split = item.item_user
-            # split = item.itemsplit
             shared_user_ids = split.shared_user_ids.split(',')
             shared_user_ids = [int(i) for i in shared_user_ids]
             shared_users = DjangoBaseUser.objects.filter(id__in=shared_user_ids)
@@ -145,7 +141,7 @@ def get_share_amount_list(request, receipt_id):
                     if user.id != item.user.id:
                         data['splititem'].append({
                             'split_id': split.id,
-                            'orignal_user': item.user.first_name,
+                            'original_user': item.user.first_name,
                             'shared_user': user.first_name})
         except Exception:
             pass
