@@ -90,7 +90,7 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         """
         #
         receipt_list_response = super().get(request, *args, **kwargs)
-
+        print(request.GET)
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
