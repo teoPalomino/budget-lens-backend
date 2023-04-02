@@ -30,6 +30,7 @@ SECRET_KEY = '_!l0$=nq9(ib-n1dclpoh^y1z*50jxn@_%9%(elwmspw73@qa&'
 
 ALLOWED_HOSTS = [
             '127.0.0.1',
+            '10.0.2.2',
             '206.81.3.66',
             '192.168.2.15',
             'budgetlens.tech',

@@ -206,10 +206,14 @@ class ReceiptsAvailableFilters(APIView):
         coupon = list(
             Receipts.objects.distinct().all().values_list('coupon', flat=True)
         )
+        total = list(
+            Receipts.objects.distinct().all().values_list('total', flat=True)
+        )
         context = {
             'merchants': merchants,
             'locations': locations,
             'currency': currency,
-            'coupon': coupon
+            'coupon': coupon,
+            'total': total
         }
         return Response(context)
