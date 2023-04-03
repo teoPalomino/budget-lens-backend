@@ -195,7 +195,6 @@ class ReceiptsAvailableFilters(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        print()
         merchants = list(
             Receipts.objects.filter(user=self.request.user).distinct().all().values_list('merchant__name', flat=True)
         )
