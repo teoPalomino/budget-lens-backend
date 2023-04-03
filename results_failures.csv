@@ -1,0 +1,13 @@
+Method,Name,Error,Occurrences
+GET,/rules,"OSError(24, 'Too many open files')",1688
+GET,/items,"SSLError(OSError(24, 'Too many open files'))",1277
+GET,/important_dates,"OSError(22, 'Invalid argument')",26813
+GET,/important_dates,"OSError(24, 'Too many open files')",1718
+GET,/items,"OSError(24, 'Too many open files')",1730
+GET,/items,RemoteDisconnected('Remote end closed connection without response'),32
+GET,/rules,"OSError(22, 'Invalid argument')",26939
+GET,/important_dates,"SSLError(OSError(24, 'Too many open files'))",1332
+GET,/items,"OSError(22, 'Invalid argument')",26439
+GET,/rules,RemoteDisconnected('Remote end closed connection without response'),26
+GET,/important_dates,RemoteDisconnected('Remote end closed connection without response'),29
+GET,/rules,"SSLError(OSError(24, 'Too many open files'))",1387
