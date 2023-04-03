@@ -31,12 +31,12 @@ class RegisterAPI(generics.GenericAPIView):
         token = BearerToken.objects.create(user=user_profile.user)
         user = UserSerializer(user_profile.user, context=self.get_serializer_context())
 
-        # creating the forwardingEmail of a user
+        # creating the forwarding_email of a user
 
         email = user.data['email']
         splitEmail = email.split('@')[0]
         randomInt = secrets.randbelow(9000) + 1000
-        user_profile.forwardingEmail = str(splitEmail + str(randomInt) + "@budgetlens.tech")
+        user_profile.forwarding_email = str(splitEmail + str(randomInt) + "@budgetlens.tech")
         user_profile.save()
 
         # TODO: a proper registration email need to be developed, right now, the function is proven to work
@@ -52,7 +52,7 @@ class RegisterAPI(generics.GenericAPIView):
             # saves user and its data
             "user": user.data,
             "telephone_number": str(user_profile.telephone_number),
-            "forwardingEmail": str(user_profile.forwardingEmail),
+            "forwarding_email": str(user_profile.forwarding_email),
             # creates token for that particular user
             # "token": AuthToken.objects.create(user_profile.user)[1],
             "token": token.key,
@@ -117,7 +117,7 @@ class UserProfileAPI(generics.UpdateAPIView):
                 "last_name": user_profile.user.last_name,
                 "email": user_profile.user.email,
                 "telephone_number": str(user_profile.telephone_number),
-                "forwardingEmail": user_profile.forwardingEmail
+                "forwarding_email": user_profile.forwarding_email
             }
             return Response(data, status=HTTP_200_OK)
         except Exception as e:

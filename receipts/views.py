@@ -90,7 +90,6 @@ class DefaultReceiptPaginationAPIListView(generics.ListAPIView):
         """
         #
         receipt_list_response = super().get(request, *args, **kwargs)
-
         # Try to turn page number to an int value, otherwise make sure the response returns an empty list
         try:
             kwargs['pageNumber'] = int(kwargs['pageNumber'])
@@ -164,7 +163,7 @@ class ParseReceiptsAPIView(APIView):
         # check if it is a valid forwarding email
         try:
             email = request.POST.get('To').strip()
-            userProfile = UserProfile.objects.get(forwardingEmail=email)
+            userProfile = UserProfile.objects.get(forwarding_email=email)
         except Exception:
             return Response({"response": "This email does not correspond to any Budget Lens account"},
                             status=status.HTTP_400_BAD_REQUEST)
