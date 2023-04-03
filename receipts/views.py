@@ -189,3 +189,32 @@ class ParseReceiptsAPIView(APIView):
             return Response(receipt_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(receipt_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReceiptsAvailableFilters(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        merchants = list(
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('merchant__name', flat=True)
+        )
+        locations = list(
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('location', flat=True)
+        )
+        currency = list(
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('currency', flat=True)
+        )
+        coupon = list(
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('coupon', flat=True)
+        )
+        total = list(
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('total', flat=True)
+        )
+        context = {
+            'merchants': merchants,
+            'locations': locations,
+            'currency': currency,
+            'coupon': coupon,
+            'total': total
+        }
+        return Response(context)

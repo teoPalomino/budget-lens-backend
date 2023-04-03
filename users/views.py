@@ -120,8 +120,8 @@ class UserProfileAPI(generics.UpdateAPIView):
                 "forwarding_email": user_profile.forwarding_email
             }
             return Response(data, status=HTTP_200_OK)
-        except Exception:
-            return Response({"response": "There has been an error retrieving the user profile."},
+        except Exception as e:
+            return Response({"response": "There has been an error retrieving the user profile." + str(e)},
                             status=404)
 
     def update(self, request, *args, **kwargs):
