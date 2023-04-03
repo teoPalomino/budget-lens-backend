@@ -29,7 +29,7 @@ class AddReceiptsAPITest(APITransactionTestCase):
         self.user_profile = UserProfile.objects.create(
             user=self.user,
             telephone_number="+1-613-555-0187",
-            forwardingEmail='momoamineahmadi@gmail.com'
+            forwarding_email='momoamineahmadi@gmail.com'
         )
         self.data = {
             'username': 'johncena123@gmail.com',

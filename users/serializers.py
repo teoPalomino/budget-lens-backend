@@ -57,7 +57,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('user', 'telephone_number', 'forwardingEmail')
+        fields = ('user', 'telephone_number', 'forwarding_email')
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')

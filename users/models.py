@@ -11,7 +11,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='user', on_delete=models.CASCADE)
     telephone_number = PhoneNumberField(null=False, blank=False, unique=True)
     one_time_code = models.PositiveBigIntegerField(default=0)
-    forwardingEmail = models.EmailField(max_length=254, null=True)
+    forwarding_email = models.EmailField(max_length=254, null=True)
 
     @receiver(post_save, sender='users.UserProfile')
     def post_save_user(sender, instance, created, *args, **kwargs):
