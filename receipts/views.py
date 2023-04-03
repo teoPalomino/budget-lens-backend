@@ -193,21 +193,24 @@ class ParseReceiptsAPIView(APIView):
 
 
 class ReceiptsAvailableFilters(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
+        print()
         merchants = list(
-            Receipts.objects.distinct().all().values_list('merchant__name', flat=True)
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('merchant__name', flat=True)
         )
         locations = list(
-            Receipts.objects.distinct().all().values_list('location', flat=True)
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('location', flat=True)
         )
         currency = list(
-            Receipts.objects.distinct().all().values_list('currency', flat=True)
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('currency', flat=True)
         )
         coupon = list(
-            Receipts.objects.distinct().all().values_list('coupon', flat=True)
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('coupon', flat=True)
         )
         total = list(
-            Receipts.objects.distinct().all().values_list('total', flat=True)
+            Receipts.objects.filter(user=self.request.user).distinct().all().values_list('total', flat=True)
         )
         context = {
             'merchants': merchants,
